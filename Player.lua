@@ -66,7 +66,7 @@ function Player:onKeyRelease(key, scancode)
 end
 
 function Player:draw()
-  love.graphics.setColor(63, 63, 255)
+  love.graphics.setColor(127, 127, 255)
   local x, y = self:getPosition()
   local w, h = self:getSize()
   love.graphics.rectangle("fill", x, y, w, h)
