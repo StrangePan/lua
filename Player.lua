@@ -6,6 +6,8 @@ Player = buildClass(PhysObject)
 function Player:_init()
   Player.superclass._init(self)
   
+  self.angle = 0
+  self.drawAngle = self.angle
   self.xStep = 32
   self.yStep = 32
 
@@ -26,10 +28,14 @@ function Player:registerWithSecretary(secretary)
   -- Register for event callbacks
   secretary:registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
   secretary:registerEventListener(self, self.onKeyRelease, EventType.KEYBOARD_UP)
+  secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
 end
 
 function Player:onKeyPress(key, scancode, isrepeat)
+  if key == "q" then self.angle = self.angle - (math.pi / 2) end
+  if key == "e" then self.angle = self.angle + (math.pi / 2) end
+  
   -- only allows a single key at a time to be pressed
   if self.key ~= nil then
     return
@@ -66,9 +72,27 @@ function Player:onKeyRelease(key, scancode)
   end
 end
 
+function Player:onPostPhysics()
+  if math.abs(self.angle - self.drawAngle) < math.pi / 128 then
+    self.drawAngle = self.angle
+  else
+    self.drawAngle = self.drawAngle - (self.drawAngle - self.angle) * 0.375
+  end
+end
+
 function Player:draw()
-  love.graphics.setColor(127, 127, 255)
+  love.graphics.push()
+  
   local x, y = self:getPosition()
   local w, h = self:getSize()
-  love.graphics.rectangle("fill", x, y, w, h)
+  local ox = w/2
+  local oy = h/2
+  
+  love.graphics.setColor(127, 127, 255)
+  love.graphics.translate(x + ox, y + oy)
+  love.graphics.rotate(self.drawAngle)
+  
+  love.graphics.rectangle("fill", -ox, -oy, w, h)
+  
+  love.graphics.pop()
 end
