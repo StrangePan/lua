@@ -1,10 +1,12 @@
 require "config"
+require "Secretary"
+require "Entity"
+
+rootSecretary = Secretary()
+
+require "loveevents"
+require "Player"
 
 function love.load()
-end
-
-function love.update()
-end
-
-function love.draw()
+  player = Player():registerWithSecretary(rootSecretary)
 end
