@@ -52,6 +52,7 @@ function Player:onKeyPress(key, scancode, isrepeat)
   
   -- Cancel jump if we would collide with a wall
   if table.getn(collisions) > 0 then
+    collisions[1]:bump(key)
     return
   end
   
