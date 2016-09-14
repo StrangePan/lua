@@ -1,11 +1,10 @@
 require "config"
 require "Secretary"
-require "Entity"
+require "Player"
 
 rootSecretary = Secretary()
 
 require "loveevents"
-require "Player"
 
 function love.load()
   player = Player():registerWithSecretary(rootSecretary)

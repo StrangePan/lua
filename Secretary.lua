@@ -3,6 +3,8 @@ require "common/functions"
 require "QuadTree"
 require "EventType"
 require "DrawLayer"
+require "Entity"
+require "PhysObject"
 
 Secretary = buildClass()
 
