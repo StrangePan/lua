@@ -12,7 +12,7 @@ function Wall:_init(x, y)
   self.xOffset = 0
   self.yOffset = 0
   
-  self.bumpStrength = 4
+  self.bumpStrength = 6
   self.bumps = {
        ["up"] = {x =  0, y = -1},
     ["right"] = {x =  1, y =  0},
