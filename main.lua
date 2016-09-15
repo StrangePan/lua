@@ -9,9 +9,14 @@ require "loveevents"
 
 function love.load()
   camera = Camera():registerWithSecretary(rootSecretary)
-  camera:moveTo(love.graphics.getWidth()/2, love.graphics.getHeight()/2)
   player = Player():registerWithSecretary(rootSecretary)
   buildWalls()
+  
+  rootSecretary:registerEventListener({}, function()
+      local px, py = player:getPosition()
+      local pw, ph = player:getSize()
+      camera:moveTo(px+(pw/2), py+(ph/2))
+    end, EventType.PRE_PHYSICS)
 end
 
 function buildWalls()
