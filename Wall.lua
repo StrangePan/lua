@@ -32,9 +32,9 @@ end
 
 function Wall:registerWithSecretary(secretary)
   Wall.superclass.registerWithSecretary(self, secretary)
-
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
   secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
+  return self
 end
 
 function Wall:onPostPhysics()

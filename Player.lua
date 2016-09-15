@@ -30,6 +30,8 @@ function Player:registerWithSecretary(secretary)
   secretary:registerEventListener(self, self.onKeyRelease, EventType.KEYBOARD_UP)
   secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
+  
+  return self
 end
 
 function Player:onKeyPress(key, scancode, isrepeat)
