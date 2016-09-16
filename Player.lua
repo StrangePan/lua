@@ -1,5 +1,6 @@
 require "common/class"
 require "PhysObject"
+require "Footprint"
 
 Player = buildClass(PhysObject)
 
@@ -10,6 +11,10 @@ function Player:_init()
   self.drawAngle = self.angle
   self.xStep = 32
   self.yStep = 32
+  
+  self.r = 127
+  self.g = 127
+  self.b = 255
 
   self:setSize(32, 32)
   self:setPosition(self.xStep, self.yStep)
@@ -64,6 +69,8 @@ function Player:onKeyPress(key, scancode, isrepeat)
     return
   end
   
+  local w, h = self:getSize()
+  Footprint(self.r, self.g, self.b, x, y, w, h):registerWithSecretary(self:getSecretary())
   self:setPosition(xNext, yNext)
   self:getSecretary():updateObject(self)
 end
@@ -90,7 +97,7 @@ function Player:draw()
   local ox = w/2
   local oy = h/2
   
-  love.graphics.setColor(127, 127, 255)
+  love.graphics.setColor(self.r, self.g, self.b)
   love.graphics.translate(x + ox, y + oy)
   love.graphics.rotate(self.drawAngle)
   
