@@ -1,3 +1,5 @@
+package.path = package.path .. ";./common/?.lua"
+
 require "Secretary"
 require "Player"
 require "Wall"

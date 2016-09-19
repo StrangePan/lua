@@ -1,3 +1,5 @@
+package.path = package.path .. ";./common/?.lua"
+
 require "Serializer"
 
 local socket = require "socket"
@@ -22,9 +24,4 @@ function love.update(dt)
     player.x = message.to.x
     player.y = message.to.y
   end
-end
-
-function love.draw()
-  love.graphics.setColor(127, 127, 255)
-  love.graphics.rectangle("fill", player.x, player.y, 32, 32)
 end
