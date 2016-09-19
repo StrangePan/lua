@@ -1,11 +1,13 @@
 require "common/class"
 require "Entity"
 
-EventCoordinator = buildClass()
+EventCoordinator = buildClass(Entity)
 
 function EventCoordinator:_init()
   self.listeners = {n = 1}
 end
+
+
 
 function EventCoordinator:registerListener(object, callback)
   
@@ -31,6 +33,8 @@ function EventCoordinator:registerListener(object, callback)
     self.listeners.n = self.listeners.n + 1
   end
 end
+
+
 
 function EventCoordinator:unregisterListener(object, callback)
   
@@ -59,11 +63,15 @@ function EventCoordinator:unregisterListener(object, callback)
   end
 end
 
+
+
 function EventCoordinator:notifyListeners(...)
   local arg = {...}
   
   for i,entry in pairs(self.listeners) do
-    if type(i) == "number" then
+    if type(entry) == "number" then
+      -- do nothing
+    elseif type(i) == "number" then
       entry(unpack(arg))
     else
       for _,callback in ipairs(entry) do

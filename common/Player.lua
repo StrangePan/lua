@@ -1,6 +1,7 @@
 require "common/class"
 require "PhysObject"
 require "Footprint"
+require "EventCoordinator"
 
 Player = buildClass(PhysObject)
 
@@ -19,6 +20,8 @@ function Player:_init()
   self:setSize(32, 32)
   self:setPosition(self.xStep, self.yStep)
   
+  self.moveEventCoordinator = EventCoordinator()
+  
   self.steps = {
        ["up"] = {x =  0, y = -1},
     ["right"] = {x =  1, y =  0},
@@ -27,8 +30,18 @@ function Player:_init()
   }
 end
 
+function Player:registerMoveListener(object, callback)
+  return self.moveEventCoordinator:registerListener(object, callback)
+end
+
+function Player:notifyMoveListeners(fromX, fromY, toX, toY)
+  return self.moveEventCoordinator:notifyListeners(self, fromX, fromY, toX, toY)
+end
+
 function Player:registerWithSecretary(secretary)
   Player.superclass.registerWithSecretary(self, secretary)
+  
+  self.moveEventCoordinator:registerWithSecretary(secretary)
   
   -- Register for event callbacks
   secretary:registerEventListener(self, self.onKeyPress, EventType.KEYBOARD_DOWN)
@@ -73,6 +86,8 @@ function Player:onKeyPress(key, scancode, isrepeat)
   Footprint(self.r, self.g, self.b, x, y, w, h):registerWithSecretary(self:getSecretary())
   self:setPosition(xNext, yNext)
   self:getSecretary():updateObject(self)
+  
+  self:notifyMoveListeners(x, y, xNext, yNext)
 end
 
 function Player:onKeyRelease(key, scancode)
