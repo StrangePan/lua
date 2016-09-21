@@ -115,17 +115,13 @@ end
 
 function Actor:draw()
   love.graphics.push()
-  
   local x, y = self:getPosition()
   local w, h = self:getSize()
   local ox = w/2
   local oy = h/2
-  
   love.graphics.setColor(self.r, self.g, self.b)
   love.graphics.translate(x + ox, y + oy)
   love.graphics.rotate(self.drawAngle)
-  
   love.graphics.rectangle("fill", -ox, -oy, w, h)
-  
   love.graphics.pop()
 end
