@@ -1,4 +1,3 @@
-require "common/class"
 require "PhysObject"
 require "Footprint"
 require "EventCoordinator"
@@ -86,7 +85,6 @@ end
 
 function Actor:setPosition(x, y, z)
   local ox, oy, oz = self:getPosition()
-  
   Actor.superclass.setPosition(self, x, y, z)
   
   x, y, z = self:getPosition()
