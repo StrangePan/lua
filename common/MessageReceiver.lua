@@ -2,6 +2,7 @@ require "common/class"
 require "common/functions"
 require "messages"
 require "Serializer"
+require "EventCoordinator"
 
 MessageReceiver = buildClass()
 
@@ -12,12 +13,12 @@ end
 
 function MessageReceiver:processIncomingMessages()
   repeat
-    data, err, addr, port = self.udp:receivefrom()
+    data, err, port = self.udp:receivefrom()
     if data then
       message = Serializer.deserialize(data)
       if message ~= nil then
         self.processed = {}
-        self:processMessage(message, addr, port)
+        self:processMessage(message, err, port)
       else
         print("unable to parse message: ", data)
       end
