@@ -1,3 +1,4 @@
+require "common/functions"
 require "common/class"
 require "Entity"
 
@@ -23,9 +24,11 @@ function EventCoordinator:registerListener(object, callback)
     self.listeners[object].n = self.listeners[object].n + 1
     
     -- register for destroy callbacks with the secretary
-    local secretary = self:getSecretary()
-    if secretary ~= nil then
-      secretary:registerEventListener(self, self.unregisterListener, EventType.DESTROY, object)
+    if instanceOf(object, Entity) then
+      local secretary = self:getSecretary()
+      if secretary ~= nil then
+        secretary:registerEventListener(self, self.unregisterListener, EventType.DESTROY, object)
+      end
     end
   else
     -- if no object is given
