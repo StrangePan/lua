@@ -2,21 +2,6 @@ require "MessageType"
 
 messages = {}
 
-messages[MessageType.CLIENT_CONNECT_INIT] = {
-  -- empty message
-}
-
-messages[MessageType.SERVER_CONNECT_ACK] = {
-  id = 0, -- CHANGE
-}
-
-
-
--- initialize common message fields
-for i,msg in ipairs(messages) do
-  msg.type = i
-end
-
 -- creates a message to attempt to connect to a server
 function messages.clientConnectInit()
   return {
@@ -28,6 +13,12 @@ function messages.serverConnectAck(clientId)
   return {
     type=MessageType.SERVER_CONNECT_ACK,
     id=clientId
+  }
+end
+
+function messages.clientDisconnect()
+  return {
+    type=MessageType.CLIENT_DISCONNECT
   }
 end
 

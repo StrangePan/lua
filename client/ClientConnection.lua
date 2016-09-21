@@ -33,8 +33,9 @@ function ClientConnection:_init()
   
   -- Initialize status variables
   self.connectionStatus = ConnectionStatus.DISCONNECTED
-  self.connectionid = nil
+  self.connectionId = nil
   self.connectionSendTime = nil
+  self.lastReceivedTime = nil
   
   -- Initialize sender/receiver objects
   self.sender = MessageSender(self.udp)
@@ -80,6 +81,18 @@ function ClientConnection:requestConnectToServer()
   self.connectionSendTime = love.timer.getTime()
 end
 
+function ClientConnection:disconnectFromServer()
+  if self:getConnectionStatus() == ConnectionStatus.DISCONNECTED then
+    return
+  end
+  print("disconnected from server")
+  self.sender:sendMessage(messages.clientDisconnect(), self.server)
+  self.connectionSendTime = nil
+  self.lastReceivedTime = nil
+  self.connectionId = nil
+  self:setConnectionStatus(ConnectionStatus.DISCONNECTED)
+end
+
 --
 -- Reads and processes incoming messages
 --
@@ -89,6 +102,14 @@ function ClientConnection:update()
   if self:getConnectionStatus() == ConnectionStatus.CONNECTING and
       love.timer.getTime() >= self.connectionSendTime + 3 then
     self:requestConnectToServer()
+  elseif self:getConnectionStatus() == ConnectionStatus.CONNECTED and
+      love.timer.getTime() >= self.lastReceivedTime + 5 then
+    self:setConnectionStatus(ConnectionStatus.STALLED)
+    print("connection stalled")
+  elseif self:getConnectionStatus() == ConnectionStatus.STALLED and
+      love.timer.getTime() >= self.lastReceivedTime + 30 then
+    self:disconnectFromServer()
+    print("connection timed out")
   end
 end
 
@@ -97,12 +118,13 @@ end
 --
 function ClientConnection:onReceiveServerConnectAck(message, address, port)
   if self:shouldIgnore(message, address, port) then return end
+  self:updateLastReceivedTime()
   
   -- ignore message if not looking to connect
   if self:getConnectionStatus() ~= ConnectionStatus.CONNECTING then return end
   
   print("connected to server with client id "..message.id)
-  self.connectionid = message.id
+  self.connectionId = message.id
   self:setConnectionStatus(ConnectionStatus.CONNECTED)
 end
 
@@ -111,4 +133,14 @@ end
 --
 function ClientConnection:shouldIgnore(message, address, port)
   return address ~= self.serverAddress or port ~= self.serverPort
+end
+
+--
+-- Updates the last received message time to prevent connection going stale
+--
+function ClientConnection:updateLastReceivedTime()
+  self.lastReceivedTime = love.timer.getTime()
+  if self:getConnectionStatus() == ConnectionStatus.STALLED then
+    self:setConnectionStatus(ConnectionStatus.CONNECTED)
+  end
 end
