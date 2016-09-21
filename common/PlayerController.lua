@@ -4,12 +4,13 @@ require "Player"
 require "Direction"
 
 PlayerController = buildClass()
+local Class = PlayerController
 
 function PlayerController:_init(player)
   self:setPlayer(player)
 end
 
-function LocalPlayerController:setPlayer(player)
+function Class:setPlayer(player)
   if player ~= nil then
     assertType(player, "player", Player)
   end
@@ -23,30 +24,30 @@ function LocalPlayerController:setPlayer(player)
   end
 end
 
-function LocalPlayerController:moveUp()
+function Class:moveUp()
   return self:move(Direction.UP)
 end
 
-function LocalPlayerController:moveRight()
+function Class:moveRight()
   return self:move(Direction.RIGHT)
 end
 
-function LocalPlayerController:moveDown()
+function Class:moveDown()
   return self:move(Direction.DOWN)
 end
 
-function LocalPlayerController:moveLeft()
+function Class:moveLeft()
   return self:move(Direction.LEFT)
 end
 
-function LocalPlayerController:move(direction)
+function Class:move(direction)
   direction = Direction.fromId(direction)
   if direction == nil then return false end
   if self:isBoundToPlayer() == false then return false end
   return self.player:move(direction)
 end
 
-function LocalPlayerController:emoteSpin()
+function Class:emoteSpin()
   if self:isBoundToPlayer() == false then return false end
   return self.player:spin()
 end
