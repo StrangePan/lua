@@ -24,6 +24,13 @@ function messages.clientConnectInit()
   }
 end
 
+function messages.serverConnectAck(clientId)
+  return {
+    type=MessageType.SERVER_CONNECT_ACK,
+    id=clientId
+  }
+end
+
 -- bundles multiple messages into a single message bundle
 function messages.bundle(...)
   local msgs = {...}
