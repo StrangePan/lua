@@ -105,7 +105,9 @@ function ClientConnection:update()
   local time = love.timer.getTime()
   
   -- ping server periodically
-  if time >= self.lastSentTime + 2 then
+  if (self.connectionStatus == ConnectionStatus.CONNECTED or
+      self.connectionStatus == ConnectionStatus.STALLED) and
+      time >= self.lastSentTime + 2 then
     self:sendMessage(messages.ping())
   end
   

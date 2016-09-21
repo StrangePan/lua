@@ -18,7 +18,9 @@ function ServerConnection:_init()
   end
   
   -- Initialize clients table
-  self.clients = {n = 0}
+  self.clients = {}
+  self.clientIds = {n = 0}
+  self.nextId = 1
   
   -- Initialize sender/receiver objects
   self.sender = MessageSender(self.udp)
@@ -40,7 +42,8 @@ function ServerConnection:update()
   self.receiver:processIncomingMessages()
   
   local time = love.timer.getTime()
-  for id,client in ipairs(self.clients) do
+  for client in self:allClients() do
+    local id = client.id
     
     -- periodically ping client
     if time >= client.lastSentTime + 2 then
@@ -61,60 +64,96 @@ function ServerConnection:update()
 end
 
 function ServerConnection:disconnectClient(id)
-  local client = self.clients[id]
+  local client = self:getClient(id)
+  if client == nil then return end
   local clientString = self:createClientString(client.address, client.port)
   self.clients[id] = nil
-  self.clients[clientString] = nil
+  for k,v in ipairs(self.clientIds) do
+    if v == id then
+      table.remove(self.clientIds, k)
+      self.clientIds.n = self.clientIds.n - 1
+      break
+    end
+  end
+  self.clientIds[clientString] = nil
   print("disconnected client "..id.." @ "..clientString)
 end
 
 function ServerConnection:onReceiveClientConnectInit(message, address, port)
-  local clientId = self:getClientId(address, port)
-  if clientId == nil then
-    self.clients.n = self.clients.n + 1
-    clientId = self.clients.n
-    self.clients[clientId] = {
+  local client = self:getClient(address, port)
+  if client == nil then
+    client = {
+      id = self.nextId,
       address = address,
       port = port,
       connectionStatus = ConnectionStatus.CONNECTED,
-      lastReceivedTime = love.timer.getTime()
     }
     local clientString = self:createClientString(address, port)
-    self.clients[clientString] = clientId
-    print("connected to new client "..clientString.." with id "..clientId)
+    self.clients[client.id] = client
+    self.clientIds.n = self.clientIds.n + 1
+    self.clientIds[self.clientIds.n] = client.id
+    self.clientIds[clientString] = client.id
+    self.nextId = self.nextId + 1
+    print("connected to new client "..clientString.." with id "..client.id)
   end
-  local client = self.clients[clientId]
-  client.lastReceivedTime = love.timer.getTime()
   
-  self:sendMessage(messages.serverConnectAck(clientId), clientId)
+  client.lastReceivedTime = love.timer.getTime()
+  self:sendMessage(messages.serverConnectAck(client.id), client.id)
 end
 
 function ServerConnection:onReceiveClientDisconnect(message, address, port)
-  local clientId = self:getClientId(address, port)
-  if clientId == nil then return end
-  
-  local client = self.clients[clientId]
+  local client = self:getClient(address, port)
   client.lastReceivedTime = love.timer.getTime()
   self:disconnectClient(clientId)
 end
 
 function ServerConnection:onReceivePing(message, address, port)
-  local clientId = self:getClientId(address, port)
-  if clientId == nil then return end
-  local client = self.clients[clientId]
+  local client = self:getClient(address, port)
   client.lastReceivedTime = love.timer.getTime()
-  print("received ping from "..clientId)
+  print("received ping from "..client.id)
 end
 
 --
--- Returns the ID of a client based on address and port
+-- Gets the client object based on the parameters, which can be:
+-- 1. clientId
+-- 2. clientAddress, clientPort
+-- 3. clientString
 --
-function ServerConnection:getClientId(address, port)
-  local clientString = self:createClientString(address, port)
-  if self.clients[clientString] then
-    return self.clients[clientString]
+function ServerConnection:getClient(...)
+  local args = {...}
+  local id = nil
+  
+  if type(args[1]) == "string" then
+    if type(args[2]) == "number" then
+      id = self.clientIds[self:createClientString(args[1], args[2])]
+    else
+      id = self.clientIds[args[1]]
+    end
+  elseif type(args[1]) == "number" then
+    id = args[1]
   end
-  return nil
+  
+  if id == nil then return nil end
+  
+  return self.clients[id]
+end
+
+function ServerConnection:allClients()
+  local i = 0
+  return function()
+    i = i + 1
+    if self.clientIds[i] then
+      return self.clients[self.clientIds[i]]
+    end
+  end
+end
+
+function ServerConnection:allClientIds()
+  local i = 0
+  return function()
+    i = i + 1
+    return self.clientIds[i]
+  end
 end
 
 function ServerConnection:createClientString(address, port)
@@ -123,11 +162,16 @@ end
 
 function ServerConnection:sendMessage(message, ...)
   local clientIds = {...}
-  local clients = {}
+  local clients = {n = 0}
   local time = love.timer.getTime()
   for _,clientId in ipairs(clientIds) do
-    clients[clientId] = self.clients[clientId]
-    clients[clientId].lastSentTime = time
+    local client = self:getClient(clientId)
+    if client ~= nil then
+      clients.n = clients.n + 1
+      clients[clients.n] = client
+      client.lastSentTime = time
+    end
   end
+  self.clients.n = nil
   self.sender:sendMessage(message, unpack(clients))
 end
