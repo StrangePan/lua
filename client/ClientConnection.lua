@@ -16,6 +16,10 @@ function ClientConnection:_init()
   
   self.serverAddress = '127.0.0.1'
   self.serverPort = 25565
+  self.server = {
+    address = self.serverAddress,
+    port = self.serverPort
+  }
   
   -- Initialize udp connection object
   self.socket = require "socket"
@@ -30,6 +34,7 @@ function ClientConnection:_init()
   -- Initialize status variables
   self.connectionStatus = ConnectionStatus.DISCONNECTED
   self.connectionid = nil
+  self.connectionSendTime = nil
   
   -- Initialize sender/receiver objects
   self.sender = MessageSender(self.udp)
@@ -38,6 +43,7 @@ function ClientConnection:_init()
   -- Register for message callbacks
   self.receiver:registerListener(MessageType.SERVER_CONNECT_ACK,
     self, self.onReceiveServerConnectAck)
+  
 end
 
 --
@@ -56,11 +62,34 @@ function ClientConnection:setConnectionStatus(status)
   self.connectionStatus = status
 end
 
+function ClientConnection:connectToServer()
+  
+  -- ignore command if already connected/connecting
+  if self:getConnectionStatus() ~= ConnectionStatus.DISCONNECTED then
+    return
+  end
+  
+  -- initialize connection protocol
+  self:requestConnectToServer()
+  self:setConnectionStatus(ConnectionStatus.CONNECTING)
+end
+
+function ClientConnection:requestConnectToServer()
+  print("ping server @ "..self.serverAddress..":"..self.serverPort)
+  self.sender:sendMessage(messages.clientConnectInit(), self.server)
+  self.connectionSendTime = love.timer.getTime()
+end
+
 --
 -- Reads and processes incoming messages
 --
-function ClientConnection:processIncomingMessages()
+function ClientConnection:update()
   self.receiver:processIncomingMessages()
+  
+  if self:getConnectionStatus() == ConnectionStatus.CONNECTING and
+      love.timer.getTime() >= self.connectionSendTime + 3 then
+    self:requestConnectToServer()
+  end
 end
 
 --

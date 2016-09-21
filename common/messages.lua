@@ -17,6 +17,13 @@ for i,msg in ipairs(messages) do
   msg.type = i
 end
 
+-- creates a message to attempt to connect to a server
+function messages.clientConnectInit()
+  return {
+    type=MessageType.CLIENT_CONNECT_INIT
+  }
+end
+
 -- bundles multiple messages into a single message bundle
 function messages.bundle(...)
   local msgs = {...}

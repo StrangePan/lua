@@ -24,8 +24,10 @@ function love.load()
     end, EventType.STEP)
   
   rootSecretary:registerEventListener({}, function()
-      connection:processIncomingMessages()
+      connection:update()
     end, EventType.STEP)
+  
+  connection:connectToServer()
 end
 
 function buildWalls()
