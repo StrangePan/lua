@@ -22,6 +22,12 @@ function messages.clientDisconnect()
   }
 end
 
+function messages.ping()
+  return {
+    type=MessageType.PING
+  }
+end
+
 -- bundles multiple messages into a single message bundle
 function messages.bundle(...)
   local msgs = {...}

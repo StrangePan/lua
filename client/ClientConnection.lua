@@ -36,6 +36,7 @@ function ClientConnection:_init()
   self.connectionId = nil
   self.connectionSendTime = nil
   self.lastReceivedTime = nil
+  self.lastSentTime = nil
   
   -- Initialize sender/receiver objects
   self.sender = MessageSender(self.udp)
@@ -45,6 +46,8 @@ function ClientConnection:_init()
   self.receiver:registerListener(MessageType.SERVER_CONNECT_ACK,
     self, self.onReceiveServerConnectAck)
   
+  self.receiver:registerListener(MessageType.PING,
+    self, self.onReceivePing)
 end
 
 --
@@ -76,8 +79,8 @@ function ClientConnection:connectToServer()
 end
 
 function ClientConnection:requestConnectToServer()
-  print("attempting ton connect to server @ "..self.serverAddress..":"..self.serverPort)
-  self.sender:sendMessage(messages.clientConnectInit(), self.server)
+  print("attempting to connect to server @ "..self.serverAddress..":"..self.serverPort)
+  self:sendMessage(messages.clientConnectInit())
   self.connectionSendTime = love.timer.getTime()
 end
 
@@ -86,7 +89,7 @@ function ClientConnection:disconnectFromServer()
     return
   end
   print("disconnected from server")
-  self.sender:sendMessage(messages.clientDisconnect(), self.server)
+  self:sendMessage(messages.clientDisconnect())
   self.connectionSendTime = nil
   self.lastReceivedTime = nil
   self.connectionId = nil
@@ -99,15 +102,23 @@ end
 function ClientConnection:update()
   self.receiver:processIncomingMessages()
   
+  local time = love.timer.getTime()
+  
+  -- ping server periodically
+  if time >= self.lastSentTime + 2 then
+    self:sendMessage(messages.ping())
+  end
+  
+  -- handle timeouts
   if self:getConnectionStatus() == ConnectionStatus.CONNECTING and
-      love.timer.getTime() >= self.connectionSendTime + 3 then
+      time >= self.connectionSendTime + 3 then
     self:requestConnectToServer()
   elseif self:getConnectionStatus() == ConnectionStatus.CONNECTED and
-      love.timer.getTime() >= self.lastReceivedTime + 5 then
+      time >= self.lastReceivedTime + 5 then
     self:setConnectionStatus(ConnectionStatus.STALLED)
     print("connection stalled")
   elseif self:getConnectionStatus() == ConnectionStatus.STALLED and
-      love.timer.getTime() >= self.lastReceivedTime + 30 then
+      time >= self.lastReceivedTime + 30 then
     self:disconnectFromServer()
     print("connection timed out")
   end
@@ -128,6 +139,12 @@ function ClientConnection:onReceiveServerConnectAck(message, address, port)
   self:setConnectionStatus(ConnectionStatus.CONNECTED)
 end
 
+function ClientConnection:onReceivePing(message, address, port)
+  if self:shouldIgnore(message, address, port) then return end
+  self:updateLastReceivedTime()
+  print("received ping")
+end
+
 --
 -- returns true if the given message should not be processed
 --
@@ -143,4 +160,9 @@ function ClientConnection:updateLastReceivedTime()
   if self:getConnectionStatus() == ConnectionStatus.STALLED then
     self:setConnectionStatus(ConnectionStatus.CONNECTED)
   end
+end
+
+function ClientConnection:sendMessage(message)
+  self.sender:sendMessage(message, self.server)
+  self.lastSentTime = love.timer.getTime()
 end

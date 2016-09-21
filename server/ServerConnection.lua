@@ -31,6 +31,9 @@ function ServerConnection:_init()
   self.receiver:registerListener(MessageType.CLIENT_DISCONNECT,
     self, self.onReceiveClientDisconnect)
   
+  self.receiver:registerListener(MessageType.PING,
+    self, self.onReceivePing)
+  
 end
 
 function ServerConnection:update()
@@ -38,6 +41,13 @@ function ServerConnection:update()
   
   local time = love.timer.getTime()
   for id,client in ipairs(self.clients) do
+    
+    -- periodically ping client
+    if time >= client.lastSentTime + 2 then
+      self:sendMessage(messages.ping(), id)
+    end
+    
+    -- handle timeouts
     if client.connectionStatus == ConnectionStatus.CONNECTED and
         time >= client.lastReceivedTime + 5 then
       client.connectionStatus = ConnectionStatus.STALLED
@@ -76,7 +86,7 @@ function ServerConnection:onReceiveClientConnectInit(message, address, port)
   local client = self.clients[clientId]
   client.lastReceivedTime = love.timer.getTime()
   
-  self.sender:sendMessage(messages.serverConnectAck(clientId),client)
+  self:sendMessage(messages.serverConnectAck(clientId), clientId)
 end
 
 function ServerConnection:onReceiveClientDisconnect(message, address, port)
@@ -88,6 +98,13 @@ function ServerConnection:onReceiveClientDisconnect(message, address, port)
   self:disconnectClient(clientId)
 end
 
+function ServerConnection:onReceivePing(message, address, port)
+  local clientId = self:getClientId(address, port)
+  if clientId == nil then return end
+  local client = self.clients[clientId]
+  client.lastReceivedTime = love.timer.getTime()
+  print("received ping from "..clientId)
+end
 
 --
 -- Returns the ID of a client based on address and port
@@ -102,4 +119,15 @@ end
 
 function ServerConnection:createClientString(address, port)
   return string.format("%s:%s", address, port)
+end
+
+function ServerConnection:sendMessage(message, ...)
+  local clientIds = {...}
+  local clients = {}
+  local time = love.timer.getTime()
+  for _,clientId in ipairs(clientIds) do
+    clients[clientId] = self.clients[clientId]
+    clients[clientId].lastSentTime = time
+  end
+  self.sender:sendMessage(message, unpack(clients))
 end
