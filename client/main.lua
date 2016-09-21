@@ -10,7 +10,7 @@ rootSecretary = Secretary()
 
 require "loveevents"
 
-local connection = ClientConnection()
+local connection
 
 function love.load()
   camera = Camera():registerWithSecretary(rootSecretary)
@@ -23,10 +23,10 @@ function love.load()
       camera:moveTo(px+(pw/2), py+(ph/2))
     end, EventType.STEP)
   
+  connection = ClientConnection()
   rootSecretary:registerEventListener({}, function()
       connection:update()
     end, EventType.STEP)
-  
   connection:connectToServer()
 end
 
