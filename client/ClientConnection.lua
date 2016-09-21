@@ -25,7 +25,7 @@ function ClientConnection:_init()
   self.socket = require "socket"
   self.udp = socket:udp()
   self.udp:settimeout(0)
-  local res,err = self.udp:setsockname('*', 25565)
+  local res,err = self.udp:setsockname('*', 25566)
   if res == nil then
     print(err)
     return
@@ -75,7 +75,7 @@ function ClientConnection:connectToServer()
 end
 
 function ClientConnection:requestConnectToServer()
-  print("ping server @ "..self.serverAddress..":"..self.serverPort)
+  print("attempting ton connect to server @ "..self.serverAddress..":"..self.serverPort)
   self.sender:sendMessage(messages.clientConnectInit(), self.server)
   self.connectionSendTime = love.timer.getTime()
 end
@@ -101,6 +101,7 @@ function ClientConnection:onReceiveServerConnectAck(message, address, port)
   -- ignore message if not looking to connect
   if self:getConnectionStatus() ~= ConnectionStatus.CONNECTING then return end
   
+  print("connected to server with client id "..message.id)
   self.connectionid = message.id
   self:setConnectionStatus(ConnectionStatus.CONNECTED)
 end
