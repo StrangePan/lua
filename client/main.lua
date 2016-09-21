@@ -4,10 +4,13 @@ require "Secretary"
 require "Player"
 require "Wall"
 require "Camera"
+require "ClientConnection"
 
 rootSecretary = Secretary()
 
 require "loveevents"
+
+local connection = ClientConnection()
 
 function love.load()
   camera = Camera():registerWithSecretary(rootSecretary)
@@ -18,7 +21,11 @@ function love.load()
       local px, py = player:getPosition()
       local pw, ph = player:getSize()
       camera:moveTo(px+(pw/2), py+(ph/2))
-    end, EventType.PRE_PHYSICS)
+    end, EventType.STEP)
+  
+  rootSecretary:registerEventListener({}, function()
+      connection:processIncomingMessages()
+    end, EventType.STEP)
 end
 
 function buildWalls()
@@ -28,7 +35,13 @@ function buildWalls()
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1},
     {1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+    {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+    {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
   }
   
   for wallY,row in ipairs(wallCodes) do
