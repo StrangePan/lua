@@ -1,36 +1,47 @@
 require "common/class"
 require "common/functions"
 require "messages"
-require "Queue"
+require "Serializer"
 
 MessageReceiver = buildClass()
 
-function MessageReceiver:_init(address, port)
-  self.socket = require "socket"
-  self.udp = self.socket:udp()
-  
-  if address and port then
-    self.udp:setpeername(address, port)
-  end
-  
-  self.udp:settimeout(0)
-  
+function MessageReceiver:_init(udp)
+  self.udp = udp
   self.coordinators = {}
 end
 
 function MessageReceiver:processIncomingMessages()
   repeat
-    data, err = self.udp:receive()
+    data, err, addr, port = self.udp:receivefrom()
     if data then
       message = Serializer.deserialize(data)
       if message ~= nil then
-        self:notifyListeners(message)
+        self.processed = {}
+        self:processMessage(message, addr, port)
+      else
+        print("unable to parse message: ", data)
       end
     end
   until data == nil
 end
 
-function MessageReceiver:notifyListeners(message)
+function MessageReceiver:processMessage(message, addr, port)
+  
+  -- short-circuit if we've already processed this message
+  if self.processed[message] then return end
+  self.processed[message] = true
+  
+  if message.type == MessageType.BUNDLE then
+    for i,submessage in ipairs(message) do
+      self:processMessage(message, addr, port)
+    end
+  else
+    self:notifyListeners(message, addr, port)
+  end
+end
+
+function MessageReceiver:notifyListeners(message, addr, port)
+  if type(message) ~= "table" then return end
   local t = message.type
   
   -- if message has no type, then no listeners to notify
@@ -39,9 +50,15 @@ function MessageReceiver:notifyListeners(message)
   -- if eventcoordinator does not exist, then no listeners to notify
   if self.coordinators[t] == nil then return end
   
-  self.coordinators[t]:notifyListeners(message)
+  self.coordinators[t]:notifyListeners(message, addr, port)
 end
 
+--
+-- Callback function will receive
+-- 1. message object
+-- 2. sender IP address
+-- 3. sender port
+--
 function MessageReceiver:registerListener(messageType, listener, callback)
   messageType = MessageType.fromId(messageType)
   assert(messageType ~= nil)
