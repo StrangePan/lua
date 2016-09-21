@@ -5,7 +5,7 @@ require "Entity"
 EventCoordinator = buildClass(Entity)
 
 function EventCoordinator:_init()
-  self.listeners = {n = 1}
+  self.listeners = {n = 0}
 end
 
 
@@ -18,10 +18,10 @@ function EventCoordinator:registerListener(object, callback)
   
   if object ~= nil then
     if self.listeners[object] == nil then
-      self.listeners[object] = {n = 1}
+      self.listeners[object] = {n = 0}
     end
-    self.listeners[object][self.listeners[object].n] = callback
     self.listeners[object].n = self.listeners[object].n + 1
+    self.listeners[object][self.listeners[object].n] = callback
     
     -- register for destroy callbacks with the secretary
     if instanceOf(object, Entity) then
@@ -32,8 +32,8 @@ function EventCoordinator:registerListener(object, callback)
     end
   else
     -- if no object is given
-    self.listeners[self.listeners.n] = callback
     self.listeners.n = self.listeners.n + 1
+    self.listeners[self.listeners.n] = callback
   end
 end
 
@@ -49,7 +49,8 @@ function EventCoordinator:unregisterListener(object, callback)
     if self.listeners[object] ~= nil then
       for i,entry in ipairs(self.listeners[object]) do
         if entry == callback then
-          self.listeners[object][i] = nil
+          table.remove(self.listeners[object], i)
+          self.listeners[object].n = self.listeners[object].n - 1
           return
         end
       end
@@ -59,7 +60,8 @@ function EventCoordinator:unregisterListener(object, callback)
   elseif object == nil and callback ~= nil then
     for i,entry in ipairs(self.listeners) do
       if entry == callback then
-        self.listeners[i] = nil
+        table.remove(self.listeners, i)
+        self.listeners.n = self.listeners.n - 1
         return
       end
     end
