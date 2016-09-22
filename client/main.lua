@@ -5,6 +5,8 @@ require "Player"
 require "Wall"
 require "Camera"
 require "ClientConnection"
+require "CommandMap"
+require "LocalPlayerController"
 
 rootSecretary = Secretary()
 
@@ -15,13 +17,27 @@ local connection
 function love.load()
   camera = Camera():registerWithSecretary(rootSecretary)
   player = Player():registerWithSecretary(rootSecretary)
+  commandMap = CommandMap()
+  playerController = LocalPlayerController(player, commandMap)
   buildWalls()
+  
+  commandMap:mapCommandToKeyboardKey(CommandType.MOVE_UP, "up")
+  commandMap:mapCommandToKeyboardKey(CommandType.MOVE_RIGHT, "right")
+  commandMap:mapCommandToKeyboardKey(CommandType.MOVE_DOWN, "down")
+  commandMap:mapCommandToKeyboardKey(CommandType.MOVE_LEFT, "left")
+  commandMap:mapCommandToKeyboardKey(CommandType.EMOTE_SPIN, "space")
   
   rootSecretary:registerEventListener({}, function()
       local px, py = player:getPosition()
       local pw, ph = player:getSize()
       camera:moveTo(px+(pw/2), py+(ph/2))
     end, EventType.STEP)
+  
+  rootSecretary:registerEventListener({}, function(_, key, scancode, isrepeat)
+      if isrepeat == false then
+        commandMap:onKeyboardInput(key)
+      end
+    end, EventType.KEYBOARD_DOWN)
   
   connection = ClientConnection()
   rootSecretary:registerEventListener({}, function()

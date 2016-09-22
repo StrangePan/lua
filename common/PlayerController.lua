@@ -24,6 +24,10 @@ function Class:setPlayer(player)
   end
 end
 
+function Class:getPlayer()
+  return self.player
+end
+
 function Class:moveUp()
   return self:move(Direction.UP)
 end
@@ -43,11 +47,11 @@ end
 function Class:move(direction)
   direction = Direction.fromId(direction)
   if direction == nil then return false end
-  if self:isBoundToPlayer() == false then return false end
+  if self:getPlayer() == nil then return false end
   return self.player:move(direction)
 end
 
 function Class:emoteSpin()
-  if self:isBoundToPlayer() == false then return false end
+  if self:getPlayer() == nil then return false end
   return self.player:spin()
 end

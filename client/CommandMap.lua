@@ -21,13 +21,25 @@ function CommandMap:_init()
 end
 
 function CommandMap:registerCommandListener(command, listener, callback)
-  command = self.mappings.methods[method][input]
+  command = CommandType.fromId(command)
   if command == nil then return end
   self.mappings.commands[command].coordinator:registerListener(listener, callback)
 end
 
+function CommandMap:onKeyboardInput(key)
+  return self:onInput(InputMethod.KEYBOARD, key)
+end
+
+function CommandMap:onJoystickInput(button)
+  return self:onInput(InputMethod.JOYSTICK, button)
+end
+
+function CommandMap:onMouseInput(button)
+  return self:onInput(InputMethod.MOUSE, button)
+end
+
 function CommandMap:onInput(method, input)
-  method = InputMethods.fromId(method)
+  method = InputMethod.fromId(method)
   if method == nil then return end
   local command = self.mappings.methods[method][input]
   if command == nil then return end
@@ -61,7 +73,9 @@ function CommandMap:mapCommandToInput(command, method, input)
   if command == nil or method == nil or input == nil then return end
   self:unmapCommand(command)
   self:unmapInput(method, input)
-  self.mappings.commands[command] = {method = method, input = input}
+  local commandMap = self.mappings.commands[command]
+  commandMap.method = method
+  commandMap.input = input
   self.mappings.methods[method][input] = command
 end
 

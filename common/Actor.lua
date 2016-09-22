@@ -34,7 +34,9 @@ function Actor:registerMoveListener(object, callback)
 end
 
 function Actor:notifyMoveListeners(x, y, z)
-  return self.moveEventCoordinator:notifyListeners(self, x, y, z)
+  if self.moveEventCoordinator then
+    return self.moveEventCoordinator:notifyListeners(self, x, y, z)
+  end
 end
 
 function Actor:registerWithSecretary(secretary)
@@ -43,7 +45,7 @@ function Actor:registerWithSecretary(secretary)
   self.moveEventCoordinator:registerWithSecretary(secretary)
   
   -- Register for event callbacks
-  secretary:registerEventListsner(self, self.onStep, EventType.STEP)
+  secretary:registerEventListener(self, self.onStep, EventType.STEP)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
   secretary:setDrawLayer(self, DrawLayer.MAIN)
   
@@ -54,7 +56,7 @@ end
 -- Attempts to move the player in the given direction. Returns `true` if the
 -- player moved and `false` if not.
 --
-function Actor:move(direction)
+function Actor:move(direction, force)
   direction = Direction.fromId(direction)
   if direction == nil then
     return false
@@ -67,14 +69,16 @@ function Actor:move(direction)
   local xNext = x + xStep
   local yNext = y + yStep
 
-  local t, r, b, l = self:getBoundingBox(xStep, yStep)
-  local secretary = self:getSecretary()
-  local collisions = secretary:getCollisions(t, r, b, l, Wall)
-  
-  -- Cancel jump if we would collide with a wall
-  if table.getn(collisions) > 0 then
-    collisions[1]:bump(key)
-    return false
+  if force == false then
+    local t, r, b, l = self:getBoundingBox(xStep, yStep)
+    local secretary = self:getSecretary()
+    local collisions = secretary:getCollisions(t, r, b, l, Wall)
+
+    -- Cancel jump if we would collide with a wall
+    if table.getn(collisions) > 0 then
+      collisions[1]:bump(key)
+      return false
+    end
   end
   
   local w, h = self:getSize()
@@ -89,7 +93,10 @@ function Actor:setPosition(x, y, z)
   
   x, y, z = self:getPosition()
   if ox ~= x or oy ~= y or oz ~= z then
-    self:getSecretary():updateObject(self)
+    local secretary = self:getSecretary()
+    if secretary then
+      self:getSecretary():updateObject(self)
+    end
     self:notifyMoveListeners(x, y, z)
   end
 end
@@ -107,7 +114,7 @@ function Actor:updateDrawState()
     self.angle = 0
     self.drawAngle = self.angle
   else
-    self.drawAngle = self.drawAngle - (self.drawAngle - self.angle) * 0.375
+    self.drawAngle = self.drawAngle - (self.drawAngle - self.angle) * 0.0625
   end
 end
 
