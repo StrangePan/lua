@@ -11,6 +11,7 @@ function Wall:_init(x, y)
   
   self.xOffset = 0
   self.yOffset = 0
+  self.drawScale = 0
   
   self.bumpStrength = 6
   self.bumps = {
@@ -32,12 +33,12 @@ end
 
 function Wall:registerWithSecretary(secretary)
   Wall.superclass.registerWithSecretary(self, secretary)
+  secretary:registerEventListener(self, self.onStep, EventType.STEP)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
-  secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
   return self
 end
 
-function Wall:onPostPhysics()
+function Wall:onStep()
   if self.xOffset <= -1 then
     self.xOffset = self.xOffset + 1
   elseif self.xOffset >= 1 then
@@ -52,6 +53,11 @@ function Wall:onPostPhysics()
   else
     self.yOffset = 0
   end
+  if self.drawScale > 0.95 then
+    self.drawScale = 1
+  else
+    self.drawScale = self.drawScale + 0.05
+  end
 end
 
 function Wall:draw()
@@ -60,5 +66,6 @@ function Wall:draw()
   x = x + self.xOffset
   y = y + self.yOffset
   local w, h = self:getSize()
-  love.graphics.rectangle("fill", x, y, w, h)
+  local scale = self.drawScale
+  love.graphics.rectangle("fill", x + (w/2 - w/2 * scale), y + (h/2 - h/2 * scale), w * scale, h * scale)
 end
