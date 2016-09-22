@@ -1,18 +1,19 @@
-require "common/class"
-require "MessageReceiver"
-require "MessageSender"
+require "Connection"
 require "ConnectionStatus"
+require "Queue"
 
 -- message handler and coordinator for clients
 
-ClientConnection = buildClass()
+ClientConnection = buildClass(Connection)
+local Class = ClientConnection
 
 --
 -- Initializes a new connection object optimized for clients. Registers
 -- as a listener for messageReceiver's messages and automaticaly handles
 -- communication with server.
 --
-function ClientConnection:_init()
+function Class:_init()
+  Class.superclass._init(self, 25566)
   
   self.serverAddress = '127.0.0.1'
   self.serverPort = 25565
@@ -21,26 +22,13 @@ function ClientConnection:_init()
     port = self.serverPort
   }
   
-  -- Initialize udp connection object
-  self.socket = require "socket"
-  self.udp = socket:udp()
-  self.udp:settimeout(0)
-  local res,err = self.udp:setsockname('*', 25566)
-  if res == nil then
-    print(err)
-    return
-  end
-  
   -- Initialize status variables
   self.connectionStatus = ConnectionStatus.DISCONNECTED
   self.connectionId = nil
   self.connectionSendTime = nil
   self.lastReceivedTime = nil
   self.lastSentTime = nil
-  
-  -- Initialize sender/receiver objects
-  self.sender = MessageSender(self.udp)
-  self.receiver = MessageReceiver(self.udp)
+  self.outQueue = Queue()
   
   -- Register for message callbacks
   self.receiver:registerListener(MessageType.SERVER_CONNECT_ACK,
@@ -54,7 +42,7 @@ end
 -- Gets the current status of the connection with the server.
 -- Returns a ConnectionStatus enum value.
 --
-function ClientConnection:getConnectionStatus()
+function Class:getConnectionStatus()
   return self.connectionStatus
 end
 
@@ -62,11 +50,11 @@ end
 -- Changes the connection status and notifies registered listeners if
 -- necessary.
 --
-function ClientConnection:setConnectionStatus(status)
+function Class:setConnectionStatus(status)
   self.connectionStatus = status
 end
 
-function ClientConnection:connectToServer()
+function Class:connectToServer()
   
   -- ignore command if already connected/connecting
   if self:getConnectionStatus() ~= ConnectionStatus.DISCONNECTED then
@@ -78,13 +66,13 @@ function ClientConnection:connectToServer()
   self:setConnectionStatus(ConnectionStatus.CONNECTING)
 end
 
-function ClientConnection:requestConnectToServer()
+function Class:requestConnectToServer()
   print("attempting to connect to server @ "..self.serverAddress..":"..self.serverPort)
   self:sendMessage(messages.clientConnectInit())
   self.connectionSendTime = love.timer.getTime()
 end
 
-function ClientConnection:disconnectFromServer()
+function Class:disconnectFromServer()
   if self:getConnectionStatus() == ConnectionStatus.DISCONNECTED then
     return
   end
@@ -99,7 +87,7 @@ end
 --
 -- Reads and processes incoming messages
 --
-function ClientConnection:update()
+function Class:update()
   self.receiver:processIncomingMessages()
   
   local time = love.timer.getTime()
@@ -129,7 +117,7 @@ end
 --
 -- Handles an incoming message of type MessageType.SERVER_CONNECT_ACK
 --
-function ClientConnection:onReceiveServerConnectAck(message, address, port)
+function Class:onReceiveServerConnectAck(message, address, port)
   if self:shouldIgnore(message, address, port) then return end
   self:updateLastReceivedTime()
   
@@ -141,30 +129,31 @@ function ClientConnection:onReceiveServerConnectAck(message, address, port)
   self:setConnectionStatus(ConnectionStatus.CONNECTED)
 end
 
-function ClientConnection:onReceivePing(message, address, port)
+function Class:onReceivePing(message, address, port)
   if self:shouldIgnore(message, address, port) then return end
   self:updateLastReceivedTime()
   print("received ping")
 end
 
+
 --
 -- returns true if the given message should not be processed
 --
-function ClientConnection:shouldIgnore(message, address, port)
+function Class:shouldIgnore(message, address, port)
   return address ~= self.serverAddress or port ~= self.serverPort
 end
 
 --
 -- Updates the last received message time to prevent connection going stale
 --
-function ClientConnection:updateLastReceivedTime()
+function Class:updateLastReceivedTime()
   self.lastReceivedTime = love.timer.getTime()
   if self:getConnectionStatus() == ConnectionStatus.STALLED then
     self:setConnectionStatus(ConnectionStatus.CONNECTED)
   end
 end
 
-function ClientConnection:sendMessage(message)
+function Class:sendMessage(message)
   self.sender:sendMessage(message, self.server)
   self.lastSentTime = love.timer.getTime()
 end

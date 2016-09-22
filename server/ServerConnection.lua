@@ -1,30 +1,16 @@
-require "common/class"
-require "MessageReceiver"
-require "MessageSender"
+require "Connection"
 require "ConnectionStatus"
 
-ServerConnection = buildClass()
+ServerConnection = buildClass(Connection)
+local Class = ServerConnection
 
-function ServerConnection:_init()
-  
-  -- Initialize udp connection object
-  self.socket = require "socket"
-  self.udp = socket:udp()
-  self.udp:settimeout(0)
-  local res,err = self.udp:setsockname('*', 25565)
-  if res == nil then
-    print(err)
-    return
-  end
+function Class:_init()
+  Class.superclass._init(self, 25565)
   
   -- Initialize clients table
   self.clients = {}
   self.clientIds = {n = 0}
   self.nextId = 1
-  
-  -- Initialize sender/receiver objects
-  self.sender = MessageSender(self.udp)
-  self.receiver = MessageReceiver(self.udp)
   
   -- Register for message callbacks
   self.receiver:registerListener(MessageType.CLIENT_CONNECT_INIT,
@@ -35,10 +21,9 @@ function ServerConnection:_init()
   
   self.receiver:registerListener(MessageType.PING,
     self, self.onReceivePing)
-  
 end
 
-function ServerConnection:update()
+function Class:update()
   self.receiver:processIncomingMessages()
   
   local time = love.timer.getTime()
@@ -63,7 +48,7 @@ function ServerConnection:update()
   end
 end
 
-function ServerConnection:disconnectClient(id)
+function Class:disconnectClient(id)
   local client = self:getClient(id)
   if client == nil then return end
   local clientString = self:createClientString(client.address, client.port)
@@ -79,7 +64,7 @@ function ServerConnection:disconnectClient(id)
   print("disconnected client "..id.." @ "..clientString)
 end
 
-function ServerConnection:onReceiveClientConnectInit(message, address, port)
+function Class:onReceiveClientConnectInit(message, address, port)
   local client = self:getClient(address, port)
   if client == nil then
     client = {
@@ -101,13 +86,13 @@ function ServerConnection:onReceiveClientConnectInit(message, address, port)
   self:sendMessage(messages.serverConnectAck(client.id), client.id)
 end
 
-function ServerConnection:onReceiveClientDisconnect(message, address, port)
+function Class:onReceiveClientDisconnect(message, address, port)
   local client = self:getClient(address, port)
   client.lastReceivedTime = love.timer.getTime()
   self:disconnectClient(clientId)
 end
 
-function ServerConnection:onReceivePing(message, address, port)
+function Class:onReceivePing(message, address, port)
   local client = self:getClient(address, port)
   client.lastReceivedTime = love.timer.getTime()
   print("received ping from "..client.id)
@@ -119,7 +104,7 @@ end
 -- 2. clientAddress, clientPort
 -- 3. clientString
 --
-function ServerConnection:getClient(...)
+function Class:getClient(...)
   local args = {...}
   local id = nil
   
@@ -138,7 +123,7 @@ function ServerConnection:getClient(...)
   return self.clients[id]
 end
 
-function ServerConnection:allClients()
+function Class:allClients()
   local i = 0
   return function()
     i = i + 1
@@ -148,7 +133,7 @@ function ServerConnection:allClients()
   end
 end
 
-function ServerConnection:allClientIds()
+function Class:allClientIds()
   local i = 0
   return function()
     i = i + 1
@@ -156,11 +141,11 @@ function ServerConnection:allClientIds()
   end
 end
 
-function ServerConnection:createClientString(address, port)
+function Class:createClientString(address, port)
   return string.format("%s:%s", address, port)
 end
 
-function ServerConnection:sendMessage(message, ...)
+function Class:sendMessage(message, ...)
   local clientIds = {...}
   local clients = {n = 0}
   local time = love.timer.getTime()
