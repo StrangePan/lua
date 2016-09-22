@@ -14,10 +14,10 @@ function Wall:_init(x, y)
   
   self.bumpStrength = 6
   self.bumps = {
-       ["up"] = {x =  0, y = -1},
-    ["right"] = {x =  1, y =  0},
-     ["down"] = {x =  0, y =  1},
-     ["left"] = {x = -1, y =  0}
+       [Direction.UP] = {x =  0, y = -1},
+    [Direction.RIGHT] = {x =  1, y =  0},
+     [Direction.DOWN] = {x =  0, y =  1},
+     [Direction.LEFT] = {x = -1, y =  0}
   }
 end
 

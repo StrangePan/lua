@@ -57,6 +57,7 @@ end
 -- player moved and `false` if not.
 --
 function Actor:move(direction, force)
+  if force == nil then force = false end
   direction = Direction.fromId(direction)
   if direction == nil then
     return false
@@ -69,14 +70,14 @@ function Actor:move(direction, force)
   local xNext = x + xStep
   local yNext = y + yStep
 
+  local secretary = self:getSecretary()
   if force == false then
     local t, r, b, l = self:getBoundingBox(xStep, yStep)
-    local secretary = self:getSecretary()
     local collisions = secretary:getCollisions(t, r, b, l, Wall)
 
     -- Cancel jump if we would collide with a wall
     if table.getn(collisions) > 0 then
-      collisions[1]:bump(key)
+      collisions[1]:bump(direction)
       return false
     end
   end
@@ -114,7 +115,14 @@ function Actor:updateDrawState()
     self.angle = 0
     self.drawAngle = self.angle
   else
-    self.drawAngle = self.drawAngle - (self.drawAngle - self.angle) * 0.0625
+    local delta = -(self.drawAngle - self.angle) * 0.25
+    local maxdelta = math.pi / 12
+    if delta < -maxdelta then
+      delta = -maxdelta
+    elseif delta > maxdelta then
+      delta = maxdelta
+    end
+    self.drawAngle = self.drawAngle + delta
   end
 end
 
