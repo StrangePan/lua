@@ -10,6 +10,8 @@ require "Queue"
 MessagePasser = buildClass()
 local Class = MessagePasser
 
+local ANY_MESSAGE_TYPE = "any"
+
 function Class:_init(udp)
   self.udp = udp
   self.inbox = {}
@@ -161,15 +163,24 @@ function Class:notifyListeners(message, addr, port)
   if type(message) ~= "table" then return end
   local t = message.type
   
-  -- if message has no type, then no listeners to notify
-  if t == nil then return end
+  -- Notify listeners registerd with message type-specific event coordinators.
+  if t ~= nil and self.coordinators[t] ~= nil then
+    self.coordinators[t]:notifyListeners(message, addr, port)
+  end
   
-  -- if eventcoordinator does not exist, then no listeners to notify
-  if self.coordinators[t] == nil then return end
-  
-  self.coordinators[t]:notifyListeners(message, addr, port)
+  -- Notify listeners registerd with message type-agnostic event coordinator.
+  if self.coordinators[ANY_MESSAGE_TYPE] ~= nil then
+    self.coordinators[ANY_MESSAGE_TYPE]:notifyListeners(message, addr, port)
+  end
 end
 
+--
+-- Registers a listener to receive callbacks when a message is received.
+-- The callback will only be called when receiving messages of the specified
+-- MessageType.
+--
+-- If first parameter is nil, then listener will receive callbacks for ALL
+-- message types!
 --
 -- Callback function will receive
 -- 1. message object
@@ -177,11 +188,20 @@ end
 -- 3. sender port
 --
 function Class:registerListener(messageType, listener, callback)
-  messageType = MessageType.fromId(messageType)
-  assert(messageType ~= nil)
+  -- Validate parameters.
+  if messageType == nil then
+    messageType = ANY_MESSAGE_TYPE
+  else
+    messageType = MessageType.fromId(messageType)
+    assert(messageType ~= nil)
+  end
   assertType(callback, "callback", "function")
+  
+  -- Lazily instantiate event coordinators.
   if self.coordinators[messageType] == nil then
     self.coordinators[messageType] = EventCoordinator()
   end
+  
+  -- Register for callbacks.
   self.coordinators[messageType]:registerListener(listener, callback)
 end
