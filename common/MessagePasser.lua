@@ -163,14 +163,14 @@ function Class:notifyListeners(message, addr, port)
   if type(message) ~= "table" then return end
   local t = message.type
   
-  -- Notify listeners registerd with message type-specific event coordinators.
-  if t ~= nil and self.coordinators[t] ~= nil then
-    self.coordinators[t]:notifyListeners(message, addr, port)
-  end
-  
   -- Notify listeners registerd with message type-agnostic event coordinator.
   if self.coordinators[ANY_MESSAGE_TYPE] ~= nil then
     self.coordinators[ANY_MESSAGE_TYPE]:notifyListeners(message, addr, port)
+  end
+  
+  -- Notify listeners registerd with message type-specific event coordinators.
+  if t ~= nil and self.coordinators[t] ~= nil then
+    self.coordinators[t]:notifyListeners(message, addr, port)
   end
 end
 
