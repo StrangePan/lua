@@ -1,6 +1,12 @@
+require "common/functions"
 require "common/class"
 require "Queue"
 
+--
+-- Class that handles the sending and receiving of messages of UDP and
+-- includes mechanisms for registering for message receipt callbacks
+-- and handling message acknowledgements.
+--
 MessagePasser = buildClass()
 local Class = MessagePasser
 
@@ -11,16 +17,35 @@ function Class:_init(udp)
   self.coordinators = {}
 end
 
+--
+-- Builds a message channel identification string.
+--
 local function buildAckKey(address, port, channel)
   return string.format("%s:%s:%s", address, port, channel)
 end
 
+--
+-- Sends message object to the specified IP address and port number.
+--
 function Class:sendMessage(message, address, port)
+  assertType(message, "message", "table")
+  assertType(address, "address", "string")
+  assertType(port, "port", "number")
   local data = Serializer.serialize(message)
   self.udp:sendto(data, address, port)
 end
 
+--
+-- Sends message object to the specified IP address and port number, along
+-- with a request that the receiver send back an acknowledgement of receipt,
+-- blocking any other outgoing messages on the provided channel until the
+-- client sends acknowledgement.
+--
 function Class:sendMessageWithAck(message, channel, address, port)
+  assertType(message, "message", "table")
+  assertType(channel, "channel", "string")
+  assertType(address, "address", "string")
+  assertType(port, "port", "number")
   local ackKey = buildAckKey(address, port, channel)
   local outbox = self.outbox[ackKey]
   if outbox == nil then
@@ -33,6 +58,10 @@ function Class:sendMessageWithAck(message, channel, address, port)
   self:sendMessage(messageWithAck, address, port)
 end
 
+--
+-- Processes all incoming messages and notifies registered listeners as
+-- appropriate.
+--
 function Class:receiveAllMessages()
   repeat
     data, addr, port = self.udp:receivefrom()
@@ -48,6 +77,11 @@ function Class:receiveAllMessages()
   until data == nil
 end
 
+--
+-- Internally processes receipt of a message. Automatically handles bundled
+-- messages, recursive messages, received acknowledgements, acknowledgement
+-- requests, and acknowledgement resets.
+--
 function Class:processMessage(message, addr, port)
   
   -- short-circuit if we've already processed this message
@@ -119,6 +153,10 @@ function Class:processMessage(message, addr, port)
   end
 end
 
+--
+-- Notifies registered listeners of the provided message's type of receipt
+-- of message, providing sender address and port.
+--
 function Class:notifyListeners(message, addr, port)
   if type(message) ~= "table" then return end
   local t = message.type
