@@ -1,6 +1,5 @@
 require "common/class"
-require "MessageReceiver"
-require "MessageSender"
+require "MessagePasser"
 
 Connection = buildClass()
 local Class = Connection
@@ -19,6 +18,5 @@ function Class:_init(port)
   end
 
   -- Initialize sender/receiver objects
-  self.sender = MessageSender(self.udp)
-  self.receiver = MessageReceiver(self.udp)
+  self.passer = MessagePasser(self.udp)
 end

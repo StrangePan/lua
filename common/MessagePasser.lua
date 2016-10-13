@@ -1,8 +1,8 @@
 require "common/class"
 require "Queue"
 
-MessageCommunicator = buildClass()
-local Class = MessageCommunicator
+MessagePasser = buildClass()
+local Class = MessagePasser
 
 function Class:_init(udp)
   self.udp = udp
@@ -119,7 +119,7 @@ function Class:processMessage(message, addr, port)
   end
 end
 
-function MessageReceiver:notifyListeners(message, addr, port)
+function Class:notifyListeners(message, addr, port)
   if type(message) ~= "table" then return end
   local t = message.type
   
