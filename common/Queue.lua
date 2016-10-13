@@ -36,6 +36,13 @@ function Queue:pop()
   return obj
 end
 
+function Queue:peek()
+  if self.font == nil then
+    return nil
+  end
+  return self.front.value
+end
+
 function Queue:empty()
   return self.size == 0
 end
