@@ -103,6 +103,8 @@ function Actor:setPosition(x, y, z)
 end
 
 function Actor:spin()
+  -- Don't allow more than 2 spins to be queued up.
+  if self.drawAngle < self.angle - math.pi * 2 then return end
   self.angle = self.angle + math.pi * 2
 end
 
