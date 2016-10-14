@@ -1,4 +1,4 @@
-require "Connection"
+require "ConnectionManager"
 require "ConnectionStatus"
 require "MessageType"
 require "messages"
@@ -6,8 +6,8 @@ require "Queue"
 
 -- message handler and coordinator for clients
 
-ClientConnection = buildClass(Connection)
-local Class = ClientConnection
+ClientConnectionManager = buildClass(ConnectionManager)
+local Class = ClientConnectionManager
 
 --
 -- Initializes a new connection object optimized for clients. Registers

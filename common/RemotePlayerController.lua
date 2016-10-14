@@ -13,7 +13,7 @@ end
 
 function Class:setConnection(connection)
   if connection ~= nil then
-    assertType(connection, "connection", Connection)
+    assertType(connection, "connection", ConnectionManager)
   end
   
   if self.connection ~= nil then

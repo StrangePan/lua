@@ -1,8 +1,8 @@
 require "common/class"
 require "MessagePasser"
 
-Connection = buildClass()
-local Class = Connection
+ConnectionManager = buildClass()
+local Class = ConnectionManager
 
 function Class:_init(port)
   self.port = port

@@ -1,11 +1,11 @@
 package.path = package.path .. ";./common/?.lua"
 
-require "ServerConnection"
+require "ServerConnectionManager"
 
 local connection
 
 function love.load()
-  connection = ServerConnection()
+  connection = ServerConnectionManager()
 end
 
 function love.update(dt)

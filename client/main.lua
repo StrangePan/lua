@@ -4,7 +4,7 @@ require "Secretary"
 require "Player"
 require "Wall"
 require "Camera"
-require "ClientConnection"
+require "ClientConnectionManager"
 require "CommandMap"
 require "LocalPlayerController"
 
@@ -39,7 +39,7 @@ function love.load()
       end
     end, EventType.KEYBOARD_DOWN)
   
-  connection = ClientConnection()
+  connection = ClientConnectionManager()
   rootSecretary:registerEventListener({}, function()
       connection:update()
     end, EventType.STEP)
