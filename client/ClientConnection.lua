@@ -1,5 +1,7 @@
 require "Connection"
 require "ConnectionStatus"
+require "MessageType"
+require "messages"
 require "Queue"
 
 -- message handler and coordinator for clients
@@ -29,12 +31,16 @@ function Class:_init()
   self.lastReceivedTime = nil
   self.lastSentTime = nil
   self.outQueue = Queue()
+  self.lastReceivedNum = 0
   
   -- Register for message callbacks
-  self.receiver:registerListener(MessageType.SERVER_CONNECT_ACK,
+  self.passer:registerListener(nil,
+    self, self.onReceiveMessage)
+  
+  self.passer:registerListener(MessageType.SERVER_CONNECT_ACK,
     self, self.onReceiveServerConnectAck)
   
-  self.receiver:registerListener(MessageType.PING,
+  self.passer:registerListener(MessageType.PING,
     self, self.onReceivePing)
 end
 
@@ -88,7 +94,7 @@ end
 -- Reads and processes incoming messages
 --
 function Class:update()
-  self.receiver:processIncomingMessages()
+  self.passer:receiveAllMessages()
   
   local time = love.timer.getTime()
   
@@ -115,11 +121,18 @@ function Class:update()
 end
 
 --
+-- Handles incoming messages of all types.
+--
+function Class:onReceiveMessage(message, address, port)
+  if self:shouldIgnore(message, address, port) then return end
+  self:updateLastReceivedTime()
+end
+
+--
 -- Handles an incoming message of type MessageType.SERVER_CONNECT_ACK
 --
 function Class:onReceiveServerConnectAck(message, address, port)
   if self:shouldIgnore(message, address, port) then return end
-  self:updateLastReceivedTime()
   
   -- ignore message if not looking to connect
   if self:getConnectionStatus() ~= ConnectionStatus.CONNECTING then return end
@@ -129,12 +142,13 @@ function Class:onReceiveServerConnectAck(message, address, port)
   self:setConnectionStatus(ConnectionStatus.CONNECTED)
 end
 
+--
+-- Handles incoming pings, keeping the server connection alive
+--
 function Class:onReceivePing(message, address, port)
   if self:shouldIgnore(message, address, port) then return end
-  self:updateLastReceivedTime()
   print("received ping")
 end
-
 
 --
 -- returns true if the given message should not be processed
@@ -153,7 +167,21 @@ function Class:updateLastReceivedTime()
   end
 end
 
+--
+-- Sends a message to the server.
+--
 function Class:sendMessage(message)
-  self.sender:sendMessage(message, self.server)
+  return self:sendMessageWithAck(message, nil)
+end
+
+--
+-- Sends a message to the server and requests acknowledgement of receipt.
+--
+function Class:sendMessageWithAck(message, channel)
+  if channel then
+    self.passer:sendMessageWithAck(message, channel, self.server.address, self.server.port)
+  else
+    self.passer:sendMessage(message, self.server.address, self.server.port)
+  end
   self.lastSentTime = love.timer.getTime()
 end

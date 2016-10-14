@@ -28,6 +28,39 @@ function messages.ping()
   }
 end
 
+function messages.mapStatus(num, map)
+  return {
+    type=MessageType.MAP_STATUS,
+    num,
+    map=map:getStatus()
+  }
+end
+
+function messages.ack(channel, ackNum)
+  return {
+    type=MessageType.ACK,
+    c=channel,
+    n=ackNum
+  }
+end
+
+function messages.ackReset(channel, ackNum)
+  return {
+    type=MessageType.ACK_RESET,
+    c=channel,
+    n=ackNum
+  }
+end
+
+function messages.ackRequest(channel, ackNum, message)
+  return {
+    type=MessageType.ACK_REQUEST,
+    c=channel,
+    n=ackNum,
+    m=message
+  }
+end
+
 -- bundles multiple messages into a single message bundle
 function messages.bundle(...)
   local msgs = {...}

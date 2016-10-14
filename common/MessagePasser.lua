@@ -1,6 +1,10 @@
 require "common/functions"
 require "common/class"
+require "EventCoordinator"
+require "MessageType"
+require "messages"
 require "Queue"
+require "Serializer"
 
 --
 -- Class that handles the sending and receiving of messages of UDP and
