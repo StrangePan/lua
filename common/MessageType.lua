@@ -2,9 +2,9 @@ require "common/enum"
 
 MessageType = {
   "BUNDLE",
-  "CLIENT_CONNECT_INIT",
-  "SERVER_CONNECT_ACK",
-  "CLIENT_DISCONNECT",
+  "CONNECT_INIT",
+  "CONNECT_ACK",
+  "DISCONNECT",
   "PING",
   "ACK",
   "ACK_RESET",

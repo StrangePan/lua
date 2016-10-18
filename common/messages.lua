@@ -3,22 +3,21 @@ require "MessageType"
 messages = {}
 
 -- creates a message to attempt to connect to a server
-function messages.clientConnectInit()
+function messages.connectionInit()
   return {
-    type=MessageType.CLIENT_CONNECT_INIT
+    type=MessageType.CONNECT_INIT
   }
 end
 
-function messages.serverConnectAck(clientId)
+function messages.connectionAck()
   return {
-    type=MessageType.SERVER_CONNECT_ACK,
-    id=clientId
+    type=MessageType.CONNECT_ACK,
   }
 end
 
-function messages.clientDisconnect()
+function messages.disconnect()
   return {
-    type=MessageType.CLIENT_DISCONNECT
+    type=MessageType.DISCONNECT
   }
 end
 
