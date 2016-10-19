@@ -180,6 +180,7 @@ function Secretary:registerChildSecretary( child )
   
   -- Register event methods of child with self
   self:registerEventListener(child, child.onDraw, EventType.DRAW)
+  self:registerEventListener(child, child.onPreStep, EventType.PRE_STEP)
   self:registerEventListener(child, child.onStep, EventType.STEP)
   self:registerEventListener(child, child.onPrePhysics, EventType.PRE_PHYSICS)
   self:registerEventListener(child, child.onPhysics, EventType.PHYSICS)
@@ -453,9 +454,14 @@ function Secretary:onDraw()
 end
 
 -- Called every game step
-function Secretary:onStep()
+function Secretary:onPreStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PRE_STEP])
+end
+
+-- Called every game step
+function Secretary:onStep()
+  if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.STEP])
 end
 

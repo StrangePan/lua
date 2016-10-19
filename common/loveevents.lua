@@ -8,6 +8,7 @@ function love.update( dt )
   rootSecretary:onPrePhysics()
   rootSecretary:onPhysics()
   rootSecretary:onPostPhysics()
+  rootSecretary:onPreStep()
   rootSecretary:onStep()
 end
 
