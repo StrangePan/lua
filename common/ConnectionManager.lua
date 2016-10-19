@@ -53,11 +53,13 @@ function Class:_init(port)
 end
 
 --
--- Periodically called by framework. Processes incoming messages and sends pings to
--- connections whom we have not pinged in a while and updates connection information
--- for connections from whomw e have not heard in a while.
+-- Processes incoming messages and sends pings to connections whom we have not
+-- pinged in a while and updates connection information for connections from
+-- whom we have not heard in a while.
 --
-function Class:update()
+-- Should be called multiple times a second for more responsive results.
+--
+function Class:receiveAllMessages()
   self.passer:receiveAllMessages()
 
   local time = love.timer.getTime()
@@ -88,9 +90,10 @@ function Class:update()
 end
 
 --
--- Called when the frameworks is shutting down. Terminates all current connections.
+-- Terminates all current connections and broadcasts connection termination
+-- messages to all conected instances.
 --
-function Class:onShutdown()
+function Class:terminateAllConnections()
   for connection in self:allConnections() do
     self:terminateConnection(connection, true)
   end

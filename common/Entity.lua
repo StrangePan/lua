@@ -1,6 +1,7 @@
 require "common/class"
 
 Entity = buildClass()
+local Class = Entity
 
 --------------------------------------------------------------------------------
 --                                Entity Class                                --
@@ -11,8 +12,8 @@ Entity = buildClass()
 --
 -- `Entity` constructor. Initializes data members.
 --
-function Entity:_init()
-  Object._init(self)
+function Class:_init()
+  Class.superclass._init(self)
   
   -- Assigned secretary object
   self.secretary = nil
@@ -29,7 +30,7 @@ end
 -- Return: This same object so that this method can be called inline without
 --         affecting normal function.
 --
-function Entity:registerWithSecretary(secretary)
+function Class:registerWithSecretary(secretary)
   
   -- Ensure secretary is of correct type
   assertType(secretary, "secretary", Secretary)
@@ -51,7 +52,7 @@ end
 -- Unregisters this object from the `Secretary` object it had been previously
 -- registered with using the `registerWithSecretary()` method, if any.
 --
-function Entity:deregisterWithSecretary()
+function Class:deregisterWithSecretary()
   
   -- Remove all record of self from current secretary
   if self.secretary ~= nil then
@@ -72,7 +73,7 @@ end
 --         if this object has not been registered or if
 --         `deregisterWithSecretary()` has been more recently called.
 --
-function Entity:getSecretary()
+function Class:getSecretary()
   return self.secretary
 end
 
@@ -82,6 +83,6 @@ end
 -- Performs any necessary self-destruction steps, including deregistering this
 -- object from any known `Secretary` objects.
 --
-function Entity:destroy()
+function Class:destroy()
   self:deregisterWithSecretary()
 end
