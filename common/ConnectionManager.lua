@@ -103,19 +103,16 @@ function Class:createConnection(address, port)
   print('createConnection', address, port)
   if self:getConnection(address, port) then return end
   
-  local connectionId = self.connectionIds.nxt
+  local id = self.connectionIds.nxt
   self.connectionIds.nxt = self.connectionIds.nxt + 1
   
-  local connection = Connection(connectionId)
-  connection.address = address
-  connection.port = port
-  connection.status = ConnectionStatus.DISCONNECTED
+  local connection = Connection(id, address, port)
   
   local connectionString = self:createConnectionString(address, port)
-  self.connections[connection.id] = connection
+  self.connections[id] = connection
   self.connectionIds.n = self.connectionIds.n + 1
-  self.connectionIds[self.connectionIds.n] = connection.id
-  self.connectionIds[connectionString] = connection.id
+  self.connectionIds[self.connectionIds.n] = id
+  self.connectionIds[connectionString] = id
   
   return connection
 end
@@ -141,17 +138,18 @@ end
 function Class:deleteConnection(connection)
   local connection = self:getConnection(connection)
   if connection == nil then return end
+  local id = connection.id
   local connectionString = self:createConnectionString(connection.address, connection.port)
-  self.connections[connection.id]= nil
+  self.connections[id]= nil
   for k,v in ipairs(self.connectionIds) do
-    if v == connection.id then
+    if v == id then
       table.remove(self.connectionIds, k)
       self.connectionIds.n = self.connectionIds.n - 1
       break
     end
   end
   self.connectionIds[connectionString] = nil
-  print("disconnected from "..connection.id.." @ "..connectionString)
+  print("disconnected from "..id.." @ "..connectionString)
 end
 
 --
@@ -268,12 +266,12 @@ end
 
 function Class:sendConnectionInit(connection)
   connection = self:getConnection(connection)
-  if connection == nil then
-    return
-  end
-  print("attempting to connect to "..connection.id.." @ "..connection.address..":"..connection.port)
+  if connection == nil then return end
+  
+  local id = connection.id
+  print("attempting to connect to "..id.." @ "..connection.address..":"..connection.port)
   connection.status = ConnectionStatus.CONNECTING
-  self:sendMessage(messages.connectionInit(), connection.id)
+  self:sendMessage(messages.connectionInit(), id)
 end
 
 --
@@ -309,10 +307,12 @@ end
 function Class:onReceiveConnectionInit(message, address, port)
   local connection = self:createConnection(address, port)
   if connection == nil then return end
-  print("connection request "..connection.id.." received from "..address..":"..port)
+  
+  local id = connection.id
+  print("connection request "..id.." received from "..address..":"..port)
   connection.status = ConnectionStatus.CONNECTED
   connection.lastReceivedTime = love.timer.getTime()
-  self:sendMessage(messages.connectionAck(), connection.id)
+  self:sendMessage(messages.connectionAck(), id)
 end
 
 --
