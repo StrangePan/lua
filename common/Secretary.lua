@@ -7,16 +7,17 @@ require "Entity"
 require "PhysObject"
 
 Secretary = buildClass()
+local Class = Secretary
 
 
 
 --
 -- CONSTRUCTOR
 --
-function Secretary:_init( )
+function Class:_init( )
   
   -- Collision detection data structure
-  self.tree = QuadTree( 1, -1000, 1000, 1000, -1000 )
+  self.tree = QuadTree(1, -1000, 1000, 1000, -1000)
   
   self.paused = false
   self.objectNodes = {}  -- table containing direct references to object quadtree nodes
@@ -51,7 +52,7 @@ end
 --
 -- object: The new object to track collisions with.
 --
-function Secretary:registerPhysObject( object )
+function Class:registerPhysObject(object)
   
   -- Validate arguments
   assertType(object, "object", PhysObject)
@@ -77,7 +78,7 @@ end
 --
 -- object: The object to unregister.
 --
-function Secretary:unregisterPhysObject( object )
+function Class:unregisterPhysObject(object)
   
   -- Validate arguments
   assertType(object, "object", PhysObject)
@@ -102,7 +103,7 @@ end
 --
 -- object: The object to update information for.
 --
-function Secretary:updateObject(object)
+function Class:updateObject(object)
   local path = self.tree:getFullIndex(object:getBoundingBox())
   
   if path ~= self.objectNodes[object] then
@@ -130,7 +131,7 @@ end
 --   Table containing indexed array of objects whose bounding boxes intersect
 --     with the supplied coordinates.
 --
-function Secretary:getCollisions( top, right, bottom, left, front, back, ... )
+function Class:getCollisions(top, right, bottom, left, front, back, ...)
   local arg = {...}
   assert(top and right and bottom and left, "parameter(s) cannot be nil")
   
@@ -142,7 +143,7 @@ function Secretary:getCollisions( top, right, bottom, left, front, back, ... )
   local i = 1
   
   -- Retrieve list of all possible collisions from tree
-  self.tree:retrieve( list, top, right, bottom, left, unpack(arg) )
+  self.tree:retrieve(list, top, right, bottom, left, unpack(arg))
   
   -- Remove objects from list that we do not collide with
   local lastIndex = 1
@@ -163,7 +164,7 @@ function Secretary:getCollisions( top, right, bottom, left, front, back, ... )
   return list
 end
 
-function Secretary:remove( object )
+function Class:remove(object)
   if object:instanceOf(PhysObject) then
     self:unregisterPhysObject(object)
   end
@@ -172,7 +173,7 @@ end
 
 
 
-function Secretary:registerChildSecretary( child )
+function Class:registerChildSecretary(child)
   
   -- Validate parameters
   assertType(child, "child", Secretary)
@@ -222,7 +223,7 @@ end
 --           that are required for the given event type.
 -- eventType: type of event the listener is listening for.
 --
-function Secretary:registerEventListener( object, listener, eventType, ... )
+function Class:registerEventListener(object, listener, eventType, ...)
   local arg = {...}
   
   -- Verify arguments
@@ -311,7 +312,7 @@ end
 -- listener (optional): specific draw function to move to drawLayer
 --     in case object has multiple draw callbacks registered
 --
-function Secretary:setDrawLayer( object, drawLayer, listener )
+function Class:setDrawLayer(object, drawLayer, listener)
   
   -- Validate arguments
   assertType(object, "object", "table")
@@ -362,7 +363,7 @@ end
 --
 -- object: The object to delete all registered callbacks for.
 --
-function Secretary:unregisterAllListeners( object )
+function Class:unregisterAllListeners(object)
   
   -- Validate arguments
   assertType(object, "object", "table")
@@ -424,7 +425,7 @@ end
 --
 -- paused: `true` if the secretary should be paused, `false` if it should become unpaused.
 --
-function Secretary:setPaused(paused)
+function Class:setPaused(paused)
   self.paused = paused
 end
 
@@ -435,7 +436,7 @@ end
 --
 -- returns: `true` if the secretary is paused, `false` if not.
 --
-function Secretary:isPaused()
+function Class:isPaused()
   return self.paused
 end
 
@@ -447,114 +448,114 @@ end
 
 
 -- Called every draw step
-function Secretary:onDraw()
+function Class:onDraw()
   for l in DrawLayer.values() do
     self:executeCallbacks(self.callbacks[EventType.DRAW][l])
   end
 end
 
 -- Called every game step
-function Secretary:onPreStep()
+function Class:onPreStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PRE_STEP])
 end
 
 -- Called every game step
-function Secretary:onStep()
+function Class:onStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.STEP])
 end
 
 -- Called before every physics event
-function Secretary:onPrePhysics()
+function Class:onPrePhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PRE_PHYSICS])
 end
 
 -- CAlled every step to execute physics
-function Secretary:onPhysics()
+function Class:onPhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PHYSICS])
 end
 
 -- Called after physics event
-function Secretary:onPostPhysics()
+function Class:onPostPhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.POST_PHYSICS])
 end
 
 -- Called when framework is shutting down
-function Secretary:onShutdown()
+function Class:onShutdown()
   self:executeCallbacks(self.callbacks[EventType.SHUTDOWN])
 end
 
 -- Called when a keyboard button is pressed
-function Secretary:onKeyboardDown( key, scancode, isrepeat )
+function Class:onKeyboardDown(key, scancode, isrepeat)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.KEYBOARD_DOWN], key, scancode, isrepeat)
 end
 
 -- Called when a keyboard button is released
-function Secretary:onKeyboardUp( key, scancode )
+function Class:onKeyboardUp(key, scancode)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.KEYBOARD_UP], key, scancode )
 end
 
 -- Called when a mouse button is pressed
-function Secretary:onMouseDown(x, y, button, istouch)
+function Class:onMouseDown(x, y, button, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_DOWN], x, y, button, istouch)
 end
 
 -- Called when a mouse button is released
-function Secretary:onMouseUp(x, y, button, istouch)
+function Class:onMouseUp(x, y, button, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_UP], x, y, button, istouch)
 end
 
 -- Called when the mouse is moved
-function Secretary:onMouseMove(x, y, dx, dy, istouch)
+function Class:onMouseMove(x, y, dx, dy, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_MOVE], x, y, dx, dy, istouch)
 end
 
 -- Called when the mouse wheel moves
-function Secretary:onMouseWheelMove(x, y)
+function Class:onMouseWheelMove(x, y)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_WHEEL], x, y)
 end
 
 -- Called when a joystick button is pressed
-function Secretary:onJoystickDown(joystick, button)
+function Class:onJoystickDown(joystick, button)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_DOWN], joystick, button)
 end
 
 -- Called when a joystick button is released
-function Secretary:onJoystickUp(joystick, button)
+function Class:onJoystickUp(joystick, button)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_UP], joystick, button)
 end
 
 -- Called when a joystick is connected
-function Secretary:onJoystickAdd(joystick)
+function Class:onJoystickAdd(joystick)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_ADD], joystick)
 end
 
 -- Called when a joystick is released
-function Secretary:onJoystickRemove(joystick)
+function Class:onJoystickRemove(joystick)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_REMOVE], joystick)
 end
 
 -- Called when the game window is resized
-function Secretary:onWindowResize(w, h)
+function Class:onWindowResize(w, h)
   self:executeCallbacks(self.callbacks[EventType.WINDOW_RESIZE], w, h)
 end
 
 -- Called before draw events are executed
-function Secretary:onPreDraw()
+function Class:onPreDraw()
   self:executeCallbacks(self.callbacks[EventType.PRE_DRAW])
 end
 
@@ -563,7 +564,7 @@ end
 -- Generic function that executes callbacks for a given event type
 -- Handles errors and takes any variable number of arguments and passes
 -- them along to the callbacks.
-function Secretary:executeCallbacks( callbacks, ... )
+function Class:executeCallbacks(callbacks, ...)
   local arg = {...}
   
   -- Prevent concurrent modification
