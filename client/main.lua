@@ -42,7 +42,10 @@ function love.load()
   connection = ClientConnectionManager()
   rootSecretary:registerEventListener({}, function()
       connection:update()
-    end, EventType.STEP)
+    end, EventType.PRE_STEP)
+  rootSecretary:registerEventListener({}, function()
+      connection:onShutdown()
+    end, EventType.SHUTDOWN)
   connection:connectToServer()
 end
 

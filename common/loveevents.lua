@@ -11,6 +11,10 @@ function love.update( dt )
   rootSecretary:onStep()
 end
 
+function love.quit()
+  rootSecretary:onShutdown()
+end
+
 function love.resize( w, h )
   rootSecretary:onWindowResize(w, h)
 end

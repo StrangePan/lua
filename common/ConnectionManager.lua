@@ -3,6 +3,11 @@ require "MessagePasser"
 require "Connection"
 require "ConnectionStatus"
 
+--
+-- Object that manages and maintains connections to other program instances,
+-- initiating connections, sendings periodic pings, and provides mechanisms
+-- for sending message objects to other connected instances.
+--
 ConnectionManager = buildClass()
 local Class = ConnectionManager
 
@@ -48,7 +53,7 @@ function Class:_init(port)
 end
 
 --
--- Periodicall called by framework. Processes incoming messages and sends pings to
+-- Periodically called by framework. Processes incoming messages and sends pings to
 -- connections whom we have not pinged in a while and updates connection information
 -- for connections from whomw e have not heard in a while.
 --
@@ -79,6 +84,15 @@ function Class:update()
       self:terminateConnection(id, true)
       print("connection timed out")
     end
+  end
+end
+
+--
+-- Called when the frameworks is shutting down. Terminates all current connections.
+--
+function Class:onShutdown()
+  for connection in self:allConnections() do
+    self:terminateConnection(connection, true)
   end
 end
 
@@ -121,8 +135,8 @@ end
 -- Destroys connection with supplied connectionId. Optionally sends the
 -- notifies connection about the disconnect with a message.
 --
-function Class:terminateConnection(connectionId, sendDisconnect)
-  local connection = self:getConnection(connectionId)
+function Class:terminateConnection(connection, sendDisconnect)
+  local connection = self:getConnection(connection)
   if connection == nil then return end
   if sendDisconnect then
     assertType(sendDisconnect, "boolean")

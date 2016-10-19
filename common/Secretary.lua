@@ -184,6 +184,7 @@ function Secretary:registerChildSecretary( child )
   self:registerEventListener(child, child.onPrePhysics, EventType.PRE_PHYSICS)
   self:registerEventListener(child, child.onPhysics, EventType.PHYSICS)
   self:registerEventListener(child, child.onPostPhysics, EventType.POST_PHYSICS)
+  self:registerEventListener(child, child.onShutdown, EventType.SHUTDOWN)
   self:registerEventListener(child, child.onKeyboardDown, EventType.KEYBOARD_DOWN)
   self:registerEventListener(child, child.onKeyboardUp, EventType.KEYBOARD_UP)
   self:registerEventListener(child, child.onMouseDown, EventType.MOUSE_DOWN)
@@ -454,6 +455,7 @@ end
 -- Called every game step
 function Secretary:onStep()
   if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.PRE_STEP])
   self:executeCallbacks(self.callbacks[EventType.STEP])
 end
 
@@ -473,6 +475,11 @@ end
 function Secretary:onPostPhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.POST_PHYSICS])
+end
+
+-- Called when framework is shutting down
+function Secretary:onShutdown()
+  self:executeCallbacks(self.callbacks[EventType.SHUTDOWN])
 end
 
 -- Called when a keyboard button is pressed

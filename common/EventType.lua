@@ -4,6 +4,7 @@ require "common/enum"
 -- Event types; used for event registration
 EventType = {
   "DRAW",
+  "PRE_STEP",
   "STEP",
   "PRE_PHYSICS",
   "PHYSICS",
@@ -20,7 +21,8 @@ EventType = {
   "JOYSTICK_REMOVE",
   "WINDOW_RESIZE",
   "PRE_DRAW",
-  "DESTROY"
+  "DESTROY",
+  "SHUTDOWN"
 }
 
 buildEnum(EventType)

@@ -11,3 +11,7 @@ end
 function love.update(dt)
   connection:update()
 end
+
+function love.quit()
+  connection:onShutdown()
+end
