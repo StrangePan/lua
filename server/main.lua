@@ -1,16 +1,11 @@
 package.path = package.path .. ";./common/?.lua"
 
-require "Secretary"
+require "LoveSecretary"
 require "ServerConnectionManager"
 require "EntityConnectionManager"
 
-rootSecretary = Secretary()
-
-require "loveevents"
-
-local connection
-
 function love.load()
-  connection = ServerConnectionManager()
+  local rootSecretary = LoveSecretary():captureLoveEvents()
+  local connection = ServerConnectionManager()
   EntityConnectionManager(connection):registerWithSecretary(rootSecretary)
 end

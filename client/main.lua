@@ -1,6 +1,6 @@
 package.path = package.path .. ";./common/?.lua"
 
-require "Secretary"
+require "LoveSecretary"
 require "Player"
 require "Wall"
 require "Camera"
@@ -9,13 +9,10 @@ require "EntityConnectionManager"
 require "CommandMap"
 require "LocalPlayerController"
 
-rootSecretary = Secretary()
-
-require "loveevents"
-
 local connection
 
 function love.load()
+  rootSecretary = LoveSecretary():captureLoveEvents()
   camera = Camera():registerWithSecretary(rootSecretary)
   player = Player():registerWithSecretary(rootSecretary)
   commandMap = CommandMap()
