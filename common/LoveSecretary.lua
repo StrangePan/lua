@@ -35,12 +35,12 @@ local captureMap = {
   {'keyreleased', 'onKeyboardUp'},
   {'mousepressed', 'onMouseDown'},
   {'mousereleased', 'onMouseUp'},
-  {'mousemoved', 'onMouseMoved'},
+  {'mousemoved', 'onMouseMove'},
   {'wheelmoved', 'onMouseWheelMove'},
   {'joystickpressed', 'onJoystickDown'},
   {'joystickreleased', 'onJoystickUp'},
-  {'joystickadded', 'onJoystickAdded'},
-  {'joystickremoved', 'onJoystickRemoved'},
+  {'joystickadded', 'onJoystickAdd'},
+  {'joystickremoved', 'onJoystickRemove'},
 }
 
 
