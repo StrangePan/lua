@@ -18,13 +18,18 @@ local registeredEntities = {}
 --
 -- Registers a subclass of NetworkedEntity to be associated with the provided
 -- EntityType so that it can be instantiated when createNewInstance is called.
+-- If an entity has already been registered with the given EntityType, then this
+-- method will return `false`.
 --
 function Class.registerEntityType(entityType, entityClass)
   assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
   assertType(entityClass, "entityClass", NetworkedEntity)
   assert(entityClass ~= Class, "Cannot register NetworkedEntity with itself!")
-  assert(not registeredEntities[entityType], "EntityType "..entityType.." already registered.")
+  if registeredEntities[entityType] then
+    return false
+  end
   registeredEntities[entityType] = entityClass
+  return true
 end
 
 --
@@ -35,20 +40,33 @@ end
 -- statically to register themselves so that their corresponding
 -- createNewInstance method can be called.
 --
-function Class.createNewInstance(id, entityType, params)
+-- If no entity has been associated with the given EntityType, then this method
+-- will return `nil`. Otherwise, if successful, the newly created entity will be
+-- returned.
+--
+-- This method should not be called by subclasses.
+--
+-- manager: The NetworkedEntityManager that is invoking this method
+-- id: The network ID that this new instance is assigned
+-- entityType: The type of entity to instantiate
+-- params: The instantiation params ot use when creating the new entity 
+--
+function Class.createNewInstance(manager, id, entityType, params)
   assertType(id, "id", "number")
   
   -- Ensure supplied entityType is indeed an EntityType.
   assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
   
-  -- Ensure entity type is registered.
-  assert(registeredEntities[entityType], "EntityType "..entityType.." not registered.")
+  -- Ensure entity type is registered. Otherwise, return nil.
+  if not registeredEntities[entityType] then
+    return nil
+  end
   
   -- Try to catch infinite recursion if user fails to override createNewInstance.
   assert(registeredEntities[entityType].createNewInstance ~= Class.createNewInstance, "Make sure .createNewInstance() is overridden")
   
   -- Instantiate and return new instance using given arguments.
-  return registeredEntities[entityType].createNewInstance(id, entityType, params)
+  return registeredEntities[entityType].createNewInstance(manager, id, entityType, params)
 end
 
 
@@ -56,12 +74,21 @@ end
 --
 -- Instantiates a new NetworkedEntity.
 --
-function Class:_init(networkId, entityType, params)
+function Class:_init(manager, networkId, entityType, params)
   Class.superclass._init(self)
+  self.manager = manager
   self.id = networkId
-  assertType(networkId, "networkId", "number")
   self.entityType = entityType
+  assertType(manager, "manager", NetworkedEntityManager)
+  assertType(networkId, "networkId", "number")
   assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
+end
+
+--
+-- Gets the NetworkedEntityManager that created this NetworkedEntity.
+--
+function Class:getManager()
+  return self.manager
 end
 
 --
@@ -105,4 +132,12 @@ end
 -- about the entity and the entity should handle it appropriately.
 --
 function Class:performIncrementalUpdate(update)
+end
+
+--
+-- Deletes this entity; entity should be immediately destroyed and its
+-- resources freed; no exceptions, and no animations.
+--
+function Class:delete()
+  self:getManager():deleteEntity(self)
 end

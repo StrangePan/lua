@@ -8,6 +8,8 @@ local F_NETWORK_ENTITY_ID = "neid"
 local F_ENTITY_UPDATE_TYPE = "utype"
 local F_ENTITY_TYPE = "etype"
 local F_CREATE_PARAMS = "params"
+local F_SYNC_DATA = "sdata"
+local F_INC_DATA = "idata"
 
 --
 -- Maintains an internal list of entities that are connected to network
@@ -29,9 +31,17 @@ end
 -- - Returns nil in all other cases.
 --
 function Class:getEntity(entity)
+  
+  -- If parameter is already a NetworkedEntity
   if instanceOf(entity, NetworkedEntity) then
-    return entity
-  elseif instanceOf(entity, "number") then -- search for entity by ID
+    
+    -- Verify entity is managed by this instance
+    if self.entities[entity:getNetworkId()] == entity then
+      return entity
+    else
+      return nil -- Not managed by this instance; return nil.
+    end
+  elseif instanceOf(entity, "number") then -- Search for entity by ID.
     return self.entities[entity]
   end
 end
@@ -40,7 +50,32 @@ end
 -- Creates a new entity and adds it to this manager.
 --
 function Class:createEntity(id, entityType, params)
+  assertType(id, "id", "number")
+  assert(EntityType.fromId(entityType), "entityType: "..entityType.." is not a valid EntityType")
   
+  -- If an entity already exists with the given ID, then fail
+  if self:getEntity(id) then
+    return
+  end
+  
+  -- Instantiate a new entity and hook everything up
+  local entity = NetworkedEntity.createNewEntity(self, id, entityType, params)
+  self.entities[id] = entity
+  return entity
+end
+
+--
+-- Delete an existing entity immediately; skips any animations and forces the
+-- entity to cease existing.
+--
+function Class:deleteEntity(entity)
+  entity = self:getEntity(entity)
+  if not entity then return end
+  
+  -- DELETE RECORD OF ENTITY BEFORE PROPOGATING DESTRUCTION CALL
+  -- TO AVOID INFINITE RECURSION
+  self.entities[entity:getNetworkId()] = nil
+  entity:delete()
 end
 
 --
@@ -86,10 +121,19 @@ function Class:onReceiveEntityCreate(message, connectionId)
 end
 
 --
--- Handles an EntityUpdateType.DESTROYING message. Performs any necessary
--- validation and cleanup.
+-- Handles an EntityUpdateType.DELETE message. Performs any necessary
+-- validation and cleanup and destroys the underlying entity.
 --
-function Class:onReceiveEntityDestroy(message, connectionId)
+function Class:onReceiveEntityDelete(message, connectionId)
+  local id = message[F_NETWORK_ENTITY_ID]
+
+  -- Verify that the entity already exists. If not, cancel; there's nothing
+  -- left to do.
+  local entity = self:getEntity(id)
+  if not entity then return end
+
+  -- Destroy the entity
+  self:deleteEntity(entity)
 end
 
 --
@@ -98,6 +142,14 @@ end
 -- contents of the received message.
 --
 function Class:onReceiveEntitySync(message, connectionId)
+  local id = message[F_NETWORK_ENTITY_ID]
+  
+  -- Verify that the entity already exists. If not, cancel; there's nothing
+  -- left to do.
+  local entity = self:getEntity(id)
+  if not entity then return end
+  
+  entity:setSynchronizedData(message[F_SYNC_DATA])s
 end
 
 --
@@ -107,4 +159,12 @@ end
 -- incremental message was skipped since the last received update message).
 --
 function Class:onReceiveEntityInc(message, connectionId)
+  local id = message[F_NETWORK_ENTITY_ID]
+  
+  -- Verify that the entity already exists. If not, cancel; there's nothing
+  -- left to do.
+  local entity = self:getEntity(id)
+  if not entity then return end
+  
+  entity:performIncrementalUpdate(message[F_INC_DATA])
 end
