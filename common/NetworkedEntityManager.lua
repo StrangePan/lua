@@ -1,8 +1,9 @@
 require "common/functions"
-require "Entity"
 require "ConnectionManager"
-require "NetworkedEntity"
+require "Entity"
+require "EntityType"
 require "EntityUpdateType"
+require "NetworkedEntity"
 
 local F_NETWORK_ENTITY_ID = "neid"
 local F_ENTITY_UPDATE_TYPE = "utype"

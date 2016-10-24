@@ -1,4 +1,5 @@
 require "common/class"
+require "EntityType"
 
 --
 -- Represents an Entity that is available across a network and tied to similar
