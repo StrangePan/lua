@@ -1,7 +1,7 @@
 require "common/class"
 
 --
--- Represents an entity that is available across a network and tied to similar
+-- Represents an Entity that is available across a network and tied to similar
 -- entities on remote program instances. Generally instantiated by a manager
 -- of some sort who handles connections and permissions.
 --
@@ -74,14 +74,17 @@ end
 --
 -- Instantiates a new NetworkedEntity.
 --
-function Class:_init(manager, networkId, entityType, params)
+function Class:_init(manager, networkId, entityType, params, entity)
   Class.superclass._init(self)
-  self.manager = manager
-  self.id = networkId
-  self.entityType = entityType
   assertType(manager, "manager", NetworkedEntityManager)
   assertType(networkId, "networkId", "number")
   assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
+  assertType(entity, "entity", Entity)
+
+  self.manager = manager
+  self.id = networkId
+  self.entityType = entityType
+  self.entity = entity
 end
 
 --
@@ -103,6 +106,13 @@ end
 --
 function Class:getEntityType()
   return self.entityType
+end
+
+--
+-- Gets the local entity.
+--
+function Class:getLocalEntity()
+  return self.entity
 end
 
 --
@@ -139,5 +149,14 @@ end
 -- resources freed; no exceptions, and no animations.
 --
 function Class:delete()
-  self:getManager():deleteEntity(self)
+  local entity = self:getLocalEntity()
+  local manager = self:getManager()
+  if manager and entity then
+    return
+  end
+
+  self.entity = nil
+  self.manager = nil
+  entity:destroy()
+  manager:deleteEntity(self)
 end

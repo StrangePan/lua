@@ -1,6 +1,7 @@
 require "PhysObject"
 require "Footprint"
 require "EventCoordinator"
+require "Color"
 
 Actor = buildClass(PhysObject)
 
@@ -12,14 +13,13 @@ function Actor:_init()
   self.xStep = 32
   self.yStep = 32
   
-  self.r = 127
-  self.g = 127
-  self.b = 255
+  self.color = Color(127, 127, 255)
 
   self:setSize(32, 32)
   self:setPosition(self.xStep, self.yStep)
   
   self.moveEventCoordinator = EventCoordinator()
+  self.spinEventCoordinator = EventCoordinator()
   
   self.steps = {
        [Direction.UP] = {x =  0, y = -1},
@@ -29,14 +29,40 @@ function Actor:_init()
   }
 end
 
-function Actor:registerMoveListener(object, callback)
-  return self.moveEventCoordinator:registerListener(object, callback)
+--
+-- Callbacks receive:
+-- actor: the Actor instance that moved
+-- fromX: the starting X position
+-- fromY: the starting Y position
+-- direction: the direction of movement
+-- success: boolean whether or not the movement was a success
+--
+function Actor:registerMoveListener(listener, callback)
+  return self.moveEventCoordinator:registerListener(listener, callback)
 end
 
-function Actor:notifyMoveListeners(x, y, z)
-  if self.moveEventCoordinator then
-    return self.moveEventCoordinator:notifyListeners(self, x, y, z)
-  end
+function Actor:notifyMoveListeners(x, y, dir, success)
+  return self.moveEventCoordinator:notifyListeners(self, x, y, dir, success)
+end
+
+function Actor:unregisterMoveListener(listener, callback)
+  return self.moveEventCoordinator:unregisterListener(listener, callback)
+end
+
+--
+-- Callbacks receive:
+-- actor: the Actor instance that spun
+--
+function Actor:registerSpinListener(listener, callback)
+  return self.spinEventCoordinator:registerListener(listener, callback)
+end
+
+function Actor:notifySpinListeners()
+  return self.spinEventCoordinator:notifyListeners(self)
+end
+
+function Actor:unregisterSpinListener(listener, callback)
+  return self.spinEventCoordinator:unregisterListener(listener, callback)
 end
 
 function Actor:registerWithSecretary(secretary)
@@ -53,10 +79,35 @@ function Actor:registerWithSecretary(secretary)
 end
 
 --
+-- Gets the actor's base color
+--
+function Actor:getColor()
+  return self.color
+end
+
+--
+-- Sets the actor's base color
+--
+function Actor:setColor(color)
+  self.color = color
+end
+
+--
 -- Attempts to move the player in the given direction. Returns `true` if the
--- player moved and `false` if not.
+-- player moved and `false` if not. Notifies registered move listeners.
 --
 function Actor:move(direction, force)
+  local x, y = self:getPosition()
+  local success = self:tryMove(direction, force)
+  self:notifyMoveListeners(x, y, direction, success)
+  return success
+end
+
+--
+-- Attempts to move the actor one space in the specified direction. If the
+-- actor successfully moves as a result, returns `true`.
+--
+function Actor:tryMove(direction, force)
   if force == nil then force = false end
   direction = Direction.fromId(direction)
   if direction == nil then
@@ -83,7 +134,8 @@ function Actor:move(direction, force)
   end
   
   local w, h = self:getSize()
-  Footprint(self.r, self.g, self.b, x, y, w, h):registerWithSecretary(secretary)
+  local r, g, b = self:getColor():getRGBA()
+  Footprint(r, g, b, x, y, w, h):registerWithSecretary(secretary)
   self:setPosition(xNext, yNext)
   return true
 end
@@ -98,11 +150,22 @@ function Actor:setPosition(x, y, z)
     if secretary then
       self:getSecretary():updateObject(self)
     end
-    self:notifyMoveListeners(x, y, z)
   end
 end
 
+--
+-- Causes the actor to perform a "spin" emote and notifies listeners of event.
+--
 function Actor:spin()
+  self:trySpin()
+  self:notifySpinListeners()
+  return true
+end
+
+--
+-- Causes the actor to perform a "spin" emote.
+--
+function Actor:trySpin()
   -- Don't allow more than 2 spins to be queued up.
   if self.drawAngle < self.angle - math.pi * 2 then return end
   self.angle = self.angle + math.pi * 2
@@ -134,7 +197,7 @@ function Actor:draw()
   local w, h = self:getSize()
   local ox = w/2
   local oy = h/2
-  love.graphics.setColor(self.r, self.g, self.b)
+  love.graphics.setColor(self:getColor():getRGBA())
   love.graphics.translate(x + ox, y + oy)
   love.graphics.rotate(self.drawAngle)
   love.graphics.rectangle("fill", -ox, -oy, w, h)

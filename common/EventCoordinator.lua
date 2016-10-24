@@ -45,8 +45,8 @@ function EventCoordinator:unregisterListener(object, callback)
   if type(object) ~= "table" then object = nil end
   if type(callback) ~= "function" then callback = nil end
   
-  if object ~= nil and callback ~= nil then
-    if self.listeners[object] ~= nil then
+  if object and callback then
+    if self.listeners[object] then
       for i,entry in ipairs(self.listeners[object]) do
         if entry == callback then
           table.remove(self.listeners[object], i)
@@ -55,9 +55,9 @@ function EventCoordinator:unregisterListener(object, callback)
         end
       end
     end
-  elseif object ~= nil and callback == nil then
+  elseif object and not callback then
     self.listeners[object] = nil
-  elseif object == nil and callback ~= nil then
+  elseif callback and not object then
     for i,entry in ipairs(self.listeners) do
       if entry == callback then
         table.remove(self.listeners, i)
