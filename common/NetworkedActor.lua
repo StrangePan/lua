@@ -29,8 +29,9 @@ local Class = NetworkedActor
 function Class.createNewInstance(manager, id, entityType, params, actor)
   actor = actor or Actor()
   assertType(actor, "actor", Actor)
-  self:setSynchronizedState(params, actor)
-  return Class(manager, id, entityType, params, actor)
+  local instance = Class(manager, id, entityType, params, actor)
+  instance:setSynchronizedState(params)
+  return instance
 end
 
 --
@@ -44,9 +45,9 @@ function Class:_init(manager, networkedId, entityType, params, actor)
   Class.superclass._init(self, manager, networkedId, entityType, params, actor)
 end
 
-function Class:setSynchronizedState(state, actor)
+function Class:setSynchronizedState(state)
   Class.superclass.setSynchronizedState(self, state)
-  local actor = actor or self:getEntity()
+  local actor = self:getLocalEntity()
   local x, y = state[F_X], state[F_Y]
   local r, g, b = state[F_RED], state[F_GREEN], state[F_BLUE]
   actor:setPosition(x, y)
