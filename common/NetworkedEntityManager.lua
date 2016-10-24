@@ -1,5 +1,5 @@
-require "common/class"
 require "common/functions"
+require "Entity"
 require "ConnectionManager"
 require "NetworkedEntity"
 require "EntityUpdateType"
@@ -15,10 +15,11 @@ local F_INC_DATA = "idata"
 -- Maintains an internal list of entities that are connected to network
 -- versions. Works to track and coordinate changes between networked entities.
 --
-NetworkedEntityManager = buildClass()
+NetworkedEntityManager = buildClass(Entity)
 local Class = NetworkedEntityManager
 
 function Class:_init(connectionManager)
+  Class.superclass._init(self)
   self.connectionManager = connectionManager
   assertType(connectionManager, "connectionManager", ConnectionManager)
   self.entities = {}
@@ -61,6 +62,7 @@ function Class:createEntity(id, entityType, params)
   -- Instantiate a new entity and hook everything up
   local entity = NetworkedEntity.createNewEntity(self, id, entityType, params)
   self.entities[id] = entity
+  entity:getLocalEntity():registerWithSecretary(self:getSecretary())
   return entity
 end
 
