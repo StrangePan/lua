@@ -1,4 +1,4 @@
-package.path = package.path .. ";./common/?.lua"
+package.path = package.path .. ";./common/?.lua;./common/entities/?.lua;./common/networking/?.lua"
 
 require "LoveSecretary"
 require "Player"

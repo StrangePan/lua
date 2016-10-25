@@ -1,5 +1,5 @@
 require "common/class"
-require "EntityType"
+require "NetworkedEntityType"
 
 --
 -- Represents an Entity that is available across a network and tied to similar
@@ -18,12 +18,12 @@ local registeredEntities = {}
 
 --
 -- Registers a subclass of NetworkedEntity to be associated with the provided
--- EntityType so that it can be instantiated when createNewInstance is called.
--- If an entity has already been registered with the given EntityType, then this
+-- NetworkedEntityType so that it can be instantiated when createNewInstance is called.
+-- If an entity has already been registered with the given NetworkedEntityType, then this
 -- method will return `false`.
 --
 function Class.registerEntityType(entityType, entityClass)
-  assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
+  assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
   assertType(entityClass, "entityClass", NetworkedEntity)
   assert(entityClass ~= Class, "Cannot register NetworkedEntity with itself!")
   if registeredEntities[entityType] then
@@ -41,7 +41,7 @@ end
 -- statically to register themselves so that their corresponding
 -- createNewInstance method can be called.
 --
--- If no entity has been associated with the given EntityType, then this method
+-- If no entity has been associated with the given NetworkedEntityType, then this method
 -- will return `nil`. Otherwise, if successful, the newly created entity will be
 -- returned.
 --
@@ -57,8 +57,8 @@ end
 function Class.createNewInstanceWithParams(manager, id, entityType, params)
   assertType(id, "id", "number")
   
-  -- Ensure supplied entityType is indeed an EntityType.
-  assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
+  -- Ensure supplied entityType is indeed an NetworkedEntityType.
+  assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
   
   -- Ensure entity type is registered. Otherwise, return nil.
   if not registeredEntities[entityType] then
@@ -87,7 +87,7 @@ end
 -- statically to register themselves so that their corresponding
 -- createNewInstance method can be called.
 --
--- If no entity has been associated with the given EntityType, then this method
+-- If no entity has been associated with the given NetworkedEntityType, then this method
 -- will return `nil`. Otherwise, if successful, the newly created entity will be
 -- returned.
 --
@@ -103,8 +103,8 @@ end
 function Class.createNewInstance(manager, id, entityType, ...)
   assertType(id, "id", "number")
   
-  -- Ensure supplied entityType is indeed an EntityType.
-  assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
+  -- Ensure supplied entityType is indeed an NetworkedEntityType.
+  assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
   
   -- Ensure entity type is registered. Otherwise, return nil.
   if not registeredEntities[entityType] then
@@ -133,7 +133,7 @@ function Class:_init(manager, networkId, entityType, params, entity)
   Class.superclass._init(self)
   assertType(manager, "manager", NetworkedEntityManager)
   assertType(networkId, "networkId", "number")
-  assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
+  assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
   assertType(entity, "entity", Entity)
 
   self.manager = manager
