@@ -1,6 +1,8 @@
 require "common/functions"
 
 function buildEnum(enum)
+  assertType(enum, "enum", "table")
+  
   local n = 1
   while enum[n] ~= nil do
     enum[enum[n]] = n

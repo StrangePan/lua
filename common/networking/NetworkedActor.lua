@@ -47,7 +47,7 @@ end
 --
 -- Registers this class to be instantiated by the network.
 --
-Class.registerEntityType(EntityType.ACTOR, Class)
+Class.registerEntityType(NetworkedEntityType.ACTOR, Class)
 
 
 

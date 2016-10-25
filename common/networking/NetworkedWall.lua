@@ -34,7 +34,7 @@ end
 --
 -- Registers this class to be instantiated by the network.
 --
-Class.registerEntityType(EntityType.WALL, Class)
+Class.registerEntityType(NetworkedEntityType.WALL, Class)
 
 
 

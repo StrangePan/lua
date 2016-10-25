@@ -1,7 +1,7 @@
 require "common/functions"
 require "ConnectionManager"
 require "Entity"
-require "EntityType"
+require "NetworkedEntityType"
 require "EntityUpdateType"
 require "NetworkedEntity"
 
