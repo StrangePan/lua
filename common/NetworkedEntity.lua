@@ -35,7 +35,7 @@ end
 
 --
 -- Creates a new instance of a registered network entity using the provided
--- ID, type, and instantiation parameters.
+-- ID, type, and instantiation parameters in the form of a table.
 --
 -- Subclasses call NetworkedEntity.registerEntityType(NetworkedEntitySubclass)
 -- statically to register themselves so that their corresponding
@@ -45,14 +45,16 @@ end
 -- will return `nil`. Otherwise, if successful, the newly created entity will be
 -- returned.
 --
--- This method should not be called by subclasses.
+-- This method should **not** be called by subclasses.
 --
 -- manager: The NetworkedEntityManager that is invoking this method
 -- id: The network ID that this new instance is assigned
 -- entityType: The type of entity to instantiate
--- params: The instantiation params ot use when creating the new entity 
+-- params: The instantiation params to use when creating the new entity in the
+--   form of a single table. See `createNewInstance` method to create new
+--   entity with individual construction params.
 --
-function Class.createNewInstance(manager, id, entityType, params)
+function Class.createNewInstanceWithParams(manager, id, entityType, params)
   assertType(id, "id", "number")
   
   -- Ensure supplied entityType is indeed an EntityType.
@@ -63,11 +65,63 @@ function Class.createNewInstance(manager, id, entityType, params)
     return nil
   end
   
-  -- Try to catch infinite recursion if user fails to override createNewInstance.
-  assert(registeredEntities[entityType].createNewInstance ~= Class.createNewInstance, "Make sure .createNewInstance() is overridden")
-  
+  -- Try to catch infinite recursion if user fails to override this method.
+  assert(registeredEntities[entityType].createNewInstanceWithParams ~=
+      Class.createNewInstanceWithParams,
+      "Make sure createNewInstanceWithParams() is overridden")
+
   -- Instantiate and return new instance using given arguments.
-  return registeredEntities[entityType].createNewInstance(manager, id, entityType, params)
+  return registeredEntities[entityType].createNewInstanceWithParams(
+      manager,
+      id,
+      entityType,
+      params)
+end
+
+--
+-- Creates a new instance of a registered network entity using the provided
+-- ID, type, and instantiation parameters in the form of multiple unspecified
+-- arguments that will be passed to the constructor of the local entity.
+--
+-- Subclasses call NetworkedEntity.registerEntityType(NetworkedEntitySubclass)
+-- statically to register themselves so that their corresponding
+-- createNewInstance method can be called.
+--
+-- If no entity has been associated with the given EntityType, then this method
+-- will return `nil`. Otherwise, if successful, the newly created entity will be
+-- returned.
+--
+-- This method should **not** be called by subclasses.
+--
+-- manager: The NetworkedEntityManager that is invoking this method
+-- id: The network ID that this new instance is assigned
+-- entityType: The type of entity to instantiate
+-- ...: The instantiation params to use when creating the new entity in the
+--   form of multiple unspecified arguments. These arguments will be passed to
+--   the newly created local instance.
+--
+function Class.createNewInstance(manager, id, entityType, ...)
+  assertType(id, "id", "number")
+  
+  -- Ensure supplied entityType is indeed an EntityType.
+  assert(EntityType.fromId(entityType), entityType.." is not a valid EntityType")
+  
+  -- Ensure entity type is registered. Otherwise, return nil.
+  if not registeredEntities[entityType] then
+    return nil
+  end
+  
+  -- Try to catch infinite recursion if user fails to override this method.
+  assert(registeredEntities[entityType].createNewInstance ~=
+      Class.createNewInstance,
+      "Make sure createNewInstance() is overridden")
+
+  -- Instantiate and return new instance using given arguments.
+  return registeredEntities[entityType].createNewInstance(
+      manager,
+      id,
+      entityType,
+      ...)
 end
 
 
@@ -119,6 +173,21 @@ end
 --
 -- This method should be overridden and called by subclasses.
 --
+-- Given a params object, prompts this NetworkedEntity to put relevant
+-- instantiation parameters into the provided object. This object will be used
+-- to create local copies of this entity on connected instances. If no params
+-- object is supplied, this method should still return a valid object
+-- containing valid entity instantiation parameters.
+--
+-- Returns a params object containing the local entity's params.
+--
+function Class:getInstantiationParams(params)
+  return params or {}
+end
+
+--
+-- This method should be overridden and called by subclasses.
+--
 -- Sets the state of the NetworkedEntity based the contents of a received state
 -- synchronization message.
 --
@@ -129,9 +198,13 @@ end
 -- This method should be overridden and called by subclasses.
 --
 -- Given a state object, prompts this NetworkedEntity to store its state into
--- the provided object.
+-- the provided object. If no state object is supplied, this method shoud still
+-- return a valid object containing this object's state.
+--
+-- Returns a state object containing the local entity's state.
 --
 function Class:getSynchronizedState(state)
+  return state or {}
 end
 
 --

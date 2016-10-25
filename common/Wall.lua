@@ -6,7 +6,7 @@ Wall = buildClass(PhysObject)
 function Wall:_init(x, y)
   Wall.superclass._init(self)
   
-  self:setPosition(x, y)
+  self:setPosition(x or 0, y or 0)
   self:setSize(32, 32)
   
   self.xOffset = 0

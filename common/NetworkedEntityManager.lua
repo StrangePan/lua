@@ -21,9 +21,13 @@ local Class = NetworkedEntityManager
 
 function Class:_init(connectionManager)
   Class.superclass._init(self)
-  self.connectionManager = connectionManager
   assertType(connectionManager, "connectionManager", ConnectionManager)
+  self.connectionManager = connectionManager
   self.entities = {}
+  self.nextId = 1
+  
+  self.connectionManager:registerMessageListener(self,
+    self.onReceiveEntityUpdate, MessageType.ENTITY_UPDATE)
 end
 
 --
@@ -48,22 +52,72 @@ function Class:getEntity(entity)
   end
 end
 
+function Class:getNextId()
+  return self.nextId
+end
+
+function Class:claimId(id)
+  if self.nextId <= id then
+    self.nextId = id + 1
+  end
+  return id
+end
+
 --
--- Creates a new entity and adds it to this manager.
+-- Creates a new local entity and adds it to this manager, assigning it
+-- a specific ID and using the supplied `params` object to initialize object.
+-- This method should be used to create a local representation of an existing
+-- network entity.
 --
-function Class:createEntity(id, entityType, params)
+function Class:createEntityWithParams(id, entityType, params)
   assertType(id, "id", "number")
-  assert(EntityType.fromId(entityType), "entityType: "..entityType.." is not a valid EntityType")
+  assert(EntityType.fromId(entityType),
+      "entityType: "..entityType.." is not a valid EntityType")
   
   -- If an entity already exists with the given ID, then fail
   if self:getEntity(id) then
     return
+  else
+    self:claimId(id)
   end
   
   -- Instantiate a new entity and hook everything up
-  local entity = NetworkedEntity.createNewEntity(self, id, entityType, params)
+  local entity = NetworkedEntity.createNewEntityWithParams(
+      self,
+      id,
+      entityType,
+      params)
   self.entities[id] = entity
   entity:getLocalEntity():registerWithSecretary(self:getSecretary())
+  return entity
+end
+
+--
+-- Creates a new entity, automatically assigning it an ID and broadcasting its
+-- creation to other connections. Instantiates the object with the supplied list
+-- of arguments. See the specific implementation of the NetworkedEntity class
+-- for the expected arguments.
+--
+function Class:spawnEntity(entityType, ...)
+  assert(EntityType.fromId(entityType),
+      "entityType: "..entityType.." is not a valid EntityType")
+  
+  -- Generate an ID.
+  local id = self:claimId(self:getNextId())
+  
+  -- Instantiate a new entity and hook everything up.
+  local entity = NetworkedEntity.createNewEntity(
+      self,
+      id,
+      entityType,
+      ...)
+  self.entities[id] = entity
+  entity:getLocalEntity():registerWithSecretary(self:getSecretary())  
+  self.connectionManager:broadcastMessageWithAck(messages.entityUpdate.create(
+      entity:getNetworkId(),
+      entity:getEntityType(),
+      entity:getInstantiationParams()),
+      buildChannelStringForEntity(entity:getNetworkId()))
   return entity
 end
 
@@ -120,7 +174,7 @@ function Class:onReceiveEntityCreate(message, connectionId)
   local entityType = message[F_ENTITY_TYPE]
   local params = message[F_CREATE_PARAMS]
   
-  self:createEntity(id, entityType, params)
+  self:createEntityWithParams(id, entityType, params)
 end
 
 --
@@ -152,7 +206,7 @@ function Class:onReceiveEntitySync(message, connectionId)
   local entity = self:getEntity(id)
   if not entity then return end
   
-  entity:setSynchronizedData(message[F_SYNC_DATA])s
+  entity:setSynchronizedData(message[F_SYNC_DATA])
 end
 
 --
@@ -170,4 +224,8 @@ function Class:onReceiveEntityInc(message, connectionId)
   if not entity then return end
   
   entity:performIncrementalUpdate(message[F_INC_DATA])
+end
+
+local function buildChannelStringForEntity(entityId)
+  return string.format("entity:%s", entityId)
 end

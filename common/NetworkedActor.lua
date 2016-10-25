@@ -26,12 +26,22 @@ local Class = NetworkedActor
 --
 -- Instantiates an Actor and performs necessary setup.
 --
-function Class.createNewInstance(manager, id, entityType, params, actor)
-  actor = actor or Actor()
-  assertType(actor, "actor", Actor)
-  local instance = Class(manager, id, entityType, params, actor)
-  instance:setSynchronizedState(params)
-  return instance
+function Class.createNewInstanceWithParams(manager, id, entityType, params)
+  return Class(manager, id, entityType, params, Actor())
+end
+
+--
+-- Instantiates an Actor and performs necessary setup.
+--
+function Class.createNewInstance(manager, id, entityType, ...)
+  local x, y, r, g, b = ...
+  return Class.createNewInstanceWithParams(manager, id, entityType, {
+      [F_X] = x,
+      [F_Y] = y,
+      [F_RED] = r,
+      [F_GREEN] = g,
+      [F_BLUE] = b,
+  })
 end
 
 --
@@ -43,27 +53,60 @@ Class.registerEntityType(EntityType.ACTOR, Class)
 
 function Class:_init(manager, networkedId, entityType, params, actor)
   Class.superclass._init(self, manager, networkedId, entityType, params, actor)
+  assertType(actor, "actor", Actor)
+  self:setActorState(params)
+end
+
+function Class:getInstantiationParams(params)
+  params = Class.superclass.getInstantiationParams(self, params)
+  return self:writeActorState(params, "new")
 end
 
 function Class:setSynchronizedState(state)
   Class.superclass.setSynchronizedState(self, state)
+  self:setActorState(state)
+end
+
+--
+-- Sets the state of the actor given a params/state object.
+--
+function Class:setActorState(state)
   local actor = self:getLocalEntity()
   local x, y = state[F_X], state[F_Y]
   local r, g, b = state[F_RED], state[F_GREEN], state[F_BLUE]
-  actor:setPosition(x, y)
-  actor:setColor(Color(r, g, b))
+  if x and y then
+    actor:setPosition(x, y)
+  end
+  if r and g and b then
+    actor:setColor(Color(r, g, b))
+  end
 end
 
 function Class:getSynchronizedState(state)
-  Class.superclass.getSynchronizedState(self, state)
+  state = Class.superclass.getSynchronizedState(self, state)
+  return self:writeActorState(state, "sync")
+end
+
+--
+-- Outputs the state of the actor to the provided table.
+-- Available modes:
+-- - 'new': for new Actors
+-- - 'sync': for sync updates
+--
+function Class:writeActorState(state, mode)
   local actor = self:getLocalEntity()
   local x, y = actor:getPosition()
-  local r, g, b = actor:getColor():getRGBA()
   state[F_X] = x
   state[F_Y] = y
-  color[F_RED] = r
-  color[F_GREEN] = g
-  color[F_BLUE] = b
+  
+  if mode == "new" then
+    local r, g, b = actor:getColor():getRGBA()
+    state[F_RED] = r
+    state[F_GREEN] = g
+    state[F_BLUE] = b
+  end
+  
+  return state
 end
 
 function Class:performIncrementalUpdate(update)

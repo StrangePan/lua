@@ -34,22 +34,10 @@ function Class:_init(port)
   self.connections = {}
   self.connectionIds = {n = 0, nxt=1}
   self.pendingConnections = {}
+  self.coordinators = {}
 
   -- Register for message callbacks.
-  self.passer:registerListener(nil,
-    self, self.onReceiveMessage)
-
-  self.passer:registerListener(MessageType.PING,
-    self, self.onReceivePing)
-
-  self.passer:registerListener(MessageType.CONNECT_INIT,
-    self, self.onReceiveConnectionInit)
-
-  self.passer:registerListener(MessageType.CONNECT_ACK,
-    self, self.onReceiveConnectionAck)
-
-  self.passer:registerListener(MessageType.DISCONNECT,
-    self, self.onReceiveDisconnect)
+  self.passer:registerListener(nil, self, self.onReceiveMessage)
 end
 
 --
@@ -198,6 +186,30 @@ function Class:getConnection(...)
 end
 
 --
+-- Registers a callback function to receive callbacks when this manager
+-- receives a message of the given type. Callbacks receive:
+-- message: The message that was received.
+-- connectionId: The ID of the connection that sent the message.
+--
+function Class:registerMessageListener(messageType, listener, callback)
+  assert(MessageType.fromId(messageType), messageType.." is not a valid MessageType")
+  if not self.coordinators[messageType] then
+    self.coordinators[messageType] = EventCoordinator()
+  end
+  self.coordinators[messageType]:registerListener(listener, callback)
+end
+
+--
+-- Notifies registers listeners of the given message's type of a received
+-- message from connection with ID connectionId.
+--
+function Class:notifyMessageListeners(message, connectionId)
+  if self.coordinators[message.type] then
+    self.coordinators[message.type]:notifyListeners(message, connectionId)
+  end
+end
+
+--
 -- Iterator function for looping through all connection objects.
 --
 function Class:allConnections()
@@ -291,6 +303,18 @@ function Class:sendConnectionInit(connection)
   self:sendMessage(messages.connectionInit(), id)
 end
 
+
+
+--
+-- Simple map mapping message types to internal handler functions.
+--
+local callbackMap = {
+  [MessageType.PING] = "onReceivePing",
+  [MessageType.CONNECT_INIT] = "onReceiveConnectionInit",
+  [MessageType.CONNECT_ACK] = "onReceiveConnectionAck",
+  [MessageType.DISCONNECT] = "onReceiveDisconnect",
+}
+
 --
 -- Callback function for when MessagePasser receives any message at all.
 -- Updates the last received message time for the sender if the sender is
@@ -304,6 +328,15 @@ function Class:onReceiveMessage(message, address, port)
     if connection.status == ConnectionStatus.STALLED then
       connection.status = ConnectionStatus.CONNECTED
     end
+  end
+  
+  if callbackMap[message.type] then
+    self[callbackMap[message.type]](message, address, port)
+  end
+  
+  connection = self:getConnection(address, port)
+  if connection then
+    self:notifyMessageListeners(message, connection.id)
   end
 end
 

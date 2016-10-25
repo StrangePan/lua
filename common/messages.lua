@@ -1,4 +1,5 @@
 require "MessageType"
+require "EntityUpdateType"
 
 messages = {}
 
@@ -57,6 +58,17 @@ function messages.ackRequest(channel, ackNum, message)
     c=channel,
     n=ackNum,
     m=message
+  }
+end
+
+messages.entityUpdate = {}
+
+function messages.entityUpdate.create(id, entityType, params)
+  return {
+    neid = id,
+    utype = EntityUpdateType.CREATING,
+    etype = entityType,
+    params = params,
   }
 end
 

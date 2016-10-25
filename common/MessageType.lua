@@ -8,7 +8,8 @@ MessageType = {
   "PING",
   "ACK",
   "ACK_RESET",
-  "ACK_REQUEST"
+  "ACK_REQUEST",
+  "ENTITY_UPDATE",
 }
 
 buildEnum(MessageType)
