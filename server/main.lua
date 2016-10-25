@@ -1,14 +1,15 @@
 package.path = package.path .. ";./common/?.lua;./common/entities/?.lua;./common/networking/?.lua"
 
 require "LoveSecretary"
+require "NetworkedEntityType"
 require "ServerConnectionManager"
-require "CustomNetworkedEntityManager"
+require "ServerNetworkedEntityManager"
 require "Wall"
 
 function love.load()
   rootSecretary = LoveSecretary():captureLoveEvents()
   connection = ServerConnectionManager()
-  entityManager = CustomNetworkedEntityManager(connection):registerWithSecretary(rootSecretary)
+  entityManager = ServerNetworkedEntityManager(connection):registerWithSecretary(rootSecretary)
   
   rootSecretary:registerEventListener(
     connection,
@@ -41,9 +42,10 @@ function buildWalls()
   for wallY,row in ipairs(wallCodes) do
     for wallX,wallCode in ipairs(row) do
       if wallCode == 1 then
-        local newWall = Wall()
-        newWall:setPosition((wallX - 1) * 32, (wallY - 1) * 32)
-        newWall:registerWithSecretary(rootSecretary)
+        entityManager:spawnEntity(
+            NetworkedEntityType.WALL,
+            (wallX - 1) * 32,
+            (wallY - 1) * 32)
       end
     end
   end

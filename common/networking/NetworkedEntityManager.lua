@@ -24,10 +24,16 @@ function Class:_init(connectionManager)
   assertType(connectionManager, "connectionManager", ConnectionManager)
   self.connectionManager = connectionManager
   self.entities = {}
+  self.entityIds = {n = 0}
   self.nextId = 1
   
-  self.connectionManager:registerMessageListener(MessageType.ENTITY_UPDATE,
-    self, self.onReceiveEntityUpdate)
+  self.connectionManager:registerMessageListener(
+    MessageType.ENTITY_UPDATE,
+    self,
+    self.onReceiveEntityUpdate)
+  self.connectionManager:registerConnectionStatusListener(
+    self,
+    self.onConnectionStatusChanged)
 end
 
 --
@@ -60,6 +66,8 @@ function Class:claimId(id)
   if self.nextId <= id then
     self.nextId = id + 1
   end
+  self.entityIds.n = self.entityIds.n + 1
+  self.entityIds[self.entityIds.n] = id
   return id
 end
 
@@ -71,8 +79,8 @@ end
 --
 function Class:createEntityWithParams(id, entityType, params)
   assertType(id, "id", "number")
-  assert(EntityType.fromId(entityType),
-      "entityType: "..entityType.." is not a valid EntityType")
+  assert(NetworkedEntityType.fromId(entityType),
+      "entityType: "..entityType.." is not a valid NetworkedEntityType")
   
   -- If an entity already exists with the given ID, then fail
   if self:getEntity(id) then
@@ -82,7 +90,7 @@ function Class:createEntityWithParams(id, entityType, params)
   end
   
   -- Instantiate a new entity and hook everything up
-  local entity = NetworkedEntity.createNewEntityWithParams(
+  local entity = NetworkedEntity.createNewInstanceWithParams(
       self,
       id,
       entityType,
@@ -99,14 +107,14 @@ end
 -- for the expected arguments.
 --
 function Class:spawnEntity(entityType, ...)
-  assert(EntityType.fromId(entityType),
-      "entityType: "..entityType.." is not a valid EntityType")
+  assert(NetworkedEntityType.fromId(entityType),
+      "entityType: "..entityType.." is not a valid NetworkedEntityType")
   
   -- Generate an ID.
   local id = self:claimId(self:getNextId())
   
   -- Instantiate a new entity and hook everything up.
-  local entity = NetworkedEntity.createNewEntity(
+  local entity = NetworkedEntity.createNewInstance(
       self,
       id,
       entityType,
@@ -114,10 +122,10 @@ function Class:spawnEntity(entityType, ...)
   self.entities[id] = entity
   entity:getLocalEntity():registerWithSecretary(self:getSecretary())  
   self.connectionManager:broadcastMessageWithAck(messages.entityUpdate.create(
-      entity:getNetworkId(),
-      entity:getEntityType(),
-      entity:getInstantiationParams()),
-      buildChannelStringForEntity(entity:getNetworkId()))
+          entity:getNetworkId(),
+          entity:getEntityType(),
+          entity:getInstantiationParams()),
+      self:buildEntityChannelString(entity))
   return entity
 end
 
@@ -132,6 +140,12 @@ function Class:deleteEntity(entity)
   -- DELETE RECORD OF ENTITY BEFORE PROPOGATING DESTRUCTION CALL
   -- TO AVOID INFINITE RECURSION
   self.entities[entity:getNetworkId()] = nil
+  for i = 1,self.entityIds.n do
+    if self.entityIds[i] == entity:getNetworkId() then
+      self.entityIds[i] = nil
+      break
+    end
+  end
   entity:delete()
 end
 
@@ -141,6 +155,8 @@ end
 -- sent the message.
 --
 function Class:onReceiveEntityUpdate(message, connectionId)
+  print("onReceiveEntityUpdate", message, connectionId)
+  
   local t = message[F_ENTITY_UPDATE_TYPE]
   
   if t == EntityUpdateType.CREATING then
@@ -226,6 +242,37 @@ function Class:onReceiveEntityInc(message, connectionId)
   entity:performIncrementalUpdate(message[F_INC_DATA])
 end
 
-local function buildChannelStringForEntity(entityId)
-  return string.format("entity:%s", entityId)
+--
+-- Handles connection status changing for a connection.
+--
+function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
+end
+
+function Class:allEntities()
+  local nextId = self:allEntityIds()
+  return function()
+    local id = nextId()
+    return id and self.entities[id] or nil
+  end
+end
+
+function Class:allEntityIds()
+  local i = 0
+  local j = 0
+  local n = self.entityIds.n
+  return function()
+    i = i + 1
+    j = j + 1
+    while not self.entityIds[j] and j <= n do
+      j = j + 1
+      self.entityIds.n = self.entityIds.n - 1
+    end
+    self.entityIds[i] = self.entityIds[j]
+    return self.entityIds[i]
+  end
+end
+
+function Class:buildEntityChannelString(entity)
+  entity = self:getEntity(entity)
+  return string.format("entity:%s", entity:getNetworkId())
 end

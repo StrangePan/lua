@@ -69,7 +69,7 @@ function Class:receiveAllMessages()
       self:sendConnectionInit(connection)
     elseif connection.status == ConnectionStatus.CONNECTED and
         time >= connection.lastReceivedTime + 5 then
-      connection.status = ConnectionStatus.STALLED
+      self:setConnectionStatus(connection, ConnectionStatus.STALLED)
       print("connection "..id.." stalled")
     elseif connection.status == ConnectionStatus.STALLED and
         time >= connection.lastReceivedTime + 30 then
@@ -96,7 +96,6 @@ end
 function Class:initiateConnection(address, port)
   local connection = self:createConnection(address, port)
   if connection == nil then return end
-  --connection.status = ConnectionStatus.CONNECTING
   self:sendConnectionInit(connection)
 end
 
@@ -107,7 +106,6 @@ end
 function Class:createConnection(address, port)
   assertType(address, "address", "string")
   assertType(port, "port", "number")
-  print('createConnection', address, port)
   if self:getConnection(address, port) then return end
   
   local id = self.connectionIds.nxt
@@ -135,6 +133,7 @@ function Class:terminateConnection(connection, sendDisconnect)
     assertType(sendDisconnect, "boolean")
     self:sendMessage(messages.disconnect(), connection)
   end
+  self:setConnectionStatus(connection, ConnectionStatus.DISCONNECTED)
   return self:deleteConnection(connection)
 end
 
@@ -171,9 +170,7 @@ function Class:getConnection(...)
   
   if instanceOf(args[1], Connection) then
     return args[1]
-  else
   end
-  
   
   if type(args[1]) == "string" then
     id = self.connectionIds[self:createConnectionString(args[1], args[2])]
@@ -181,10 +178,33 @@ function Class:getConnection(...)
     id = args[1]
   end
   
-  if id == nil then
+  if not id then
     return nil
   end
-  return self.connections[id]
+  if self.connections[id] then
+    return self.connections[id]
+  else
+    print("No connection with ID "..id)
+  end
+end
+
+--
+-- Sets the status of the supplied status to the supplied status. Notifies
+-- registered listeners if new status is different from old status.
+--
+function Class:setConnectionStatus(connection, status)
+  assert(
+      ConnectionStatus.fromId(status),
+      status.." is not a valid ConnectionStatus")
+  connection = self:getConnection(connection)
+  if not connection then return end
+  local oldStatus = connection.status or ConnectionStatus.DISCONNECTED
+  connection.status = status
+  
+  -- Notify listeners
+  if oldStatus ~= status then
+    self:notifyConnectionStatusListeners(connection.id, oldStatus)
+  end
 end
 
 --
@@ -194,6 +214,7 @@ end
 -- connectionId: The ID of the connection that sent the message.
 --
 function Class:registerMessageListener(messageType, listener, callback)
+  print("registerMessageListener", messageType)
   assert(MessageType.fromId(messageType), messageType.." is not a valid MessageType")
   if not self.coordinators[messageType] then
     self.coordinators[messageType] = EventCoordinator()
@@ -206,6 +227,7 @@ end
 -- message from connection with ID connectionId.
 --
 function Class:notifyMessageListeners(message, connectionId)
+  print("notifyMessageListeners", message.type, connectionId)
   if self.coordinators[message.type] then
     self.coordinators[message.type]:notifyListeners(message, connectionId)
   end
@@ -227,30 +249,6 @@ end
 --
 function Class:notifyConnectionStatusListeners(connectionId, oldStatus)
   self.connectionStatusCoordinator:notifyListeners(self, connectionId, oldStatus)
-end
-
---
--- Iterator function for looping through all connection objects.
---
-function Class:allConnections()
-  local i = 0
-  return function()
-    i = i + 1
-    if self.connectionIds[i] then
-      return self.connections[self.connectionIds[i]]
-    end
-  end
-end
-
---
--- Iterator function for looping through the IDs of all connections.
---
-function Class:allConnectionIds()
-  local i = 0
-  return function()
-    i = i + 1
-    return self.connectionIds[i]
-  end
 end
 
 --
@@ -313,13 +311,16 @@ function Class:sendMessageWithAck(message, channel, ...)
   end
 end
 
+--
+-- Sends a connection init message to the supplied connection.
+--
 function Class:sendConnectionInit(connection)
   connection = self:getConnection(connection)
-  if connection == nil then return end
+  if not connection then return end
   
   local id = connection.id
   print("attempting to connect to "..id.." @ "..connection.address..":"..connection.port)
-  connection.status = ConnectionStatus.CONNECTING
+  self:setConnectionStatus(connection, ConnectionStatus.CONNECTING)
   self:sendMessage(messages.connectionInit(), id)
 end
 
@@ -346,7 +347,7 @@ function Class:onReceiveMessage(message, address, port)
   if connection then
     connection.lastReceivedTime = love.timer.getTime()
     if connection.status == ConnectionStatus.STALLED then
-      connection.status = ConnectionStatus.CONNECTED
+      self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
     end
   end
   
@@ -376,13 +377,13 @@ end
 --
 function Class:onReceiveConnectionInit(message, address, port)
   local connection = self:createConnection(address, port)
-  if connection == nil then return end
+  if not connection then return end
   
   local id = connection.id
-  print("connection request "..id.." received from "..address..":"..port)
-  connection.status = ConnectionStatus.CONNECTED
+  print("connection request received from "..id.." @ "..address..":"..port)
   connection.lastReceivedTime = love.timer.getTime()
   self:sendMessage(messages.connectionAck(), id)
+  self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
 end
 
 --
@@ -391,13 +392,13 @@ end
 --
 function Class:onReceiveConnectionAck(message, address, port)
   local connection = self:getConnection(address, port)
-  if connection == nil then return end
+  if not connection then return end
   
   -- Ignore message if not looking to connect.
   if connection.status ~= ConnectionStatus.CONNECTING then return end
   
   print("connected to instance "..connection.id.." at "..connection.address..":"..connection.port)
-  connection.status = ConnectionStatus.CONNECTED
+  self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
 end
 
 --
@@ -408,4 +409,28 @@ end
 function Class:onReceiveDisconnect(message, address, port)
   local connection = self:getConnection(address, port)
   self:terminateConnection(connection, true)
+end
+
+--
+-- Iterator function for looping through all connection objects.
+--
+function Class:allConnections()
+  local i = 0
+  return function()
+    i = i + 1
+    if self.connectionIds[i] then
+      return self.connections[self.connectionIds[i]]
+    end
+  end
+end
+
+--
+-- Iterator function for looping through the IDs of all connections.
+--
+function Class:allConnectionIds()
+  local i = 0
+  return function()
+    i = i + 1
+    return self.connectionIds[i]
+  end
 end

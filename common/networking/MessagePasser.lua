@@ -54,7 +54,7 @@ function Class:sendMessageWithAck(message, channel, address, port)
   assertType(port, "port", "number")
   local ackKey = buildAckKey(address, port, channel)
   local outbox = self.outbox[ackKey]
-  if outbox == nil then
+  if not outbox then
     outbox = {ackNum = 0, queue = Queue()}
     self.outbox[ackKey] = outbox
   end
@@ -102,7 +102,7 @@ function Class:processMessage(message, addr, port)
     end
     
   elseif message.type == MessageType.ACK then
-    -- Process an acknowledgement message sent by client
+    -- Process an acknowledgement message
     local channel = message.c
     local ackNum = message.n
     local ackKey = buildAckKey(addr, port, channel)
@@ -128,7 +128,7 @@ function Class:processMessage(message, addr, port)
 
     if ackNum == inbox.ackNum + 1 then
       inbox.ackNum = ackNum
-      self:processMessage(message, addr, port)
+      self:processMessage(innerMessage, addr, port)
     else
       notifyListeners = false
     end

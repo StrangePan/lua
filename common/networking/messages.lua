@@ -57,7 +57,7 @@ function messages.ackRequest(channel, ackNum, message)
     type=MessageType.ACK_REQUEST,
     c=channel,
     n=ackNum,
-    m=message
+    m=message,
   }
 end
 
@@ -65,6 +65,7 @@ messages.entityUpdate = {}
 
 function messages.entityUpdate.create(id, entityType, params)
   return {
+    type=MessageType.ENTITY_UPDATE,
     neid = id,
     utype = EntityUpdateType.CREATING,
     etype = entityType,
