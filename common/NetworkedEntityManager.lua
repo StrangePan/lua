@@ -26,8 +26,8 @@ function Class:_init(connectionManager)
   self.entities = {}
   self.nextId = 1
   
-  self.connectionManager:registerMessageListener(self,
-    self.onReceiveEntityUpdate, MessageType.ENTITY_UPDATE)
+  self.connectionManager:registerMessageListener(MessageType.ENTITY_UPDATE,
+    self, self.onReceiveEntityUpdate)
 end
 
 --

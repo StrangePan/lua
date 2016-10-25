@@ -5,7 +5,7 @@ require "Player"
 require "Wall"
 require "Camera"
 require "ClientConnectionManager"
-require "EntityConnectionManager"
+require "CustomNetworkedEntityManager"
 require "CommandMap"
 require "LocalPlayerController"
 
@@ -38,7 +38,7 @@ function love.load()
     end, EventType.KEYBOARD_DOWN)
   
   connection = ClientConnectionManager()
-  EntityConnectionManager(connection):registerWithSecretary(rootSecretary)
+  CustomNetworkedEntityManager(connection):registerWithSecretary(rootSecretary)
   connection:connectToServer()
 end
 
