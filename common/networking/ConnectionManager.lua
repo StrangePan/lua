@@ -214,7 +214,6 @@ end
 -- connectionId: The ID of the connection that sent the message.
 --
 function Class:registerMessageListener(messageType, listener, callback)
-  print("registerMessageListener", messageType)
   assert(MessageType.fromId(messageType), messageType.." is not a valid MessageType")
   if not self.coordinators[messageType] then
     self.coordinators[messageType] = EventCoordinator()
@@ -227,7 +226,6 @@ end
 -- message from connection with ID connectionId.
 --
 function Class:notifyMessageListeners(message, connectionId)
-  print("notifyMessageListeners", message.type, connectionId)
   if self.coordinators[message.type] then
     self.coordinators[message.type]:notifyListeners(message, connectionId)
   end
@@ -342,7 +340,6 @@ local callbackMap = {
 -- a known connection.
 --
 function Class:onReceiveMessage(message, address, port)
-  print("Received message from "..address..":"..port)
   local connection = self:getConnection(address, port)
   if connection then
     connection.lastReceivedTime = love.timer.getTime()
@@ -367,7 +364,6 @@ end
 --
 function Class:onReceivePing(message, address, port)
   local connection = self:getConnection(address, port)
-  print("received ping from "..connection.id)
 end
 
 --
