@@ -36,6 +36,7 @@ function Class:_init(port)
   self.connectionIds = {n = 0, nxt=1}
   self.pendingConnections = {}
   self.coordinators = {}
+  self.connectionStatusCoordinator = EventCoordinator()
 
   -- Register for message callbacks.
   self.passer:registerListener(nil, self, self.onReceiveMessage)
@@ -201,13 +202,31 @@ function Class:registerMessageListener(messageType, listener, callback)
 end
 
 --
--- Notifies registers listeners of the given message's type of a received
+-- Notifies registered listeners of the given message's type of a received
 -- message from connection with ID connectionId.
 --
 function Class:notifyMessageListeners(message, connectionId)
   if self.coordinators[message.type] then
     self.coordinators[message.type]:notifyListeners(message, connectionId)
   end
+end
+
+--
+-- Callbacks receive:
+-- connectionManager: the ConnectionManager that triggered the event.
+-- connectionId: The ID of the connection whose status changed.
+-- oldStatus: The previous status of the connection.
+--
+function Class:registerConnectionStatusListener(listener, callback)
+  self.connectionStatusCoordinator:registerListener(listener, callback)
+end
+
+--
+-- Notifies registered listeners of old connections that a connection's status
+-- has changed.
+--
+function Class:notifyConnectionStatusListeners(connectionId, oldStatus)
+  self.connectionStatusCoordinator:notifyListeners(self, connectionId, oldStatus)
 end
 
 --

@@ -17,7 +17,6 @@ function love.load()
   player = Player():registerWithSecretary(rootSecretary)
   commandMap = CommandMap()
   playerController = LocalPlayerController(player, commandMap)
-  buildWalls()
   
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_UP, "up")
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_RIGHT, "right")
@@ -49,31 +48,4 @@ function love.load()
     connection,
     connection.terminateAllConnections,
     EventType.SHUTDOWN)
-end
-
-function buildWalls()
-  local wallCodes = {
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1},
-    {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1},
-    {1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
-    {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-  }
-  
-  for wallY,row in ipairs(wallCodes) do
-    for wallX,wallCode in ipairs(row) do
-      if wallCode == 1 then
-        local newWall = Wall()
-        newWall:setPosition((wallX - 1) * 32, (wallY - 1) * 32)
-        newWall:registerWithSecretary(rootSecretary)
-      end
-    end
-  end
 end

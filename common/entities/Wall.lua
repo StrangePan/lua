@@ -1,4 +1,5 @@
 require "common/class"
+require "Direction"
 require "PhysObject"
 
 Wall = buildClass(PhysObject)
