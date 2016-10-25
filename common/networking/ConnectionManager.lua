@@ -15,6 +15,7 @@ local Class = ConnectionManager
 -- Constructor for a connection manager. Requries a port to which to bind.
 --
 function Class:_init(port)
+  Class.superclass._init(self)
   self.port = port
 
   -- Initialize udp connection object.
@@ -331,7 +332,7 @@ function Class:onReceiveMessage(message, address, port)
   end
   
   if callbackMap[message.type] then
-    self[callbackMap[message.type]](message, address, port)
+    self[callbackMap[message.type]](self, message, address, port)
   end
   
   connection = self:getConnection(address, port)

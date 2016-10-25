@@ -38,8 +38,17 @@ function love.load()
     end, EventType.KEYBOARD_DOWN)
   
   connection = ClientConnectionManager()
-  CustomNetworkedEntityManager(connection):registerWithSecretary(rootSecretary)
+  entityManager = CustomNetworkedEntityManager(connection):registerWithSecretary(rootSecretary)
   connection:connectToServer()
+  
+  rootSecretary:registerEventListener(
+    connection,
+    connection.receiveAllMessages,
+    EventType.PRE_STEP)
+  rootSecretary:registerEventListener(
+    connection,
+    connection.terminateAllConnections,
+    EventType.SHUTDOWN)
 end
 
 function buildWalls()

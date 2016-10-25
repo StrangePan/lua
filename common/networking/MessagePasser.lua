@@ -202,7 +202,7 @@ function Class:registerListener(messageType, listener, callback)
   assertType(callback, "callback", "function")
   
   -- Lazily instantiate event coordinators.
-  if self.coordinators[messageType] == nil then
+  if not self.coordinators[messageType] then
     self.coordinators[messageType] = EventCoordinator()
   end
   

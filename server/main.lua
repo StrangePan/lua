@@ -5,7 +5,16 @@ require "ServerConnectionManager"
 require "CustomNetworkedEntityManager"
 
 function love.load()
-  local rootSecretary = LoveSecretary():captureLoveEvents()
-  local connection = ServerConnectionManager()
-  CustomNetworkedEntityManager(connection):registerWithSecretary(rootSecretary)
+  rootSecretary = LoveSecretary():captureLoveEvents()
+  connection = ServerConnectionManager()
+  entityManager = CustomNetworkedEntityManager(connection):registerWithSecretary(rootSecretary)
+  
+  rootSecretary:registerEventListener(
+    connection,
+    connection.receiveAllMessages,
+    EventType.PRE_STEP)
+  rootSecretary:registerEventListener(
+    connection,
+    connection.terminateAllConnections,
+    EventType.SHUTDOWN)
 end
