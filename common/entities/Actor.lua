@@ -20,6 +20,10 @@ function Actor:_init()
   
   self.moveEventCoordinator = EventCoordinator()
   self.spinEventCoordinator = EventCoordinator()
+
+  self.bumpStrength = 6
+  self.bumpOffsetX = 0
+  self.bumpOffsetY = 0
   
   self.steps = {
        [Direction.UP] = {x =  0, y = -1},
@@ -108,7 +112,6 @@ end
 -- actor successfully moves as a result, returns `true`.
 --
 function Actor:tryMove(direction, force)
-  if force == nil then force = false end
   direction = Direction.fromId(direction)
   if direction == nil then
     return false
@@ -122,13 +125,14 @@ function Actor:tryMove(direction, force)
   local yNext = y + yStep
 
   local secretary = self:getSecretary()
-  if force == false then
+  if not force then
     local t, r, b, l = self:getBoundingBox(xStep, yStep)
     local collisions = secretary:getCollisions(t, r, b, l, Wall)
 
     -- Cancel jump if we would collide with a wall
     if table.getn(collisions) > 0 then
       collisions[1]:bump(direction)
+      self:bump(direction)
       return false
     end
   end
@@ -154,6 +158,21 @@ function Actor:setPosition(x, y, z)
 end
 
 --
+-- Bumps the actor in a given direction, which is simply an animation that
+-- causes the entity to look like it's been nudged slightly in a given
+-- direction.
+--
+function Actor:bump(direction)
+  direction = Direction.fromId(direction)
+  if direction == nil then
+    return false
+  end
+
+  self.bumpOffsetX = self.steps[direction].x * self.bumpStrength
+  self.bumpOffsetY = self.steps[direction].y * self.bumpStrength
+end
+
+--
 -- Causes the actor to perform a "spin" emote and notifies listeners of event.
 --
 function Actor:spin()
@@ -175,7 +194,13 @@ function Actor:onStep()
   self:updateDrawState()
 end
 
+local function sign(x)
+  return x>0 and 1 or x<0 and -1 or 0
+end
+
 function Actor:updateDrawState()
+
+  -- Update for spin animation
   if math.abs(self.angle - self.drawAngle) < math.pi / 128 then
     self.angle = 0
     self.drawAngle = self.angle
@@ -189,11 +214,21 @@ function Actor:updateDrawState()
     end
     self.drawAngle = self.drawAngle + delta
   end
+
+  -- Update for bump animation
+  if self.bumpOffsetX ~= 0 then
+    self.bumpOffsetX = self.bumpOffsetX - sign(self.bumpOffsetX)
+  end
+  if self.bumpOffsetY ~= 0 then
+    self.bumpOffsetY = self.bumpOffsetY - sign(self.bumpOffsetY)
+  end
 end
 
 function Actor:draw()
   love.graphics.push()
   local x, y = self:getPosition()
+  x = x + self.bumpOffsetX
+  y = y + self.bumpOffsetY
   local w, h = self:getSize()
   local ox = w/2
   local oy = h/2
