@@ -54,10 +54,10 @@ function Wall:onStep()
   else
     self.yOffset = 0
   end
-  if self.drawScale > 0.95 then
+  if self.drawScale > 0.975 then
     self.drawScale = 1
   else
-    self.drawScale = self.drawScale + 0.05
+    self.drawScale = self.drawScale + 0.025
   end
 end
 

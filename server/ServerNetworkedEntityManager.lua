@@ -1,12 +1,14 @@
+require "common/functions"
 require "CustomNetworkedEntityManager"
 require "Connection"
-require "ConnectionManager"
+require "ServerConnectionManager"
 require "ConnectionStatus"
 
 ServerNetworkedEntityManager = buildClass(CustomNetworkedEntityManager)
 local Class = ServerNetworkedEntityManager
 
 function Class:_init(connectionManager)
+  assertType(connectionManager, "connectionManager", ServerConnectionManager)
   Class.superclass._init(self, connectionManager)
 end
 

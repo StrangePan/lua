@@ -11,17 +11,11 @@ function PlayerController:_init(player)
 end
 
 function Class:setPlayer(player)
-  if player ~= nil then
+  if player then
     assertType(player, "player", Player)
   end
-  
-  if self.player ~= nil then
-    self.player = nil
-  end
-  
-  if player ~= nil then
-    self.player = player
-  end
+
+  self.player = player
 end
 
 function Class:getPlayer()
@@ -47,11 +41,11 @@ end
 function Class:move(direction)
   direction = Direction.fromId(direction)
   if direction == nil then return false end
-  if self:getPlayer() == nil then return false end
-  return self.player:move(direction)
+  if not self:getPlayer() then return false end
+  return self:getPlayer():move(direction)
 end
 
 function Class:emoteSpin()
-  if self:getPlayer() == nil then return false end
-  return self.player:spin()
+  if not self:getPlayer() then return false end
+  return self:getPlayer():spin()
 end

@@ -9,11 +9,11 @@ function LocalPlayerController:_init(player, commandMap)
 end
 
 function LocalPlayerController:setCommandMap(commandMap)
-  if commandMap ~= nil then
+  if commandMap then
     assertType(commandMap, "commandMap", CommandMap)
   end
   
-  if self.commandMap ~= nil then
+  if self.commandMap then
     self.commandMap:unregisterCommandListener(CommandType.MOVE_UP, self)
     self.commandMap:unregisterCommandListener(CommandType.MOVE_RIGHT, self)
     self.commandMap:unregisterCommandListener(CommandType.MOVE_DOWN, self)
@@ -21,7 +21,7 @@ function LocalPlayerController:setCommandMap(commandMap)
     self.commandMap = nil
   end
   
-  if commandMap ~= nil then
+  if commandMap then
     self.commandMap = commandMap
     self.commandMap:registerCommandListener(CommandType.MOVE_UP, self, self.moveUp)
     self.commandMap:registerCommandListener(CommandType.MOVE_RIGHT, self, self.moveRight)

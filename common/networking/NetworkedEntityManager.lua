@@ -155,8 +155,6 @@ end
 -- sent the message.
 --
 function Class:onReceiveEntityUpdate(message, connectionId)
-  print("onReceiveEntityUpdate", message, connectionId)
-  
   local t = message[F_ENTITY_UPDATE_TYPE]
   
   if t == EntityUpdateType.CREATING then

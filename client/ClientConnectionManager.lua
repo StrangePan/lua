@@ -23,3 +23,10 @@ function Class:connectToServer()
   -- Initiate connection protocol to server.
   self:initiateConnection(self.serverAddress, self.serverPort)
 end
+
+--
+-- Gets the connection object representing the server.
+--
+function Class:getServerConnection()
+  return self:getConnection(self.serverAddress, self.serverPort)
+end

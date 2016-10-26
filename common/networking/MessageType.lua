@@ -10,6 +10,7 @@ MessageType = {
   "ACK_RESET",
   "ACK_REQUEST",
   "ENTITY_UPDATE",
+  "CONTROL_ACTOR",
 }
 
 buildEnum(MessageType)
