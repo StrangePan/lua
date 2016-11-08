@@ -13,7 +13,6 @@ function Class:_init(connectionManager)
 end
 
 function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
-  print("onConnectionStatusChanged", manager, connectionId, oldStatus)
   Class.superclass.onConnectionStatusChanged(
       self,
       manager,

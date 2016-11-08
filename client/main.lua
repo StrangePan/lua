@@ -3,7 +3,6 @@ package.path = package.path .. ";./common/?.lua;./common/entities/?.lua;./common
 require "LoveSecretary"
 require "Player"
 require "Wall"
-require "Camera"
 require "ClientGame"
 require "ClientConnectionManager"
 require "CustomNetworkedEntityManager"
@@ -11,18 +10,11 @@ require "CustomNetworkedEntityManager"
 local connection
 
 function love.load()
-  rootSecretary = LoveSecretary():captureLoveEvents()
-  camera = Camera():registerWithSecretary(rootSecretary)
-  player = Player():registerWithSecretary(rootSecretary)
+  local connection = ClientConnectionManager()
   
-  rootSecretary:registerEventListener({}, function()
-      local px, py = player:getPosition()
-      local pw, ph = player:getSize()
-      camera:moveTo(px+(pw/2), py+(ph/2))
-    end, EventType.STEP)
-    
-  connection = ClientConnectionManager()
-  entityManager = CustomNetworkedEntityManager(connection)  
-  game = ClientGame(rootSecretary, connection, entityManager)
-  game:run()
+  game = ClientGame(
+      LoveSecretary():captureLoveEvents(),
+      connection,
+      CustomNetworkedEntityManager(connection))
+  game:start()
 end

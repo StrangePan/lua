@@ -1,4 +1,6 @@
 require "common/class"
+require "Camera"
+require "Player"
 require "Secretary"
 require "ClientConnectionManager"
 require "NetworkedEntityManager"
@@ -13,19 +15,19 @@ function Class:_init(secretary, connectionManager, entityManager)
   assertType(secretary, "secretary", Secretary)
   assertType(connectionManager, "connectionManager", ClientConnectionManager)
   assertType(entityManager, "entityManager", NetworkedEntityManager)
-  
+
   self.secretary = secretary
   self.connections = connectionManager
   self.entities = entityManager
-  
+
   -- Register for network callbacks
   self.connections:registerConnectionStatusListener(
       self,
-      self.onN)
+      self.onConnectionStatusChanged)
   
   self.lastSpinTime = love.timer.getTime()
   self.playerController = LocalPlayerController()
-  
+
   -- Set up command map for player
   local commandMap = CommandMap()
   self.commandMap = commandMap
@@ -34,16 +36,26 @@ function Class:_init(secretary, connectionManager, entityManager)
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_DOWN, "down")
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_LEFT, "left")
   commandMap:mapCommandToKeyboardKey(CommandType.EMOTE_SPIN, "space")
-  
+
   self.playerController:setCommandMap(commandMap)
 end
 
-function Class:run()
+function Class:start()
   local secretary = self.secretary
   local connections = self.connections
   local commandMap = self.commandMap
   local entities = self.entities
-  
+
+  self.player = Player():registerWithSecretary(secretary)
+  local player = self.player
+  local px, py = player:getPosition()
+  local pw, ph = player:getSize()
+
+  self.camera = Camera():registerWithSecretary(secretary)
+  local camera = self.camera
+  camera:setSubject(player)
+  camera:jumpTo(px + pw / 2, py + ph / 2)
+
   -- Hook up entity manager to secretary
   entities:registerWithSecretary(secretary)
   
@@ -58,7 +70,7 @@ function Class:run()
     EventType.SHUTDOWN)
   
   -- Hook command map up to secretary
-  rootSecretary:registerEventListener(
+  secretary:registerEventListener(
     self.commandMap,
     function(commandMap, key, scancode, isrepeat)
       if isrepeat == false then
@@ -82,11 +94,15 @@ function Class:stop()
   local connections = self.connections
   local entities = self.entities
   local commandMap = self.commandMap
+  local player = self.player
+  local camera = self.camera
   
-  secretary:remove(entities)
-  secretary:remove(connections)
-  secretary:remove(self)
-  secretary:remove(commandMap)
+  entities:destroy()
+  connections:destroy()
+  self:destroy()
+  commandMap:destroy()
+  player:destroy()
+  camera:destroy()
 end
 
 
@@ -97,9 +113,9 @@ function Class:onStep()
   
   if connection
       and connection.status == ConnectionStatus.CONNECTING
-      and self.lastSpinTime < time - 2 then
+      and self.lastSpinTime < time - 1.75 then
     self.lastSpinTime = time
-    player:spin()
+    self.player:spin()
   end
 end
 
@@ -111,7 +127,7 @@ function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
   
   -- Give local player control when connected
   if server.status == ConnectionStatus.CONNECTED then
-    self.playerController:setPlayer(player)
+    self.playerController:setPlayer(self.player)
   else
     self.playerController:setPlayer(nil)
   end
