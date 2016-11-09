@@ -1,30 +1,23 @@
-require "common/class"
+require "Game"
 require "Camera"
 require "Player"
 require "Secretary"
 require "ClientConnectionManager"
-require "NetworkedEntityManager"
 require "CommandMap"
 require "LocalPlayerController"
 
-ClientGame = buildClass()
+ClientGame = buildClass(Game)
 local Class = ClientGame
 
 function Class:_init(secretary, connectionManager, entityManager)
-  Class.superclass._init(self)
-  assertType(secretary, "secretary", Secretary)
-  assertType(connectionManager, "connectionManager", ClientConnectionManager)
-  assertType(entityManager, "entityManager", NetworkedEntityManager)
-
-  self.secretary = secretary
-  self.connections = connectionManager
-  self.entities = entityManager
+  Class.superclass._init(self, secretary, connectionManager, entityManager)
+  assertType(connectionManager, ClientConnectionManager)
 
   -- Register for network callbacks
   self.connections:registerConnectionStatusListener(
       self,
       self.onConnectionStatusChanged)
-  
+
   self.lastSpinTime = love.timer.getTime()
   self.playerController = LocalPlayerController()
 
@@ -41,10 +34,10 @@ function Class:_init(secretary, connectionManager, entityManager)
 end
 
 function Class:start()
-  local secretary = self.secretary
-  local connections = self.connections
+  Class.superclass.start(self)
+  local secretary = self:getSecretary()
+  local connections = self:getConnectionManager()
   local commandMap = self.commandMap
-  local entities = self.entities
 
   self.player = Player():registerWithSecretary(secretary)
   local player = self.player
@@ -56,19 +49,6 @@ function Class:start()
   camera:setSubject(player)
   camera:jumpTo(px + pw / 2, py + ph / 2)
 
-  -- Hook up entity manager to secretary
-  entities:registerWithSecretary(secretary)
-  
-  -- Hook up connection manager to secretary.
-  secretary:registerEventListener(
-    connections,
-    connections.receiveAllMessages,
-    EventType.PRE_STEP)
-  secretary:registerEventListener(
-    connections,
-    connections.terminateAllConnections,
-    EventType.SHUTDOWN)
-  
   -- Hook command map up to secretary
   secretary:registerEventListener(
     self.commandMap,
@@ -78,31 +58,26 @@ function Class:start()
       end
     end,
     EventType.KEYBOARD_DOWN)
-  
+
   -- Hook up self to secretary
-  secretary:registerEventListener(
-    self,
-    self.onStep,
-    EventType.STEP)
-  
+  secretary:registerEventListener(self, self.onStep, EventType.STEP)
+
   -- Initialize connection to server
   connections:connectToServer()
+
+  return self
 end
 
 function Class:stop()
-  local secretary = self.secretary
-  local connections = self.connections
-  local entities = self.entities
+  Class.superclass.stop(self)
   local commandMap = self.commandMap
   local player = self.player
   local camera = self.camera
-  
-  entities:destroy()
-  connections:destroy()
   self:destroy()
   commandMap:destroy()
   player:destroy()
   camera:destroy()
+  return self
 end
 
 
@@ -113,7 +88,7 @@ function Class:onStep()
   
   if connection
       and connection.status == ConnectionStatus.CONNECTING
-      and self.lastSpinTime < time - 1.75 then
+      and self.lastSpinTime < time - 2 then
     self.lastSpinTime = time
     self.player:spin()
   end

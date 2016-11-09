@@ -10,11 +10,11 @@ require "CustomNetworkedEntityManager"
 local connection
 
 function love.load()
+  local secretary = LoveSecretary()
+      :captureLoveEvents()
   local connection = ClientConnectionManager()
-  
-  game = ClientGame(
-      LoveSecretary():captureLoveEvents(),
-      connection,
-      CustomNetworkedEntityManager(connection))
-  game:start()
+  local entityManager = CustomNetworkedEntityManager(connection)
+      :registerWithSecretary(secretary)
+  local game = ClientGame(secretary, connection, entityManager)
+      :start()
 end
