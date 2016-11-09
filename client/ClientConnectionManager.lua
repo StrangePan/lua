@@ -17,6 +17,8 @@ function Class:_init()
   -- Constant values
   self.serverAddress = '127.0.0.1'
   self.serverPort = 25565
+  
+  self.playerId = nil
 end
 
 function Class:connectToServer()
@@ -29,4 +31,15 @@ end
 --
 function Class:getServerConnection()
   return self:getConnection(self.serverAddress, self.serverPort)
+end
+
+--
+-- Handle connection to server.
+--
+function Class:onReceiveConnectionAck(message, address, port)
+  Class.superclass.onReceiveConnectionAck(self, message, address, port)
+  if address ~= self.serverAddress or port ~= self.serverPort then
+    return
+  end
+  self.playerId = message.pid
 end

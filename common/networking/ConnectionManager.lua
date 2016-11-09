@@ -378,7 +378,7 @@ function Class:onReceiveConnectionInit(message, address, port)
   local id = connection.id
   print("connection request received from "..id.." @ "..address..":"..port)
   connection.lastReceivedTime = love.timer.getTime()
-  self:sendMessage(messages.connectionAck(), id)
+  self:sendMessage(messages.connectionAck(id), id)
   self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
 end
 

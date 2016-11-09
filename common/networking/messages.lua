@@ -10,9 +10,10 @@ function messages.connectionInit()
   }
 end
 
-function messages.connectionAck()
+function messages.connectionAck(playerId)
   return {
     type=MessageType.CONNECT_ACK,
+    pid=playerId,
   }
 end
 
@@ -68,6 +69,16 @@ function messages.entityUpdate.create(id, entityType, params)
     type=MessageType.ENTITY_UPDATE,
     neid = id,
     utype = EntityUpdateType.CREATING,
+    etype = entityType,
+    params = params,
+  }
+end
+
+function messages.entityUpdate.sync(id, entityType, params)
+  return {
+    type=MessageType.ENTITY_UPDATE,
+    neid = id,
+    utype = EntityUpdateType.SYNCHRONIZING,
     etype = entityType,
     params = params,
   }

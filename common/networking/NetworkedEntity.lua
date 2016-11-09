@@ -118,10 +118,7 @@ function Class.createNewInstance(manager, id, entityType, ...)
 
   -- Instantiate and return new instance using given arguments.
   return registeredEntities[entityType].createNewInstance(
-      manager,
-      id,
-      entityType,
-      ...)
+      manager, id, entityType, ...)
 end
 
 

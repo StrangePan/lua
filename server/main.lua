@@ -5,7 +5,6 @@ require "ServerGame"
 require "NetworkedEntityType"
 require "ServerConnectionManager"
 require "ServerNetworkedEntityManager"
-require "Wall"
 
 function love.load()
   local secretary = LoveSecretary()

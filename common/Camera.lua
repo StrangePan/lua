@@ -42,6 +42,16 @@ function Class:jumpTo(x, y)
 end
 
 --
+-- Immediately moves camera to be centered on the specified subject.
+--
+function Class:jumpToSubject(subject)
+  assertType(subject, "subject", PhysObject)
+  local px, py = subject:getPosition()
+  local pw, ph = subject:getSize()
+  self:jumpTo(px + pw / 2, py + ph / 2)
+end
+
+--
 -- Sets the Camera subject for this camera to track or `nil` to remove the
 -- current subject. Must be of type PhysObject.
 --

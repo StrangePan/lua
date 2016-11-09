@@ -8,27 +8,39 @@ ServerNetworkedEntityManager = buildClass(CustomNetworkedEntityManager)
 local Class = ServerNetworkedEntityManager
 
 function Class:_init(connectionManager)
-  assertType(connectionManager, "connectionManager", ServerConnectionManager)
   Class.superclass._init(self, connectionManager)
+  assertType(connectionManager, "connectionManager", ServerConnectionManager)
+  connectionManager:registerConnectionStatusListener(
+    self,
+    self.onConnectionStatusChanged)
 end
 
+--
+-- Sends entity updates when connection status changes.
+--
 function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
-  Class.superclass.onConnectionStatusChanged(
-      self,
-      manager,
-      connectionId,
-      oldStatus)
   local newStatus = manager:getConnection(connectionId).status
-  if newStatus == ConnectionStatus.CONNECTED
-      and oldStatus ~= ConnectionStatus.STALLED then
-    for entity in self:allEntities() do
-      self.connectionManager:sendMessageWithAck(
-          messages.entityUpdate.create(
-              entity:getNetworkId(),
-              entity:getEntityType(),
-              entity:getInstantiationParams()),
-          self:buildEntityChannelString(entity),
-          connectionId)
+  if newStatus == ConnectionStatus.CONNECTED then
+    if oldStatus == ConnectionStatus.STALLED then
+      for entity in self:allEntities() do
+        self.connectionManager:sendMessageWithAck(
+            messages.entityUpdate.sync(
+                entity:getNetworkId(),
+                entity:getEntityType(),
+                entity:getSynchronizedState()),
+            self:buildEntityChannelString(entity),
+            connectionId)
+      end
+    else
+      for entity in self:allEntities() do
+        self.connectionManager:sendMessageWithAck(
+            messages.entityUpdate.create(
+                entity:getNetworkId(),
+                entity:getEntityType(),
+                entity:getInstantiationParams()),
+            self:buildEntityChannelString(entity),
+            connectionId)
+      end
     end
   end
 end

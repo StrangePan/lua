@@ -4,6 +4,7 @@ require "Entity"
 require "NetworkedEntityType"
 require "EntityUpdateType"
 require "NetworkedEntity"
+require "EventCoordinator"
 
 local F_NETWORK_ENTITY_ID = "neid"
 local F_ENTITY_UPDATE_TYPE = "utype"
@@ -26,14 +27,17 @@ function Class:_init(connectionManager)
   self.entities = {}
   self.entityIds = {n = 0}
   self.nextId = 1
-  
+
   self.connectionManager:registerMessageListener(
     MessageType.ENTITY_UPDATE,
     self,
     self.onReceiveEntityUpdate)
-  self.connectionManager:registerConnectionStatusListener(
-    self,
-    self.onConnectionStatusChanged)
+
+  self.entityCreateCoordinators = EventCoordinator()
+  self.entityDeleteCoordinators = EventCoordinator()
+
+  -- Remove connected entities.
+  self.connections = {n = 0}
 end
 
 --
@@ -91,12 +95,10 @@ function Class:createEntityWithParams(id, entityType, params)
   
   -- Instantiate a new entity and hook everything up
   local entity = NetworkedEntity.createNewInstanceWithParams(
-      self,
-      id,
-      entityType,
-      params)
+      self, id, entityType, params)
   self.entities[id] = entity
   entity:getLocalEntity():registerWithSecretary(self:getSecretary())
+  self:notifyEntityCreateListeners(entity)
   return entity
 end
 
@@ -109,16 +111,13 @@ end
 function Class:spawnEntity(entityType, ...)
   assert(NetworkedEntityType.fromId(entityType),
       "entityType: "..entityType.." is not a valid NetworkedEntityType")
-  
+
   -- Generate an ID.
   local id = self:claimId(self:getNextId())
-  
+
   -- Instantiate a new entity and hook everything up.
   local entity = NetworkedEntity.createNewInstance(
-      self,
-      id,
-      entityType,
-      ...)
+      self, id, entityType, ...)
   self.entities[id] = entity
   entity:getLocalEntity():registerWithSecretary(self:getSecretary())  
   self.connectionManager:broadcastMessageWithAck(messages.entityUpdate.create(
@@ -126,6 +125,7 @@ function Class:spawnEntity(entityType, ...)
           entity:getEntityType(),
           entity:getInstantiationParams()),
       self:buildEntityChannelString(entity))
+  self:notifyEntityCreateListeners(entity)
   return entity
 end
 
@@ -147,6 +147,7 @@ function Class:deleteEntity(entity)
     end
   end
   entity:delete()
+  self:notifyEntityDeleteListeners(entity)
 end
 
 --
@@ -240,12 +241,6 @@ function Class:onReceiveEntityInc(message, connectionId)
   entity:performIncrementalUpdate(message[F_INC_DATA])
 end
 
---
--- Handles connection status changing for a connection.
---
-function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
-end
-
 function Class:allEntities()
   local nextId = self:allEntityIds()
   return function()
@@ -273,4 +268,147 @@ end
 function Class:buildEntityChannelString(entity)
   entity = self:getEntity(entity)
   return string.format("entity:%s", entity:getNetworkId())
+end
+
+--
+-- Adds a connection ID to receive entity updates.
+--
+function Class:addConnection(connectionId)
+  assertType(connectionId, "number")
+  for knownId in self:allConnectionIds() do
+    if knownId == connectionId then
+      return
+    end
+  end
+  
+  self.connections.n = self.connections.n + 1
+  self.connections[self.connections.n] = connectionId
+end
+
+--
+-- Removes a connection from receiving entity updates.
+--
+function Class:removeConnection(connectionId)
+  assertType(connectionId, "number")
+  for i = 1,self.connections.n do
+    if self.connections[i] == connectionId then
+      self.connections[i] = nil
+      break
+    end
+  end
+end
+
+--
+-- Iterator function that automatically cleans out removed connections.
+--
+function Class:allConnectionIds()
+  local i = 0
+  local j = 0
+  return function()
+    i = i + 1
+    j = j + 1
+    while not self.connections[j] and i <= self.connections.n do
+      self.connections.n = self.connections.n - 1
+      j = j + 1
+    end
+    if i ~= j then
+      self.connections[i] = self.connections[j]
+      self.connections[j] = nil
+    end
+    return self.connections[i]
+  end
+end
+
+--
+-- Listeners receive the NetworkedEntityManager triggering event and the entity
+-- being created. Only receives notifications for the supplied entityType or
+-- all entities if entityType is nil.
+--
+function Class:registerEntityCreateListener(listener, callback, entityType)
+  self:registerEntityEventListener(
+      listener, callback, entityType, self.entityCreateCoordinators)
+end
+
+--
+-- Listeners receive the NetworkedEntityManager triggering event and the entity
+-- being destroyed. Only receives notifications for the supplied entityType or
+-- all entities if entityType is nil.
+--
+function Class:registerEntityDeleteListener(listener, callback, entityType)
+  self:registerEntityEventListener(
+      listener, callback, entityType, self.entityDeleteCoordinators)
+end
+
+function Class:registerEntityEventListener(
+    listener, callback, entityType, coordinators)
+  if entityType then
+    assert(NetworkedEntityType.fromId(entityType),
+        "Undefined NetworkedEntityType "..entityType)
+  else
+    entityType = "any"
+  end
+  coordinator = coordinators[entityType]
+  if not coordinator then
+    coordinator = EventCoordinator()
+    coordinators[entityType] = coordinator
+  end
+  coordinator:registerListener(listener, callback)
+end
+
+--
+-- Notifies listeners of entity creation.
+--
+function Class:notifyEntityCreateListeners(entity)
+  self:notifyEntityEventListeners(entity, self.entityCreateCoordinators)
+end
+
+--
+-- Notifies listeners of entity deletion.
+--
+function Class:notifyEntityDeleteListeners(entity)
+  self:notifyEntityEventListeners(entity, self.entityDeleteCoordinators)
+end
+
+function Class:notifyEntityEventListeners(entity, coordinators)
+  entity = self:getEntity(entity)
+  if not entity then return end
+  local entityType = entity:getEntityType()
+  local coordinator = coordinators["any"]
+  if coordinator then
+    coordinator:notifyListeners(self, entity)
+  end
+  coordinator = coordinators[entityType]
+  if coordinator then
+    coordinator:notifyListeners(self, entity)
+  end
+end
+
+--
+-- Removes a registered listener.
+--
+function Class:unregisterEntityCreateListener(listener, callback)
+  self:unregisterEntityEventListener(
+      listener, callback, self.entityCreateCoordinator)
+end
+
+--
+-- Removes a registered listener.
+--
+function Class:unregisterEntityDeleteListener(listener, callback)
+  self:unregisterEntityEventListener(
+      listener, callback, self.entityDeleteCoordinator)
+end
+
+function Class:unregisterEntityEventListeners(listener, callback, coordinators)
+  entity = self:getEntity(entity)
+  if not entity then return end
+  local entityType = entity:getEntityType()
+  local coordinator = coordinators["any"]
+  if coordinator then
+    coordinator:unregisterListeners(listener, callback)
+  end
+  coordinator = coordinators[entityType]
+  if coordinator then
+    coordinator:unreigsterListeners(listener, callback)
+  end
 end
