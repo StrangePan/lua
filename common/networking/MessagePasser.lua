@@ -6,7 +6,7 @@ require "messages"
 require "Queue"
 require "Serializer"
 
-local PRINT_MESSAGES = false
+local PRINT_MESSAGES = true
 
 --
 -- Class that handles the sending and receiving of messages of UDP and
@@ -46,7 +46,7 @@ function Class:sendMessage(message, address, port)
   end
   self.outgoingMessages[outString]:push(
       {message=message, address=address, port=port})
-  if PRINT_MESSAGES then print("sent", Serializer.serialize(message)) end
+  if PRINT_MESSAGES then print("enqueued", Serializer.serialize(message)) end
 end
 
 --
@@ -136,6 +136,8 @@ function Class:releaseMessageBundle()
     end
     if outgoing[1] then
       local data = Serializer.serialize(messages.bundle(unpack(outgoing)))
+      print("sending bundle", address..":"..port, "("..string.len(data)..")")
+      print(data)
       self.udp:sendto(data, address, port)
     end
   end

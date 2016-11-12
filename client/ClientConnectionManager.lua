@@ -16,7 +16,7 @@ function Class:_init()
   Class.superclass._init(self, math.random(25566, 25666))
 
   -- Constant values
-  self.serverAddress = '192.168.0.13'
+  self.serverAddress = '74.51.150.17'
   self.serverPort = 25565
   
   self.playerId = nil
