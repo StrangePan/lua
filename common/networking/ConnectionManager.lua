@@ -3,6 +3,8 @@ require "MessagePasser"
 require "Connection"
 require "ConnectionStatus"
 
+local PRINT_DEBUG = false
+
 --
 -- Object that manages and maintains connections to other program instances,
 -- initiating connections, sendings periodic pings, and provides mechanisms
@@ -70,11 +72,11 @@ function Class:receiveAllMessages()
     elseif connection.status == ConnectionStatus.CONNECTED and
         time >= connection.lastReceivedTime + 5 then
       self:setConnectionStatus(connection, ConnectionStatus.STALLED)
-      print("connection "..id.." stalled")
+      if PRINT_DEBUG then print("connection "..id.." stalled") end
     elseif connection.status == ConnectionStatus.STALLED and
         time >= connection.lastReceivedTime + 30 then
       self:terminateConnection(id, true)
-      print("connection timed out")
+      if PRINT_DEBUG then print("connection timed out") end
     end
   end
 end
@@ -159,7 +161,7 @@ function Class:deleteConnection(connection)
     end
   end
   self.connectionIds[connectionString] = nil
-  print("disconnected from "..id.." @ "..connectionString)
+  if PRINT_DEBUG then print("disconnected from "..id.." @ "..connectionString) end
 end
 
 --
@@ -188,7 +190,7 @@ function Class:getConnection(...)
   if self.connections[id] then
     return self.connections[id]
   else
-    print("No connection with ID "..id)
+    if PRINT_DEBUG then print("No connection with ID "..id) end
   end
 end
 
@@ -358,7 +360,7 @@ function Class:sendConnectionInit(connection)
   if not connection then return end
   
   local id = connection.id
-  print("attempting to connect to "..id.." @ "..connection.address..":"..connection.port)
+  if PRINT_DEBUG then print("attempting to connect to "..id.." @ "..connection.address..":"..connection.port) end
   self:setConnectionStatus(connection, ConnectionStatus.CONNECTING)
   self:sendMessage(messages.connectionInit(), id)
 end
@@ -417,7 +419,7 @@ function Class:onReceiveConnectionInit(message, address, port)
   if not connection then return end
   
   local id = connection.id
-  print("connection request received from "..id.." @ "..address..":"..port)
+  if PRINT_DEBUG then print("connection request received from "..id.." @ "..address..":"..port) end
   connection.lastReceivedTime = love.timer.getTime()
   self:sendMessage(messages.connectionAck(id), id)
   self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
@@ -434,7 +436,7 @@ function Class:onReceiveConnectionAck(message, address, port)
   -- Ignore message if not looking to connect.
   if connection.status ~= ConnectionStatus.CONNECTING then return end
   
-  print("connected to instance "..connection.id.." at "..connection.address..":"..connection.port)
+  if PRINT_DEBUG then print("connected to instance "..connection.id.." at "..connection.address..":"..connection.port) end
   self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
 end
 

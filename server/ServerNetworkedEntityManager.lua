@@ -5,7 +5,7 @@ require "ServerConnectionManager"
 require "ConnectionStatus"
 require "Serializer"
 
-local PRINT_DEBUG = true
+local PRINT_DEBUG = false
 
 local F_NETWORK_ENTITY_ID = "neid"
 local F_ENTITY_UPDATE_TYPE = "utype"
