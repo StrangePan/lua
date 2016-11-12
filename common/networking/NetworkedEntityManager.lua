@@ -252,7 +252,7 @@ function Class:onReceiveEntitySync(message, connectionId)
   local entity = self:getEntity(id)
   if not entity then return end
   
-  entity:setSynchronizedData(message[F_SYNC_DATA])
+  entity:setSynchronizedState(message[F_SYNC_DATA])
 end
 
 --
