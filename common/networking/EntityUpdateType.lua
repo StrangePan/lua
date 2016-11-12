@@ -1,6 +1,6 @@
 require "common/enum"
 
-EntityUpdateType = {
+EntityUpdateType = buildEnum(
   -- When an entity is created, its initial state communicated.
   "CREATING",
 
@@ -14,6 +14,8 @@ EntityUpdateType = {
   -- When an entity incremental update is triggered, such as a player moving
   -- or a wall changing color.
   "INCREMENTING",
-}
 
-buildEnum(EntityUpdateType)
+  -- When an entity incremental update is triggered but the processing of which
+  -- does not meet expectations, this message can be used to indicate to remote
+  -- entities that the local copy is out of sync.
+  "OUT_OF_SYNC")

@@ -2,7 +2,7 @@ require "common/enum"
 
 -- Enum
 -- Defines depth for drawing layers
-DrawLayer = {
+DrawLayer = buildEnum(
   "BACKGROUND",       -- wallpapers, scenery
   "BACKGROUND_PROPS", -- props, behind actors
   "MAIN",             -- where all the action happens
@@ -11,7 +11,4 @@ DrawLayer = {
   "FOREGROUND",       -- more decoration
   "HUD",              -- meters and stats and stuff
   "UI",               -- only the most important things
-  "OVERLAY",          -- higher than even the menu
-}
-
-buildEnum(DrawLayer)
+  "OVERLAY")          -- higher than even the menu

@@ -183,6 +183,7 @@ function Class:registerChildSecretary(child)
   self:registerEventListener(child, child.onDraw, EventType.DRAW)
   self:registerEventListener(child, child.onPreStep, EventType.PRE_STEP)
   self:registerEventListener(child, child.onStep, EventType.STEP)
+  self:registerEventListener(child, child.onPreStep, EventType.POST_STEP)
   self:registerEventListener(child, child.onPrePhysics, EventType.PRE_PHYSICS)
   self:registerEventListener(child, child.onPhysics, EventType.PHYSICS)
   self:registerEventListener(child, child.onPostPhysics, EventType.POST_PHYSICS)
@@ -464,6 +465,12 @@ end
 function Class:onStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.STEP])
+end
+
+-- Called every game step
+function Class:onPostStep()
+  if self.paused then return end
+  self:executeCallbacks(self.callbacks[EventType.POST_STEP])
 end
 
 -- Called before every physics event

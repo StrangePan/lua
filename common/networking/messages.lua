@@ -29,25 +29,9 @@ function messages.ping()
   }
 end
 
-function messages.mapStatus(num, map)
-  return {
-    type=MessageType.MAP_STATUS,
-    num,
-    map=map:getStatus()
-  }
-end
-
 function messages.ack(channel, ackNum)
   return {
     type=MessageType.ACK,
-    c=channel,
-    n=ackNum
-  }
-end
-
-function messages.ackReset(channel, ackNum)
-  return {
-    type=MessageType.ACK_RESET,
     c=channel,
     n=ackNum
   }
@@ -62,32 +46,66 @@ function messages.ackRequest(channel, ackNum, message)
   }
 end
 
+function messages.ackRequestReset(channel, ackNum, message)
+  return {
+    type=MessageType.ACK_REQUEST_RESET,
+    c=channel,
+    n=ackNum,
+    m=message,
+  }
+end
+
 messages.entityUpdate = {}
 
 function messages.entityUpdate.create(id, entityType, params)
   return {
     type=MessageType.ENTITY_UPDATE,
-    neid = id,
-    utype = EntityUpdateType.CREATING,
-    etype = entityType,
-    params = params,
+    neid=id,
+    utype=EntityUpdateType.CREATING,
+    etype=entityType,
+    params=params,
+  }
+end
+
+function messages.entityUpdate.delete(id)
+  return {
+    type=MessageType.ENTITY_UPDATE,
+    neid=id,
+    utype=EntityUpdateType.DESTROYING,
   }
 end
 
 function messages.entityUpdate.sync(id, entityType, params)
   return {
     type=MessageType.ENTITY_UPDATE,
-    neid = id,
-    utype = EntityUpdateType.SYNCHRONIZING,
-    etype = entityType,
-    params = params,
+    neid=id,
+    utype=EntityUpdateType.SYNCHRONIZING,
+    etype=entityType,
+    params=params,
+  }
+end
+
+function messages.entityUpdate.inc(id, params)
+  return {
+    type=MessageType.ENTITY_UPDATE,
+    neid=id,
+    utype=EntityUpdateType.INCREMENTING,
+    params=params,
+  }
+end
+
+function messages.entityUpdate.outOfSync(id)
+  return {
+    type=MessageType.ENTITY_UPDATE,
+    neid=id,
+    utype=EntityUpdateType.OUT_OF_SYNC,
   }
 end
 
 -- bundles multiple messages into a single message bundle
 function messages.bundle(...)
   local msgs = {...}
-  local bundle = {type = MessageType.CLIENT_CONNECT_INIT}
+  local bundle = {type = MessageType.BUNDLE}
   for i,msg in ipairs(msgs) do
     bundle[i] = msg
   end

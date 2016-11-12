@@ -1,6 +1,8 @@
 require "NetworkedActor"
 require "Player"
 
+local PRINT_DEBUG = false
+
 -- Message fields
 local F_OWNER = "owner"
 local F_X = "x"
@@ -19,6 +21,7 @@ local Class = NetworkedPlayer
 -- Instantiates a Player and performs necessary setup.
 --
 function Class.createNewInstanceWithParams(manager, id, entityType, params)
+  if PRINT_DEBUG then print("NetworkedPlayer.createNewInstanceWithParams") end
   local ownerId = assertType(params[F_OWNER], "number")
   return Class(manager, id, entityType, params, Player(), ownerId)
 end

@@ -2,10 +2,11 @@ require "common/enum"
 
 -- Enum
 -- Event types; used for event registration
-EventType = {
+EventType = buildEnum(
   "DRAW",
   "PRE_STEP",
   "STEP",
+  "POST_STEP",
   "PRE_PHYSICS",
   "PHYSICS",
   "POST_PHYSICS",
@@ -22,7 +23,4 @@ EventType = {
   "WINDOW_RESIZE",
   "PRE_DRAW",
   "DESTROY",
-  "SHUTDOWN"
-}
-
-buildEnum(EventType)
+  "SHUTDOWN")

@@ -6,6 +6,8 @@ require "messages"
 require "Queue"
 require "Serializer"
 
+local PRINT_MESSAGES = false
+
 --
 -- Class that handles the sending and receiving of messages of UDP and
 -- includes mechanisms for registering for message receipt callbacks
@@ -21,6 +23,7 @@ function Class:_init(udp)
   self.inbox = {}
   self.outbox = {}
   self.coordinators = {}
+  self.outgoingMessages = {}
 end
 
 --
@@ -37,8 +40,13 @@ function Class:sendMessage(message, address, port)
   assertType(message, "message", "table")
   assertType(address, "address", "string")
   assertType(port, "port", "number")
-  local data = Serializer.serialize(message)
-  self.udp:sendto(data, address, port)
+  local outString = string.format("%s:%s", address, port)
+  if not self.outgoingMessages[outString] then
+    self.outgoingMessages[outString] = Queue()
+  end
+  self.outgoingMessages[outString]:push(
+      {message=message, address=address, port=port})
+  if PRINT_MESSAGES then print("sent", Serializer.serialize(message)) end
 end
 
 --
@@ -65,6 +73,31 @@ function Class:sendMessageWithAck(message, channel, address, port)
 end
 
 --
+-- Sends message object to the specified IP address and port number, along
+-- with a request that the receiver send back an acknowledgement of receipt,
+-- blocking any other outgoing messages on the provided channel until the
+-- client sends acknowledgement.
+--
+function Class:sendMessageWithAckReset(message, channel, address, port)
+  assertType(message, "message", "table")
+  assertType(channel, "channel", "string")
+  assertType(address, "address", "string")
+  assertType(port, "port", "number")
+  local ackKey = buildAckKey(address, port, channel)
+  local outbox = self.outbox[ackKey]
+  if not outbox then
+    outbox = {ackNum = 0, queue = Queue()}
+    self.outbox[ackKey] = outbox
+  end
+  outbox.ackNum = outbox.ackNum + 1
+  outbox.queue:clear()
+  local messageWithAck = messages.ackRequestReset(
+    channel, outbox.ackNum, message)
+  outbox.queue:push(messageWithAck)
+  self:sendMessage(messageWithAck, address, port)
+end
+
+--
 -- Processes all incoming messages and notifies registered listeners as
 -- appropriate.
 --
@@ -74,6 +107,7 @@ function Class:receiveAllMessages()
     if data then
       message = Serializer.deserialize(data)
       if message ~= nil then
+        if PRINT_MESSAGES then print("received", data) end
         self.processed = {}
         self:processMessage(message, addr, port)
       else
@@ -81,6 +115,31 @@ function Class:receiveAllMessages()
       end
     end
   until data == nil
+end
+
+--
+-- Sends multiple messages in a bundle that have been queued up by various
+-- calls to the `sendMessage` functions.
+--
+function Class:releaseMessageBundle()
+  for _,outgoingMessages in pairs(self.outgoingMessages) do
+    local address
+    local port
+    local outgoing = {}
+    local i = 1
+    while not outgoingMessages:empty() do
+      local message = outgoingMessages:pop()
+      address = message.address
+      port = message.port
+      outgoing[i] = message.message
+      i = i + 1
+    end
+    if outgoing[1] then
+      local data = Serializer.serialize(messages.bundle(unpack(outgoing)))
+      self.udp:sendto(data, address, port)
+    end
+  end
+  self.outgoingMessages = {}
 end
 
 --
@@ -98,7 +157,7 @@ function Class:processMessage(message, addr, port)
   if message.type == MessageType.BUNDLE then
     -- Split apart bundles and process each contained message
     for i,submessage in ipairs(message) do
-      self:processMessage(message, addr, port)
+      self:processMessage(submessage, addr, port)
     end
     
   elseif message.type == MessageType.ACK then
@@ -136,21 +195,28 @@ function Class:processMessage(message, addr, port)
     -- Reply with acknowledgement
     self:sendMessage(messages.ack(channel, inbox.ackNum), addr, port)
     
-  elseif message.type == MessageType.ACK_RESET then
-    -- Reset acknowledgements for given inbox channel
+  elseif message.type == MessageType.ACK_REQUEST_RESET then
+    -- Unwrap acknowledgements requests and process contained message
+    -- while resetting acknowledgements for given inbox channel
     local channel = message.c
     local ackNum = message.n
+    local innerMessage = message.m
     local ackKey = buildAckKey(addr, port, channel)
     local inbox = self.inbox[ackKey]
     if inbox == nil then
       inbox = {ackNum = 0}
       self.inbox[ackKey] = inbox
     end
-    inbox.ackNum = ackNum
+    
+    if ackNum > inbox.ackNum then
+      inbox.ackNum = ackNum
+      self:processMessage(innerMessage, addr, port)
+    else
+      notifyListeners = false
+    end
     
     -- Reply with acknowledgement
     self:sendMessage(messages.ack(channel, inbox.ackNum), addr, port)
-    
   end
   
   -- Notify listeners of message received unless otherwise specified not to

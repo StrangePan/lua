@@ -5,7 +5,7 @@ require "Player"
 require "Wall"
 require "ClientGame"
 require "ClientConnectionManager"
-require "CustomNetworkedEntityManager"
+require "ClientNetworkedEntityManager"
 
 local connection
 
@@ -13,8 +13,17 @@ function love.load()
   local secretary = LoveSecretary()
       :captureLoveEvents()
   local connection = ClientConnectionManager()
-  local entityManager = CustomNetworkedEntityManager(connection)
+  local entityManager = ClientNetworkedEntityManager(connection)
       :registerWithSecretary(secretary)
   local game = ClientGame(secretary, connection, entityManager)
       :start()
+
+  secretary:registerEventListener(
+      connection.passer,
+      connection.passer.releaseMessageBundle,
+      EventType.POST_STEP)
+  secretary:registerEventListener(
+      connection.passer,
+      connection.passer.releaseMessageBundle,
+      EventType.SHUTDOWN)
 end

@@ -27,6 +27,11 @@ function Class:_init(secretary, connectionManager, entityManager)
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_DOWN, "down")
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_LEFT, "left")
   commandMap:mapCommandToKeyboardKey(CommandType.EMOTE_SPIN, "space")
+
+  local connections = self:getConnectionManager()
+  connections:registerConnectionStatusListener(
+      self,
+      self.onConnectionStatusChanged)
 end
 
 function Class:start()
@@ -48,7 +53,7 @@ function Class:start()
   secretary:registerEventListener(
     self.commandMap,
     function(commandMap, key, scancode, isrepeat)
-      if isrepeat == false then
+      if not isrepeat then
         commandMap:onKeyboardInput(key)
       end
     end,
@@ -116,6 +121,7 @@ function Class:onPlayerCreate(entityManager, networkedPlayer)
       controller = controller,
       player = networkedPlayer,
     })
+  networkedPlayer:startBroadcastingUpdates()
   
   self.idleActor:destroy()
   
@@ -139,5 +145,57 @@ function Class:onPlayerDestroy(entityManager, networkedPlayer)
   
   if table.getn(self.localPlayers) == 0 then
     self.idleActor:registerWithSecretary(self:getSecretary())
+  end
+end
+
+function Class:onServerConnected(connectionId)
+  local entities = self:getEntityManager()
+  entities:addConnection(connectionId)
+end
+
+function Class:onServerStalled(connectionId)
+  for _,localPlayer in ipairs(self.localPlayers) do
+    localPlayer.controller:setPlayer(nil)
+    localPlayer.player:stopBroadcastingUpdates()
+  end
+end
+
+function Class:onServerReconnected(connectionId)
+  for _,localPlayer in ipairs(self.localPlayers) do
+    localPlayer.controller:setPlayer(localPlayer.player)
+    localPlayer.player:startBroadcastingUpdates()
+  end
+end
+
+function Class:onServerDisconnected(connectionId)
+  local entities = self:getEntityManager()
+  entities:removeConnection(connectionId)
+end
+
+--
+-- Handles a change in connection status.
+--
+function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
+  local connections = self:getConnectionManager()
+  local connection = connections:getConnection(connectionId)
+  if not connection then
+    return
+  end
+  
+  -- Only respond to connection events to the server
+  if connections:getServerConnection() ~= connection then
+    return
+  end
+  
+  -- Give local player control when connected
+  if connection.status == ConnectionStatus.CONNECTED
+      and oldStatus ~= ConnectionStatus.STALLED then
+    self:onServerConnected(connectionId)
+  elseif connection.status == ConnectionStatus.CONNECTED then
+    self:onServerReconnected(connectionId)
+  elseif connection.status == ConnectionStatus.STALLED then
+    self:onServerStalled(connectionId)
+  elseif connection.status == ConnectionStatus.DISCONNECTED then
+    self:onServerDisconnected(connectionId)
   end
 end

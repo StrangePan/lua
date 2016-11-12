@@ -14,4 +14,13 @@ function love.load()
       :registerWithSecretary(secretary)
   local game = ServerGame(secretary, connection, entityManager)
       :start()
+
+  secretary:registerEventListener(
+      connection.passer,
+      connection.passer.releaseMessageBundle,
+      EventType.POST_STEP)
+  secretary:registerEventListener(
+      connection.passer,
+      connection.passer.releaseMessageBundle,
+      EventType.SHUTDOWN)
 end

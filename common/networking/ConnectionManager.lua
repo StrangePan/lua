@@ -84,7 +84,11 @@ end
 -- messages to all conected instances.
 --
 function Class:terminateAllConnections()
+  local connections = {}
   for connection in self:allConnections() do
+    table.insert(connections, connection)
+  end
+  for _,connection in ipairs(connections) do
     self:terminateConnection(connection, true)
   end
 end
@@ -128,7 +132,7 @@ end
 --
 function Class:terminateConnection(connection, sendDisconnect)
   local connection = self:getConnection(connection)
-  if connection == nil then return end
+  if not connection then return end
   if sendDisconnect then
     assertType(sendDisconnect, "boolean")
     self:sendMessage(messages.disconnect(), connection)
@@ -260,15 +264,27 @@ end
 -- Sends a message object to all connections.
 --
 function Class:broadcastMessage(message)
-  return self:broadcastMessageWithAck(message, nil)
+  return self:sendMessage(message, unpack(self.connectionIds))
 end
 
 --
 -- Sends a message object to all connections along with a request that
 -- the recipients acknowledge receipt of the message, blocking further messages
--- on the same channel until the connections confirm that they have received this
--- one.
+-- on the same channel until the connections confirm that they have received
+-- this one.
 function Class:broadcastMessageWithAck(message, channel)
+  self:sendMessageWithAck(message, channel, unpack(self.connectionIds))
+end
+
+--
+-- Sends a message object to all connections along with a request that
+-- the recipients acknowledge receipt of the message, blocking further messages
+-- on the same channel until the connections confirm that they have received
+-- this one. The broadcasted messages will also skip any other pending
+-- acknowledgement requests and indicate that the receiver reset its internal
+-- acknowledgement tracker to synchronize with this message.
+--
+function Class:broadcastMessageWithAckReset(message, channel)
   self:sendMessageWithAck(message, channel, unpack(self.connectionIds))
 end
 
@@ -277,7 +293,7 @@ end
 -- may be a list of connection IDs to send the message to.
 --
 function Class:sendMessage(message, ...)
-  return self:sendMessageWithAck(message, nil, ...)
+  return self:sendMessageOfType("plain", message, nil, ...)
 end
 
 --
@@ -287,6 +303,29 @@ end
 -- this one.
 --
 function Class:sendMessageWithAck(message, channel, ...)
+  return self:sendMessageOfType("ack", message, channel, ...)
+end
+
+--
+-- Sends a message object to any number of connections along with a request that
+-- the recipients acknowledge receipt of the message, blocking further messages
+-- on the same channel until the connections confirm that they have received
+-- this one. This message will also skip any other pending acknowlegement
+-- requests and indicate that the receiver reset its internal acknowledgement
+-- tracker to synchronize with this message.
+--
+function Class:sendMessageWithAckReset(message, channel, ...)
+  return self:sendMessageOfType("reset", message, channel, ...)
+end
+
+--
+-- Internal function for sending messages. All message passing methods go
+-- through here. mtype is a string with the following valid values:
+-- "plain"
+-- "ack"
+-- "reset"
+--
+function Class:sendMessageOfType(mtype, message, channel, ...)
   local connections = {...}
   local time = love.timer.getTime()
   
@@ -301,10 +340,12 @@ function Class:sendMessageWithAck(message, channel, ...)
 
   -- Send messages to connections
   for _,connection in ipairs(connections) do
-    if channel then
-      self.passer:sendMessageWithAck(message, channel, connection.address, connection.port)
-    else
+    if mtype == "plain" then
       self.passer:sendMessage(message, connection.address, connection.port)
+    elseif mtype == "ack" then
+      self.passer:sendMessageWithAck(message, channel, connection.address, connection.port)
+    elseif mtype == "reset" then
+      self.passer:sendMessageWithAckReset(message, channel, connection.address, connection.port)
     end
   end
 end

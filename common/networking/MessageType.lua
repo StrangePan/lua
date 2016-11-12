@@ -1,16 +1,12 @@
 require "common/enum"
 
-MessageType = {
+MessageType = buildEnum(
   "BUNDLE",
   "CONNECT_INIT",
   "CONNECT_ACK",
   "DISCONNECT",
   "PING",
   "ACK",
-  "ACK_RESET",
   "ACK_REQUEST",
-  "ENTITY_UPDATE",
-  "CONTROL_ACTOR",
-}
-
-buildEnum(MessageType)
+  "ACK_REQUEST_RESET",
+  "ENTITY_UPDATE")

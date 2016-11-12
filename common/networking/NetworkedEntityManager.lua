@@ -5,13 +5,16 @@ require "NetworkedEntityType"
 require "EntityUpdateType"
 require "NetworkedEntity"
 require "EventCoordinator"
+require "Serializer"
+
+local PRINT_DEBUG = false
 
 local F_NETWORK_ENTITY_ID = "neid"
 local F_ENTITY_UPDATE_TYPE = "utype"
 local F_ENTITY_TYPE = "etype"
 local F_CREATE_PARAMS = "params"
-local F_SYNC_DATA = "sdata"
-local F_INC_DATA = "idata"
+local F_SYNC_DATA = "params"
+local F_INC_DATA = "params"
 
 --
 -- Maintains an internal list of entities that are connected to network
@@ -37,7 +40,8 @@ function Class:_init(connectionManager)
   self.entityDeleteCoordinators = EventCoordinator()
 
   -- Remove connected entities.
-  self.connections = {n = 0}
+  self.connections = {}
+  self.connectionIds = {}
 end
 
 --
@@ -47,7 +51,7 @@ end
 -- - Returns nil in all other cases.
 --
 function Class:getEntity(entity)
-  
+
   -- If parameter is already a NetworkedEntity
   if instanceOf(entity, NetworkedEntity) then
     
@@ -55,10 +59,13 @@ function Class:getEntity(entity)
     if self.entities[entity:getNetworkId()] == entity then
       return entity
     else
+      if PRINT_DEBUG then print("NetworkedEntityManager:getEntity f1", entity:getNetworkId()) end
       return nil -- Not managed by this instance; return nil.
     end
-  elseif instanceOf(entity, "number") then -- Search for entity by ID.
+  elseif type(entity) == "number" then -- Search for entity by ID.
     return self.entities[entity]
+  else
+    if PRINT_DEBUG then print("NetworkedEntityManager:getEntity f2", entity.." ("..type(entity)..")") end
   end
 end
 
@@ -120,11 +127,13 @@ function Class:spawnEntity(entityType, ...)
       self, id, entityType, ...)
   self.entities[id] = entity
   entity:getLocalEntity():registerWithSecretary(self:getSecretary())  
-  self.connectionManager:broadcastMessageWithAck(messages.entityUpdate.create(
+  self.connectionManager:sendMessageWithAckReset(
+      messages.entityUpdate.create(
           entity:getNetworkId(),
           entity:getEntityType(),
           entity:getInstantiationParams()),
-      self:buildEntityChannelString(entity))
+      self:buildEntityChannelString(entity),
+      unpack(self.connectionIds))
   self:notifyEntityCreateListeners(entity)
   return entity
 end
@@ -137,17 +146,37 @@ function Class:deleteEntity(entity)
   entity = self:getEntity(entity)
   if not entity then return end
   
+  local entityId = entity:getNetworkId()
+  local channelString = self:buildEntityChannelString(entity)
+  
   -- DELETE RECORD OF ENTITY BEFORE PROPOGATING DESTRUCTION CALL
   -- TO AVOID INFINITE RECURSION
-  self.entities[entity:getNetworkId()] = nil
+  self.entities[entityId] = nil
   for i = 1,self.entityIds.n do
-    if self.entityIds[i] == entity:getNetworkId() then
+    if self.entityIds[i] == entityId then
       self.entityIds[i] = nil
       break
     end
   end
   entity:delete()
+
+  -- Notify connected instances
+  self.connectionManager:sendMessageWithAckReset(
+      messages.entityUpdate.delete(entityId), channelString, unpack(self.connectionIds))
+
   self:notifyEntityDeleteListeners(entity)
+end
+
+--
+-- Sends an incremental entity update to all connected remote instances.
+--
+function Class:broadcastEntityUpdate(entity, update)
+  local recipients = {}
+  for recipient in self:allConnectionIds() do
+    table.insert(recipients, recipient)
+  end
+  local message = messages.entityUpdate.inc(entity:getNetworkId(), update)
+  self.connectionManager:sendMessage(message, unpack(recipients))
 end
 
 --
@@ -166,6 +195,8 @@ function Class:onReceiveEntityUpdate(message, connectionId)
     self:onReceiveEntitySync(message, connectionId)
   elseif t == EntityUpdateType.INCREMENTING then
     self:onReceiveEntityInc(message, connectionId)
+  elseif t == EntityUpdateType.OUT_OF_SYNC then
+    self:onReceiveEntityOutOfSync(message, connectionId)
   else
     print("Unknown entity update type "..t)
   end
@@ -196,7 +227,7 @@ end
 -- Handles an EntityUpdateType.DELETE message. Performs any necessary
 -- validation and cleanup and destroys the underlying entity.
 --
-function Class:onReceiveEntityDelete(message, connectionId)
+function Class:onReceiveEntityDestroy(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
 
   -- Verify that the entity already exists. If not, cancel; there's nothing
@@ -238,7 +269,29 @@ function Class:onReceiveEntityInc(message, connectionId)
   local entity = self:getEntity(id)
   if not entity then return end
   
-  entity:performIncrementalUpdate(message[F_INC_DATA])
+  local inSync = entity:performIncrementalUpdate(message[F_INC_DATA])
+
+  if not inSync then
+    self.connectionManager:sendMessage(
+        messages.entityUpdate.outOfSync(entity:getNetworkId()),
+        connectionId)
+  end
+end
+
+--
+-- Handles an EntityUpdateType.OUT_OF_SYNC message. Sends the current state of
+-- the entity.
+--
+function Class:onReceiveEntityOutOfSync(message, connectionId)
+  local id = message[F_NETWORK_ENTITY_ID]
+  local entity = self:getEntity(id)
+
+  self.connectionManager:broadcastMessageWithAckReset(
+      messages.entityUpdate.sync(
+          entity:getNetworkId(),
+          entity:getEntityType(),
+          entity:getInstantiationParams()),
+      self:buildEntityChannelString(entity))
 end
 
 function Class:allEntities()
@@ -275,14 +328,12 @@ end
 --
 function Class:addConnection(connectionId)
   assertType(connectionId, "number")
-  for knownId in self:allConnectionIds() do
-    if knownId == connectionId then
-      return
-    end
+  if self.connections[connectionId] then
+    return
   end
-  
-  self.connections.n = self.connections.n + 1
-  self.connections[self.connections.n] = connectionId
+
+  self.connections[connectionId] = true
+  table.insert(self.connectionIds, connectionId)
 end
 
 --
@@ -290,9 +341,10 @@ end
 --
 function Class:removeConnection(connectionId)
   assertType(connectionId, "number")
-  for i = 1,self.connections.n do
-    if self.connections[i] == connectionId then
-      self.connections[i] = nil
+  self.connections[connectionId] = nil
+  for k,v in ipairs(self.connectionIds) do
+    if v == connectionId then
+      table.remove(self.connectionIds, k)
       break
     end
   end
@@ -303,19 +355,9 @@ end
 --
 function Class:allConnectionIds()
   local i = 0
-  local j = 0
   return function()
     i = i + 1
-    j = j + 1
-    while not self.connections[j] and i <= self.connections.n do
-      self.connections.n = self.connections.n - 1
-      j = j + 1
-    end
-    if i ~= j then
-      self.connections[i] = self.connections[j]
-      self.connections[j] = nil
-    end
-    return self.connections[i]
+    return self.connectionIds[i]
   end
 end
 

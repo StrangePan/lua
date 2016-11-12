@@ -1,9 +1,6 @@
 require "common/enum"
 
-InputMethod = {
+InputMethod = buildEnum(
   "KEYBOARD",
   "JOYSTICK",
-  "MOUSE"
-}
-
-buildEnum(InputMethod)
+  "MOUSE")

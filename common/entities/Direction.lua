@@ -1,10 +1,7 @@
 require "common/enum"
 
-Direction = {
+Direction = buildEnum(
   "UP",
   "RIGHT",
   "DOWN",
-  "LEFT"
-}
-
-buildEnum(Direction)
+  "LEFT")

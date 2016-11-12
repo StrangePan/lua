@@ -114,6 +114,7 @@ function Class:onLoveUpdate( dt )
   self:onPhysics()
   self:onPostPhysics()
   self:onStep()
+  self:onPostStep()
 end
 
 --

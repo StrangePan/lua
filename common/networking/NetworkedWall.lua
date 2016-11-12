@@ -43,7 +43,7 @@ function Class:_init(manager, networkedId, entityType, params, wall)
 end
 
 function Class:getInstantiationParams(params)
-  params = Class.superclass.getInstantiationParams(params)
+  params = Class.superclass.getInstantiationParams(self, params)
   return self:writeWallState(params)
 end
 

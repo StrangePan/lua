@@ -1,10 +1,7 @@
 require "common/enum"
 
-ConnectionStatus = {
+ConnectionStatus = buildEnum(
   "DISCONNECTED",
   "CONNECTING",
   "CONNECTED",
-  "STALLED"
-}
-
-buildEnum(ConnectionStatus)
+  "STALLED")

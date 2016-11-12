@@ -1,9 +1,6 @@
 require "common/enum"
 
-NetworkedEntityType = {
+NetworkedEntityType = buildEnum(
   "ACTOR",
   "WALL",
-  "PLAYER",
-}
-
-buildEnum(NetworkedEntityType)
+  "PLAYER")

@@ -37,21 +37,14 @@ function Queue:pop()
 end
 
 function Queue:peek()
-  if self.font == nil then
-    return nil
+  if self.font then
+    return self.front.value
   end
-  return self.front.value
+  return nil
 end
 
 function Queue:empty()
   return self.size == 0
-end
-
-function Queue:peek()
-  if self.front then
-    return self.front.value
-  end
-  return nil
 end
 
 function Queue:clear()

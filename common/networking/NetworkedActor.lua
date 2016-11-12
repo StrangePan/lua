@@ -8,13 +8,12 @@ local F_Y = "y"
 local F_RED = "r"
 local F_GREEN = "g"
 local F_BLUE = "b"
-local F_FROM = "from"
-local F_TO = "to"
 local F_DIR = "dir"
-local F_UPDATE_TYPE = "type"
+local F_SUCCESS = "success"
+local F_UPDATE_TYPE = "iutype" -- incremental update type
 
--- Update types
-local T_MOVE = 1
+-- Incremental update types
+local T_STEP = 1
 local T_SPIN = 2
 
 --
@@ -57,6 +56,25 @@ function Class:_init(manager, networkedId, entityType, params, actor)
   self:setActorState(params)
 end
 
+function Class:startBroadcastingUpdates()
+  if self:isBroadcastingUpdates() then return end
+  Class.superclass.startBroadcastingUpdates(self)
+
+  -- Register for listener callbacks
+  local actor = self:getLocalEntity()
+  actor:registerMoveListener(self, self.onActorStep)
+  actor:registerSpinListener(self, self.onActorSpin)
+end
+
+function Class:stopBroadcastingUpdates()
+  if not self:isBroadcastingUpdates() then return end
+  local actor = self:getLocalEntity()
+  actor:unregisterMoveListener(self, self.onActorStep)
+  actor:unregisterSpinListener(self, self.onActorSpin)
+
+  Class.superclass.stopBroadcastingUpdates(self)
+end
+
 function Class:getInstantiationParams(params)
   params = Class.superclass.getInstantiationParams(self, params)
   return self:writeActorState(params, "new")
@@ -71,6 +89,7 @@ end
 -- Sets the state of the actor given a params/state object.
 --
 function Class:setActorState(state)
+  self:lock()
   local actor = self:getLocalEntity()
   local x, y = state[F_X], state[F_Y]
   local r, g, b = state[F_RED], state[F_GREEN], state[F_BLUE]
@@ -80,6 +99,7 @@ function Class:setActorState(state)
   if r and g and b then
     actor:setColor(Color(r, g, b))
   end
+  self:unlock()
 end
 
 function Class:getSynchronizedState(state)
@@ -110,48 +130,93 @@ function Class:writeActorState(state, mode)
 end
 
 function Class:performIncrementalUpdate(update)
-  Class.superclass.performIncrementalUpdate(self, update)
-  local updateType = update[F_UPDATE_TYPE]
-  if updateType == T_MOVE then
-    self:performMoveUpdate(update)
-  elseif updateType == T_SPIN then
-    self:performSpinUpdate(update)
+  self:lock()
+  local inSync = Class.superclass.performIncrementalUpdate(self, update)
+
+  if inSync then
+    local updateType = update[F_UPDATE_TYPE]
+    if updateType == T_STEP then
+      inSync = self:performStepUpdate(update)
+    elseif updateType == T_SPIN then
+      inSync = self:performSpinUpdate(update)
+    end
   end
+  self:unlock()
+
+  return inSync
 end
 
 --
--- Handles actors being moved
+-- Handles actors being moved.
 --
-function Class:performMoveUpdate(update)
+function Class:performStepUpdate(update)
+  self:lock()
+  local inSync = true
   local actor = self:getLocalEntity()
-  local from = update[F_FROM]
-  local to = update[F_TO]
   local dir = update[F_DIR]
-  
-  -- Make sure actor is located where it's supposed to be
+  local didMove = update[F_SUCCESS]
+
+  -- Make sure actor is located where it's supposed to be.
   local x, y = actor:getPosition()
-  if x ~= from[F_X] or y ~= from[F_Y] then
-    actor:setPosition(from[F_X], from[F_Y])
+  if x ~= update[F_X] or y ~= update[F_Y] then
+    inSync = false
   end
-  
-  -- If the update says the actor has moved, then force movement
-  local force = x ~= to[F_X] or y ~= to[F_Y]
-  
+
+  -- If the update says the actor has moved, then force movement.
   -- Move the actor
-  actor:move(update[F_DIR], force)
-  
-  -- If the actor for some reason is not located where it's supposed to be,
-  -- the force-set it's position.
-  x, y = actor:getPosition()
-  if x ~= to[F_X] or y ~= to[F_Y] then
-    actor:setPosition(to[F_X], to[F_Y])
+  if inSync then
+    inSync = actor:move(dir) == didMove
   end
+  self:unlock()
+
+  return inSync
 end
 
 --
 -- Handles actors emoting a spin
 --
 function Class:performSpinUpdate(update)
+  self:lock()
   local actor = self:getLocalEntity()
-  actor:spin()
+  local inSync = actor:spin()
+  self:unlock()
+  return inSync
+end
+
+--
+-- Builds incremental update message for an actor stepping.
+--
+function Class:buildStepUpdate(x, y, dir, success)
+  local msg = {}
+  msg[F_UPDATE_TYPE] = T_STEP
+  msg[F_X] = x
+  msg[F_Y] = y
+  msg[F_DIR] = dir
+  msg[F_SUCCESS] = success
+  return msg
+end
+
+--
+-- Builds incremental update message for an actor spinning.
+--
+function Class:buildSpinUpdate()
+  local msg = {}
+  msg[F_UPDATE_TYPE] = T_SPIN
+  return msg
+end
+
+--
+-- Handles actor stepping.
+--
+function Class:onActorStep(actor, x, y, dir, success)
+  if self:isLocked() or self:getLocalEntity() ~= actor then return end
+  self:sendIncrementalUpdate(self:buildStepUpdate(x, y, dir, success))
+end
+
+--
+-- Handles actors spinning.
+--
+function Class:onActorSpin(actor)
+  if self:isLocked() or self:getLocalEntity() ~= actor then return end
+  self:sendIncrementalUpdate(self:buildSpinUpdate())
 end

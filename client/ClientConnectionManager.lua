@@ -12,7 +12,8 @@ local Class = ClientConnectionManager
 -- communication with server.
 --
 function Class:_init()
-  Class.superclass._init(self, 25566)
+  math.randomseed(os.time())
+  Class.superclass._init(self, math.random(25566, 25666))
 
   -- Constant values
   self.serverAddress = '127.0.0.1'

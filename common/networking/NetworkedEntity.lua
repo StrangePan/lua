@@ -1,6 +1,8 @@
 require "common/class"
 require "NetworkedEntityType"
 
+local PRINT_DEBUG = false
+
 --
 -- Represents an Entity that is available across a network and tied to similar
 -- entities on remote program instances. Generally instantiated by a manager
@@ -137,6 +139,9 @@ function Class:_init(manager, networkId, entityType, params, entity)
   self.id = networkId
   self.entityType = entityType
   self.entity = entity
+  self.lockCounter = 0
+
+  self.broadcasting = false
 end
 
 --
@@ -165,6 +170,35 @@ end
 --
 function Class:getLocalEntity()
   return self.entity
+end
+
+--
+-- Gets the owner ID of this networked entity. Default implementation returns
+-- nil.
+--
+function Class:getOwnerId()
+  return nil
+end
+
+--
+-- Commands this entity to register any necessary listeners and begin
+-- sending out incremental entity updates when necessary.
+--
+function Class:startBroadcastingUpdates()
+  if PRINT_DEBUG then print("NetworkedEntity:startBroadcastingUpdates()") end
+  self.broadcasting = true
+end
+
+function Class:isBroadcastingUpdates()
+  return self.broadcasting
+end
+
+--
+-- Commands this entity to unregister any necessary listeners and stop sending
+-- out incremental entity updates.
+--
+function Class:stopBroadcastingUpdates()
+  self.broadcasting = true
 end
 
 --
@@ -213,6 +247,19 @@ end
 -- about the entity and the entity should handle it appropriately.
 --
 function Class:performIncrementalUpdate(update)
+  return true
+end
+
+--
+-- Sends an incremental update to other connected entities through this class's
+-- `EntityManager`.
+--
+-- *This method will not do anything if `isLocked()` is true.*
+--
+function Class:sendIncrementalUpdate(update)
+  if self:isLocked() then return end
+  if PRINT_DEBUG then print("NetworkedEntity:sendIncrementalUpdate()") end
+  return self:getManager():broadcastEntityUpdate(self, update)
 end
 
 --
@@ -222,12 +269,38 @@ end
 function Class:delete()
   local entity = self:getLocalEntity()
   local manager = self:getManager()
-  if manager and entity then
+  if not manager and not entity then
     return
   end
+
+  self:stopBroadcastingUpdates()
 
   self.entity = nil
   self.manager = nil
   entity:destroy()
   manager:deleteEntity(self)
+end
+
+--
+-- Increments the internal lock counter. Check if locks are currently in place
+-- with `isLocked()`.
+--
+function Class:lock()
+  self.lockCounter = self.lockCounter + 1
+end
+
+--
+-- Decrements the internal lock counter. To check if locks are currently in
+-- place with `isLocked()`.
+--
+function Class:unlock()
+  self.lockCounter = self.lockCounter - 1
+end
+
+--
+-- Checks if the entity is currently locked because of an event resolution
+-- operation. Returns `true` if a lock is in place, `false` if not.
+--
+function Class:isLocked()
+  return self.lockCounter > 0
 end
