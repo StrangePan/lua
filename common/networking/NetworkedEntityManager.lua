@@ -30,6 +30,7 @@ function Class:_init(connectionManager)
   self.entities = {}
   self.entityIds = {n = 0}
   self.nextId = 1
+  self.updatedSinceSync = {}
 
   self.connectionManager:registerMessageListener(
     MessageType.ENTITY_UPDATE,
@@ -39,7 +40,7 @@ function Class:_init(connectionManager)
   self.entityCreateCoordinators = EventCoordinator()
   self.entityDeleteCoordinators = EventCoordinator()
 
-  -- Remove connected entities.
+  -- Tracking connected instances
   self.connections = {}
   self.connectionIds = {}
 end
@@ -174,6 +175,7 @@ function Class:broadcastEntityUpdate(entity, update)
   local recipients = {}
   for recipient in self:allConnectionIds() do
     table.insert(recipients, recipient)
+    self.updatedSinceSync[recipient][entity:getNetworkId()] = true
   end
   local message = messages.entityUpdate.inc(entity:getNetworkId(), update)
   self.connectionManager:sendMessage(message, unpack(recipients))
@@ -272,10 +274,18 @@ function Class:onReceiveEntityInc(message, connectionId)
   local inSync = entity:performIncrementalUpdate(message[F_INC_DATA])
 
   if not inSync then
-    self.connectionManager:sendMessage(
-        messages.entityUpdate.outOfSync(entity:getNetworkId()),
-        connectionId)
+    self:onEntityIncUpdateFail(entity, connectionId)
   end
+end
+
+--
+-- Handles an entity inc update failing locally. This implementation sends
+-- an out-of-date message to the connection with connectionId.
+--
+function Class:onEntityIncUpdateFail(entity, connectionId)
+  self.connectionManager:sendMessage(
+      messages.entityUpdate.outOfSync(entity:getNetworkId()),
+      connectionId)
 end
 
 --
@@ -286,12 +296,16 @@ function Class:onReceiveEntityOutOfSync(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
   local entity = self:getEntity(id)
 
-  self.connectionManager:broadcastMessageWithAckReset(
-      messages.entityUpdate.sync(
-          entity:getNetworkId(),
-          entity:getEntityType(),
-          entity:getInstantiationParams()),
-      self:buildEntityChannelString(entity))
+  if self.updatedSinceSync[connectionId][entity:getNetworkId()] then
+    self.connectionManager:sendMessageWithAckReset(
+        messages.entityUpdate.sync(
+            entity:getNetworkId(),
+            entity:getEntityType(),
+            entity:getSynchronizedState()),
+        self:buildEntityChannelString(entity),
+        connectionId)
+    self.updatedSinceSync[connectionId][entity:getNetworkId()] = nil
+  end
 end
 
 function Class:allEntities()
@@ -334,6 +348,7 @@ function Class:addConnection(connectionId)
 
   self.connections[connectionId] = true
   table.insert(self.connectionIds, connectionId)
+  self.updatedSinceSync[connectionId] = {}
 end
 
 --
@@ -348,6 +363,7 @@ function Class:removeConnection(connectionId)
       break
     end
   end
+  self.updatedSinceSync[connectionId] = {}
 end
 
 --

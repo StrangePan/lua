@@ -162,7 +162,7 @@ end
 
 function Class:onServerReconnected(connectionId)
   for _,localPlayer in ipairs(self.localPlayers) do
-    localPlayer.controller:setPlayer(localPlayer.player)
+    localPlayer.controller:setPlayer(localPlayer.player:getLocalEntity())
     localPlayer.player:startBroadcastingUpdates()
   end
 end

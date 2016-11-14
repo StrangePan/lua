@@ -45,6 +45,7 @@ function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
             self:buildEntityChannelString(entity),
             connectionId)
         self.pendingUpdates[connectionId][entity:getNetworkId()] = false
+        self.updatedSinceSync[connectionId][entity:getNetworkingId()] = nil
       end
     end
   end
@@ -64,9 +65,11 @@ function Class:broadcastEntityUpdate(entity, update)
     else
       table.insert(recipients, connectionId)
     end
+    self.updatedSinceSync[connectionId][entityId] = true
   end
 
   for recipient in self:allConnectionIds() do
+    self.updatedSinceSync[recipient][entity:getNetworkId()] = true
     table.insert(recipients, recipient)
   end
   local message = messages.entityUpdate.inc(entity:getNetworkId(), update)
@@ -102,6 +105,22 @@ function Class:onReceiveEntityUpdate(message, connectionId)
     end
   elseif t == EntityUpdateType.OUT_OF_SYNC then
     Class.superclass.onReceiveEntityUpdate(self, message, connectionId)
+  end
+end
+
+--
+-- Resyncs entity with other entities.
+--
+function Class:onEntityIncUpdateFail(entity, connectionId)
+  if self.updatedSinceSync[connectionId][entity:getNetworkId()] then
+    self.connectionManager:sendMessageWithAckReset(
+        messages.entityUpdate.sync(
+            entity:getNetworkId(),
+            entity:getEntityType(),
+            entity:getSynchronizationParams()),
+        self:buildEntityChannelString(entity),
+        connectionId)
+    self.updatedSinceSync[connectionId][entity:getNetworkId()] = nil
   end
 end
 
