@@ -17,7 +17,7 @@ MessagePasser = buildClass()
 local Class = MessagePasser
 
 local ANY_MESSAGE_TYPE = "any"
-local ACKMSG_RESEND_DELAY = 5 -- seconds
+local ACKMSG_RESEND_DELAY = 3 -- seconds
 
 function Class:_init(udp)
   self.udp = udp
@@ -172,7 +172,7 @@ function Class:releaseMessageBundle()
           self.incomingAckQueues[ackKey].ackNum),
           self.incomingAckQueues[ackKey].address,
           self.incomingAckQueues[ackKey].port)
-      srcTbl[ackKey] = nil
+      srcTbl.pending[ackKey] = nil
     end
   end
 
