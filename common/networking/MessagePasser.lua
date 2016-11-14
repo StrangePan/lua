@@ -185,7 +185,7 @@ function Class:releaseMessageBundle()
         -- Only resend messages that are ACKMSG_RESEND_DELAY stale and no more
         -- than 5 per channel
         if bundle.sendTime + ACKMSG_RESEND_DELAY < t and i < 5 then
-          if PRINT_MESSAGES then print("resending message "..bundle.ackNum.." on channel "..q.channel) end
+          if PRINT_MESSAGES then print("resending message "..bundle.n.." on channel "..q.channel) end
           self:sendMessage(bundle.message, q.address, q.port)
           bundle.sendTime = t
         else
