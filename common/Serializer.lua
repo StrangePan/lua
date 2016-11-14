@@ -135,9 +135,13 @@ end
 
 local parseTable = function() end
 
+local labelWasQuoted = false
+
 local function parseKey(data,start)
   local c = string.sub(data,start,start)
+  labelWasQuoted = false
   if c == "\"" then
+    labelWasQuoted = true
     return parseQuotedString(data,start)
   elseif c == "{" then
     return parseTable(data,start)
@@ -178,6 +182,7 @@ end
 
 parseTable = function(data,start)
   local i = start
+  local nextInteger = 1
   
   if string.sub(data,i,i) ~= "{" then
     return nil,start
@@ -200,18 +205,46 @@ parseTable = function(data,start)
     k,i = parseKey(data,i)
     if k == nil then return nil,i end
     
-    -- make sure = sign is present
-    if string.sub(data,i,i) ~= "=" then return nil,i end
-    i = i+1
+    local v
+    
+    if string.sub(data,i,i) == "," or string.sub(data,i,i) == "}" then
+      -- handle no = sign
+      v = k
+      k = nextInteger
+
+      -- handle invalid string format explicitly, convert to bool if necessary
+      if type(v) == "string" and not labelWasQuoted then
+        if v == "t" or v == "f" then
+          v = v == "t"
+        else
+          return nil,i
+        end
+      end
+
+    elseif string.sub(data,i,i) == "=" then
+      -- handle optional = sign
+      i = i+1
+      v,i = parseValue(data,i)
+
+    else
+      return nil,i
+    end
     
     -- get the value and check for errors
-    local v
-    v,i = parseValue(data,i)
     if v == nil then return nil,i end
-    
+
+    -- ensure key hasn't been set thanks to a serializing error
+    if result[k] then return nil,i end
+
     -- insert parsed key/value pair into table
     result[k]=v
-    
+    if type(k) == "number" then
+      local _,fract = math.modf(k)
+      if fract == 0 then
+        nextInteger = k + 1
+      end
+    end
+
     -- make sure delimiter or end is present
     local c = string.sub(data,i,i)
     if c == "," then
@@ -318,7 +351,8 @@ serializeTable = function(object)
     referenceTable[object] = referenceTable.n
     referenceTable.n = referenceTable.n+1
   end
-  
+
+  local lastNumericKey = 0
   local data = "{"
   for k,v in pairs(object) do
     local kType = type(k)
@@ -327,7 +361,12 @@ serializeTable = function(object)
     if kType == "nil" or kType == "function" or vType == "nil" or vType == "function" then
       -- do nothing
     else
-      local kData = serializeKey(k)
+      local kData
+      if kType == "number" and k == lastNumericKey + 1 then
+        kData = true -- arbitrary value
+      else
+        kData = serializeKey(k)
+      end
       local vData = serializeValue(v)
       if kData == nil or vData == nil then
         -- do nothing
@@ -335,7 +374,14 @@ serializeTable = function(object)
         if data ~= "{" then
           data = data..","
         end
-        data = data..kData.."="..vData
+        if kType == "number" and k == lastNumericKey + 1 then
+          data = data..vData
+        else
+          data = data..kData.."="..vData
+        end
+        if kType == "number" then
+          lastNumericKey = k
+        end
       end
     end
   end

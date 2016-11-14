@@ -277,13 +277,13 @@ function Class:processMessage(message, addr, port)
   self.processed[message] = true
   local notifyListeners = true
   
-  if message.type == MessageType.BUNDLE then
+  if message.t == MessageType.BUNDLE then
     -- Split apart bundles and process each contained message
     for i,submessage in ipairs(message) do
       self:processMessage(submessage, addr, port)
     end
     
-  elseif message.type == MessageType.ACK then
+  elseif message.t == MessageType.ACK then
     -- Process an acknowledgement message
     local channel = message.c
     local ackNum = message.n
@@ -305,8 +305,8 @@ function Class:processMessage(message, addr, port)
       end
     end
     
-  elseif message.type == MessageType.ACK_REQUEST
-      or message.type == MessageType.ACK_REQUEST_RESET then
+  elseif message.t == MessageType.ACK_REQUEST
+      or message.t == MessageType.ACK_REQUEST_RESET then
 
     -- Unwrap acknowledgement requests and process contained message
     local channel = message.c
@@ -341,9 +341,9 @@ function Class:processMessage(message, addr, port)
 
     -- Process inner message
     if incomingAck
-        and ((message.type == MessageType.ACK_REQUEST
+        and ((message.t == MessageType.ACK_REQUEST
                 and ackNum == incomingAck.ackNum + 1)
-            or (message.type == MessageType.ACK_REQUEST_RESET
+            or (message.t == MessageType.ACK_REQUEST_RESET
                 and ackNum > incomingAck.ackNum)) then
         incomingAck.ackNum = ackNum
         self:processMessage(innerMessage, addr, port)
@@ -388,7 +388,7 @@ end
 --
 function Class:notifyListeners(message, addr, port)
   if type(message) ~= "table" then return end
-  local t = message.type
+  local t = message.t
   
   -- Notify listeners registerd with message type-agnostic event coordinator.
   if self.coordinators[ANY_MESSAGE_TYPE] ~= nil then

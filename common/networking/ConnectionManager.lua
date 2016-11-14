@@ -241,8 +241,8 @@ end
 -- message from connection with ID connectionId.
 --
 function Class:notifyMessageListeners(message, connectionId)
-  if self.coordinators[message.type] then
-    self.coordinators[message.type]:notifyListeners(message, connectionId)
+  if self.coordinators[message.t] then
+    self.coordinators[message.t]:notifyListeners(message, connectionId)
   end
 end
 
@@ -413,8 +413,8 @@ function Class:onReceiveMessage(message, address, port)
     end
   end
   
-  if callbackMap[message.type] then
-    self[callbackMap[message.type]](self, message, address, port)
+  if callbackMap[message.t] then
+    self[callbackMap[message.t]](self, message, address, port)
   end
   
   connection = self:getConnection(address, port)

@@ -43,5 +43,5 @@ function Class:onReceiveConnectionAck(message, address, port)
   if address ~= self.serverAddress or port ~= self.serverPort then
     return
   end
-  self.playerId = message.pid
+  self.playerId = message.p
 end

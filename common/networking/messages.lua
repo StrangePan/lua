@@ -6,39 +6,39 @@ messages = {}
 -- creates a message to attempt to connect to a server
 function messages.connectionInit()
   return {
-    type=MessageType.CONNECT_INIT
+    t=MessageType.CONNECT_INIT
   }
 end
 
 function messages.connectionAck(playerId)
   return {
-    type=MessageType.CONNECT_ACK,
-    pid=playerId,
+    t=MessageType.CONNECT_ACK,
+    p=playerId,
   }
 end
 
 function messages.connectionAckAck(playerId)
   return {
-    type=MessageType.CONNECT_ACK_ACK,
-    pid=playerId,
+    t=MessageType.CONNECT_ACK_ACK,
+    p=playerId,
   }
 end
 
 function messages.disconnect()
   return {
-    type=MessageType.DISCONNECT
+    t=MessageType.DISCONNECT
   }
 end
 
 function messages.ping()
   return {
-    type=MessageType.PING
+    t=MessageType.PING
   }
 end
 
 function messages.ack(channel, ackNum)
   return {
-    type=MessageType.ACK,
+    t=MessageType.ACK,
     c=channel,
     n=ackNum
   }
@@ -46,7 +46,7 @@ end
 
 function messages.ackRequest(channel, ackNum, message)
   return {
-    type=MessageType.ACK_REQUEST,
+    t=MessageType.ACK_REQUEST,
     c=channel,
     n=ackNum,
     m=message,
@@ -55,7 +55,7 @@ end
 
 function messages.ackRequestReset(channel, ackNum, message)
   return {
-    type=MessageType.ACK_REQUEST_RESET,
+    t=MessageType.ACK_REQUEST_RESET,
     c=channel,
     n=ackNum,
     m=message,
@@ -66,53 +66,55 @@ messages.entityUpdate = {}
 
 function messages.entityUpdate.create(id, entityType, params)
   return {
-    type=MessageType.ENTITY_UPDATE,
-    neid=id,
-    utype=EntityUpdateType.CREATING,
-    etype=entityType,
-    params=params,
+    t=MessageType.ENTITY_UPDATE,
+    i=id,
+    u=EntityUpdateType.CREATING,
+    e=entityType,
+    d=params,
   }
 end
 
 function messages.entityUpdate.delete(id)
   return {
-    type=MessageType.ENTITY_UPDATE,
-    neid=id,
-    utype=EntityUpdateType.DESTROYING,
+    t=MessageType.ENTITY_UPDATE,
+    i=id,
+    u=EntityUpdateType.DESTROYING,
   }
 end
 
 function messages.entityUpdate.sync(id, entityType, params)
   return {
-    type=MessageType.ENTITY_UPDATE,
-    neid=id,
-    utype=EntityUpdateType.SYNCHRONIZING,
-    etype=entityType,
-    params=params,
+    t=MessageType.ENTITY_UPDATE,
+    i=id,
+    u=EntityUpdateType.SYNCHRONIZING,
+    e=entityType,
+    d=params,
   }
 end
 
 function messages.entityUpdate.inc(id, params)
   return {
-    type=MessageType.ENTITY_UPDATE,
-    neid=id,
-    utype=EntityUpdateType.INCREMENTING,
-    params=params,
+    t=MessageType.ENTITY_UPDATE,
+    i=id,
+    u=EntityUpdateType.INCREMENTING,
+    d=params,
   }
 end
 
 function messages.entityUpdate.outOfSync(id)
   return {
-    type=MessageType.ENTITY_UPDATE,
-    neid=id,
-    utype=EntityUpdateType.OUT_OF_SYNC,
+    t=MessageType.ENTITY_UPDATE,
+    i=id,
+    u=EntityUpdateType.OUT_OF_SYNC,
   }
 end
 
 -- bundles multiple messages into a single message bundle
 function messages.bundle(...)
   local msgs = {...}
-  local bundle = {type = MessageType.BUNDLE}
+  local bundle = {
+    t = MessageType.BUNDLE
+  }
   for i,msg in ipairs(msgs) do
     bundle[i] = msg
   end

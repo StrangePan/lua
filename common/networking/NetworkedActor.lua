@@ -8,9 +8,9 @@ local F_Y = "y"
 local F_RED = "r"
 local F_GREEN = "g"
 local F_BLUE = "b"
-local F_DIR = "dir"
-local F_SUCCESS = "success"
-local F_UPDATE_TYPE = "iutype" -- incremental update type
+local F_DIR = "d"
+local F_SUCCESS = "s"
+local F_UPDATE_TYPE = "i" -- incremental update type
 
 -- Incremental update types
 local T_STEP = 1

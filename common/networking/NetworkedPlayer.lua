@@ -4,7 +4,7 @@ require "Player"
 local PRINT_DEBUG = false
 
 -- Message fields
-local F_OWNER = "owner"
+local F_OWNER = "o"
 local F_X = "x"
 local F_Y = "y"
 local F_RED = "r"

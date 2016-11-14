@@ -9,12 +9,12 @@ require "Serializer"
 
 local PRINT_DEBUG = false
 
-local F_NETWORK_ENTITY_ID = "neid"
-local F_ENTITY_UPDATE_TYPE = "utype"
-local F_ENTITY_TYPE = "etype"
-local F_CREATE_PARAMS = "params"
-local F_SYNC_DATA = "params"
-local F_INC_DATA = "params"
+local F_NETWORK_ENTITY_ID = "i"
+local F_ENTITY_UPDATE_TYPE = "u"
+local F_ENTITY_TYPE = "e"
+local F_CREATE_PARAMS = "d"
+local F_SYNC_DATA = "d"
+local F_INC_DATA = "d"
 
 --
 -- Maintains an internal list of entities that are connected to network
