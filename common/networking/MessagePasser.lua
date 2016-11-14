@@ -202,9 +202,11 @@ function Class:releaseMessageBundle()
   for destKey in pairs(self.outboxDestinations) do
     local outbox = self.outbox[destKey]
     local outgoing = {}
+    local i = 1
 
-    while not outbox.queue:empty() do
-      table.insert(outgoing, outbox.queue:pop())
+    while not outbox.queue:empty() and i <= 10 do
+      outgoing[i] = outbox.queue:pop()
+      i = i + 1
     end
 
     if outgoing[1] then
