@@ -37,7 +37,7 @@ function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
     --
     for entity in self:allEntities() do
       if self.pendingUpdates[connectionId][entity:getNetworkId()] then
-        self.connectionManager:sendMessageWithAckReset(
+        self.connectionManager:sendMessageWithAck(
             messages.entityUpdate.sync(
                 entity:getNetworkId(),
                 entity:getEntityType(),

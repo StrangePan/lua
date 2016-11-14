@@ -6,7 +6,7 @@ require "messages"
 require "Queue"
 require "Serializer"
 
-local PRINT_MESSAGES = false
+local PRINT_MESSAGES = true
 
 --
 -- Class that handles the sending and receiving of messages of UDP and
@@ -24,6 +24,7 @@ function Class:_init(udp)
   self.inbox = Queue() -- raw inbox for received messages, ordered as received
   self.outbox = {} -- raw outbox for outgoing messages grouped by destination
   self.outboxDestinations = {}
+  self.outboxDeleted = {}
   self.coordinators = {} -- event coordinators for incoming messages
   self.outgoingAckQueues = {} -- table of outgoing messages with ack requests
   self.outgoingAckDestinations = {}
@@ -147,7 +148,7 @@ function Class:_sendMessageWithAck(messageType, message, channel, address, port)
   -- Bundle ougoing message into a bundle containing metadata
   local outgoingBundle = {
     message = messageWithAck,
-    sendTime = os.time(),
+    sendTime = love.timer.getTime(),
     n = ackNum,
   }
 
@@ -161,7 +162,7 @@ end
 -- calls to the `sendMessage` functions.
 --
 function Class:releaseMessageBundle()
-  local t = os.time()
+  local t = love.timer.getTime()
 
   -- Send acknowledgements for incoming ack requests
   for srcKey,srcTbl in pairs(self.incomingAckSources) do
@@ -179,20 +180,20 @@ function Class:releaseMessageBundle()
   for destKey,destTbl in pairs(self.outgoingAckDestinations) do
     for ackKey in pairs(destTbl.pending) do
       local q = self.outgoingAckQueues[ackKey]
+      for i,bundle in q.queue:items() do
+
+        -- Only resend messages that are ACKMSG_RESEND_DELAY stale and no more
+        -- than 5 per channel
+        if bundle.sendTime + ACKMSG_RESEND_DELAY < t and i < 5 then
+          if PRINT_MESSAGES then print("resending message "..bundle.ackNum.." on channel "..q.channel) end
+          self:sendMessage(bundle.message, q.address, q.port)
+          bundle.sendTime = t
+        else
+          break
+        end
+      end
       if q.queue:empty() then
         destTbl.pending[ackKey] = nil
-      else
-        for i,bundle in q.queue:items() do
-          
-          -- Only resend messages that are ACKMSG_RESEND_DELAY stale and no more
-          -- than 5 per channel
-          if bundle.sendTime + ACKMSG_RESEND_DELAY < t and i < 5 then
-            self:sendMessage(bundle.message, q.address, q.port)
-            bundle.sendTime = t
-          else
-            break
-          end
-        end
       end
     end
   end
@@ -218,6 +219,11 @@ function Class:releaseMessageBundle()
     if outbox.queue:empty() then
       self.outboxDestinations[destKey] = nil
     end
+  end
+
+  for destKey in pairs(self.outboxDeleted) do
+    self.outboxDestinations[destKey] = nil
+    self.outbox[destKey] = nil
   end
 end
 
@@ -332,16 +338,13 @@ function Class:processMessage(message, addr, port)
     end
 
     -- Process inner message
-    if incomingAck then
-      if (message.type == MessageType.ACK_REQUEST
-          and ackNum == incomingAck.ackNum + 1)
-          or (message.type == MessageType.ACK_REQUEST_RESET
-          and ackNum > incomingAck.ackNum) then
+    if incomingAck
+        and ((message.type == MessageType.ACK_REQUEST
+                and ackNum == incomingAck.ackNum + 1)
+            or (message.type == MessageType.ACK_REQUEST_RESET
+                and ackNum > incomingAck.ackNum)) then
         incomingAck.ackNum = ackNum
         self:processMessage(innerMessage, addr, port)
-      else
-        notifyListeners = false
-      end
     else
       notifyListeners = false
     end
@@ -374,8 +377,7 @@ function Class:freeResources(address, port)
     self.incomingAckQueues[ackKey] = nil
   end
   self.incomingAckSources[destKey] = nil
-  self.outbox[destKey] = nil
-  self.outboxDestinations[destKey] = nil
+  self.outboxDeleted[destKey] = true -- mark outbox contents for deletion
 end
 
 --
