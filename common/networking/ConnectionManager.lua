@@ -36,7 +36,6 @@ function Class:_init(port)
   -- Initialize mechanisms for tracking connections.
   self.connections = {}
   self.connectionIds = {n = 0, nxt=1}
-  self.pendingConnections = {}
   self.coordinators = {}
   self.connectionStatusCoordinator = EventCoordinator()
 
@@ -68,7 +67,16 @@ function Class:receiveAllMessages()
     -- handle timeouts
     if connection.status == ConnectionStatus.CONNECTING and
         time >= connection.lastSentTime + 3 then
-      self:sendConnectionInit(connection)
+      if time < connection.initTime + 60 then
+        if connection.didInit then
+          self:sendConnectionInit(connection)
+        else
+          self:sendConnectionAck(connection)
+        end
+      else
+        self:terminateConnection(connection, false)
+        if PRINT_DEBUG then print("connection "..id.." timed out") end
+      end
     elseif connection.status == ConnectionStatus.CONNECTED and
         time >= connection.lastReceivedTime + 5 then
       self:setConnectionStatus(connection, ConnectionStatus.STALLED)
@@ -76,7 +84,7 @@ function Class:receiveAllMessages()
     elseif connection.status == ConnectionStatus.STALLED and
         time >= connection.lastReceivedTime + 30 then
       self:terminateConnection(id, true)
-      if PRINT_DEBUG then print("connection timed out") end
+      if PRINT_DEBUG then print("connection "..id.." timed out") end
     end
   end
 end
@@ -101,7 +109,8 @@ end
 --
 function Class:initiateConnection(address, port)
   local connection = self:createConnection(address, port)
-  if connection == nil then return end
+  if not connection then return end
+  connection.didInit = true
   self:sendConnectionInit(connection)
 end
 
@@ -117,7 +126,7 @@ function Class:createConnection(address, port)
   local id = self.connectionIds.nxt
   self.connectionIds.nxt = self.connectionIds.nxt + 1
   
-  local connection = Connection(id, address, port)
+  local connection = Connection(id, address, port, love.timer.getTime())
   
   local connectionString = self:createConnectionString(address, port)
   self.connections[id] = connection
@@ -358,13 +367,25 @@ end
 function Class:sendConnectionInit(connection)
   connection = self:getConnection(connection)
   if not connection then return end
-  
   local id = connection.id
+
   if PRINT_DEBUG then print("attempting to connect to "..id.." @ "..connection.address..":"..connection.port) end
   self:setConnectionStatus(connection, ConnectionStatus.CONNECTING)
   self:sendMessage(messages.connectionInit(), id)
 end
 
+--
+-- Sends a connection ack message to the supplied connection.
+--
+function Class:sendConnectionAck(connection)
+  connection = self:getConnection(connection)
+  if not connection then return end
+  local id = connection.id
+
+  if PRINT_DEBUG then print("attempting to connect to "..id.." @ "..connection.address..":"..connection.port) end
+  self:setConnectionStatus(connection, ConnectionStatus.CONNECTING)
+  self:sendMessage(messages.connectionAck(id), id)
+end
 
 
 --
@@ -417,14 +438,19 @@ end
 --
 function Class:onReceiveConnectionInit(message, address, port)
   local connection = self:createConnection(address, port)
+  local didCreate = connection ~= nil
+  connection = connection or self:getConnection(address, port)
   if not connection then return end
 
   local id = connection.id
-  connection.lastReceivedTime = love.timer.getTime()
+  if didCreate then
+    connection.lastReceivedTime = love.timer.getTime()
+  elseif connection.status ~= ConnectionStatus.CONNECTING then
+    return
+  end
 
   if PRINT_DEBUG then print("connection request received from "..id.." @ "..address..":"..port) end
-  self:sendMessage(messages.connectionAck(id), id)
-  self:setConnectionStatus(connection, ConnectionStatus.CONNECTING)
+  self:sendConnectionAck(connection)
 end
 
 --

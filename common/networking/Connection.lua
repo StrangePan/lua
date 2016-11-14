@@ -10,7 +10,7 @@ require "ConnectionStatus"
 Connection = buildClass()
 local Class = Connection
 
-function Class:_init(networkId, address, port)
+function Class:_init(networkId, address, port, initTime)
   assertType(networkId, "networkId", "number")
   assertType(address, "address", "string")
   assertType(port, "port", "number")
@@ -34,4 +34,11 @@ function Class:_init(networkId, address, port)
   -- The last numeric time this connection was sent a message.
   -- Defaults to 0
   self.lastSentTime = 0
+
+  -- Did we init the connection? If false, a remote instance initiated.
+  self.didInit = false
+
+  -- Time connection was initiated. In the case of an incoming connection, time
+  -- when initial contact was received.
+  self.initTime = initTime or os.time()
 end
