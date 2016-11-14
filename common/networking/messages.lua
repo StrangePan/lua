@@ -17,6 +17,13 @@ function messages.connectionAck(playerId)
   }
 end
 
+function messages.connectionAckAck(playerId)
+  return {
+    type=MessageType.CONNECT_ACK_ACK,
+    pid=playerId,
+  }
+end
+
 function messages.disconnect()
   return {
     type=MessageType.DISCONNECT

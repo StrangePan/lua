@@ -3,7 +3,7 @@ require "MessagePasser"
 require "Connection"
 require "ConnectionStatus"
 
-local PRINT_DEBUG = false
+local PRINT_DEBUG = true
 
 --
 -- Object that manages and maintains connections to other program instances,
@@ -374,6 +374,7 @@ local callbackMap = {
   [MessageType.PING] = "onReceivePing",
   [MessageType.CONNECT_INIT] = "onReceiveConnectionInit",
   [MessageType.CONNECT_ACK] = "onReceiveConnectionAck",
+  [MessageType.CONNECT_ACK_ACK] = "onReceiveConnectionAckAck",
   [MessageType.DISCONNECT] = "onReceiveDisconnect",
 }
 
@@ -417,12 +418,13 @@ end
 function Class:onReceiveConnectionInit(message, address, port)
   local connection = self:createConnection(address, port)
   if not connection then return end
-  
+
   local id = connection.id
-  if PRINT_DEBUG then print("connection request received from "..id.." @ "..address..":"..port) end
   connection.lastReceivedTime = love.timer.getTime()
+
+  if PRINT_DEBUG then print("connection request received from "..id.." @ "..address..":"..port) end
   self:sendMessage(messages.connectionAck(id), id)
-  self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
+  self:setConnectionStatus(connection, ConnectionStatus.CONNECTING)
 end
 
 --
@@ -432,10 +434,32 @@ end
 function Class:onReceiveConnectionAck(message, address, port)
   local connection = self:getConnection(address, port)
   if not connection then return end
-  
+  local id = connection.id
+
   -- Ignore message if not looking to connect.
-  if connection.status ~= ConnectionStatus.CONNECTING then return end
-  
+  if connection.status ~= ConnectionStatus.CONNECTING 
+      and connection.status ~= ConnectionStatus.CONNECTED then
+    return
+  end
+
+  if PRINT_DEBUG then print("connected to instance "..connection.id.." at "..connection.address..":"..connection.port) end
+  self:sendMessage(messages.connectionAckAck(id), id)
+  self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
+end
+
+--
+-- Callback function for messages of type CONNECT_ACK_ACK. Confirms connection
+-- to remote instance.
+--
+function Class:onReceiveConnectionAckAck(message, address, port)
+  local connection = self:getConnection(address, port)
+  if not connection then return end
+
+  -- Ignore message if not looking to connect
+  if connection.status ~= ConnectionStatus.CONNECTING then
+    return
+  end
+
   if PRINT_DEBUG then print("connected to instance "..connection.id.." at "..connection.address..":"..connection.port) end
   self:setConnectionStatus(connection, ConnectionStatus.CONNECTED)
 end

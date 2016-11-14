@@ -4,6 +4,7 @@ MessageType = buildEnum(
   "BUNDLE",
   "CONNECT_INIT",
   "CONNECT_ACK",
+  "CONNECT_ACK_ACK",
   "DISCONNECT",
   "PING",
   "ACK",

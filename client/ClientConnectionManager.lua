@@ -17,6 +17,7 @@ function Class:_init()
 
   -- Constant values
   self.serverAddress = '74.51.150.17'
+  --self.serverAddress = '127.0.0.1'
   self.serverPort = 25565
   
   self.playerId = nil
