@@ -15,6 +15,7 @@ local F_ENTITY_TYPE = "e"
 local F_CREATE_PARAMS = "d"
 local F_SYNC_DATA = "d"
 local F_INC_DATA = "d"
+local F_SYNC_NUM = "n"
 
 --
 -- Maintains an internal list of entities that are connected to network
@@ -31,6 +32,7 @@ function Class:_init(connectionManager)
   self.entityIds = {n = 0}
   self.nextId = 1
   self.updatedSinceSync = {}
+  self.lastSyncNum = {}
 
   self.connectionManager:registerMessageListener(
     MessageType.ENTITY_UPDATE,
@@ -104,6 +106,9 @@ function Class:createEntityWithParams(id, entityType, params)
   -- Instantiate a new entity and hook everything up
   local entity = NetworkedEntity.createNewInstanceWithParams(
       self, id, entityType, params)
+  for connectionId in self:allConnectionIds() do
+    self.lastSyncNum[connectionId][id] = 1
+  end
   self.entities[id] = entity
   entity:getLocalEntity():registerWithSecretary(self:getSecretary())
   self:notifyEntityCreateListeners(entity)
@@ -135,6 +140,9 @@ function Class:spawnEntity(entityType, ...)
           entity:getInstantiationParams()),
       self:buildEntityChannelString(entity),
       unpack(self.connectionIds))
+  for connectionId in self:allConnectionIds() do
+    self.lastSyncNum[connectionId][id] = 1
+  end
   self:notifyEntityCreateListeners(entity)
   return entity
 end
@@ -159,6 +167,9 @@ function Class:deleteEntity(entity)
       break
     end
   end
+  for connectionId in self:allConnectionIds() do
+    self.lastSyncNum[connectionId][entityId] = nil
+  end
   entity:delete()
 
   -- Notify connected instances
@@ -172,13 +183,14 @@ end
 -- Sends an incremental entity update to all connected remote instances.
 --
 function Class:broadcastEntityUpdate(entity, update)
-  local recipients = {}
   for recipient in self:allConnectionIds() do
-    table.insert(recipients, recipient)
     self.updatedSinceSync[recipient][entity:getNetworkId()] = true
+    local message = messages.entityUpdate.inc(
+        entity:getNetworkId(),
+        update,
+        self.lastSyncNum[recipient][entity:getNetworkId()])
+    self.connectionManager:sendMessage(message, recipient)
   end
-  local message = messages.entityUpdate.inc(entity:getNetworkId(), update)
-  self.connectionManager:sendMessage(message, unpack(recipients))
 end
 
 --
@@ -196,7 +208,7 @@ function Class:onReceiveEntityUpdate(message, connectionId)
   elseif t == EntityUpdateType.SYNCHRONIZING then
     self:onReceiveEntitySync(message, connectionId)
   elseif t == EntityUpdateType.INCREMENTING then
-    self:onReceiveEntityInc(message, connectionId)
+    return self:onReceiveEntityInc(message, connectionId)
   elseif t == EntityUpdateType.OUT_OF_SYNC then
     self:onReceiveEntityOutOfSync(message, connectionId)
   else
@@ -221,7 +233,7 @@ function Class:onReceiveEntityCreate(message, connectionId)
   -- Extract relevant information from message.
   local entityType = message[F_ENTITY_TYPE]
   local params = message[F_CREATE_PARAMS]
-  
+
   self:createEntityWithParams(id, entityType, params)
 end
 
@@ -248,12 +260,18 @@ end
 --
 function Class:onReceiveEntitySync(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
-  
+
   -- Verify that the entity already exists. If not, cancel; there's nothing
   -- left to do.
   local entity = self:getEntity(id)
   if not entity then return end
-  
+
+  if self.lastSyncNum[connectionId][entity:getNetworkId()] >=
+        message[F_SYNC_NUM] then
+    return
+  end
+
+  self.lastSyncNum[connectionId][entity:getNetworkId()] = message[F_SYNC_NUM]
   entity:setSynchronizedState(message[F_SYNC_DATA])
 end
 
@@ -269,13 +287,17 @@ function Class:onReceiveEntityInc(message, connectionId)
   -- Verify that the entity already exists. If not, cancel; there's nothing
   -- left to do.
   local entity = self:getEntity(id)
-  if not entity then return end
+  if not entity or message[F_SYNC_NUM] ~=
+      self.lastSyncNum[connectionId][entity:getNetworkId()] then
+    return
+  end
   
   local inSync = entity:performIncrementalUpdate(message[F_INC_DATA])
 
   if not inSync then
     self:onEntityIncUpdateFail(entity, connectionId)
   end
+  return inSync
 end
 
 --
@@ -284,7 +306,9 @@ end
 --
 function Class:onEntityIncUpdateFail(entity, connectionId)
   self.connectionManager:sendMessage(
-      messages.entityUpdate.outOfSync(entity:getNetworkId()),
+      messages.entityUpdate.outOfSync(
+          entity:getNetworkId(),
+          self.lastSyncNum[connectionId][entity:getNetworkId()]),
       connectionId)
 end
 
@@ -296,12 +320,17 @@ function Class:onReceiveEntityOutOfSync(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
   local entity = self:getEntity(id)
 
-  if self.updatedSinceSync[connectionId][entity:getNetworkId()] then
+  if self.updatedSinceSync[connectionId][entity:getNetworkId()]
+      and self.lastSyncNum[connectionId][entity:getNetworkId()] 
+          == message[F_SYNC_NUM] then
+    self.lastSyncNum[connectionId][entity:getNetworkId()] =
+        self.lastSyncNum[connectionId][entity:getNetworkId()] + 1
     self.connectionManager:sendMessageWithAckReset(
         messages.entityUpdate.sync(
             entity:getNetworkId(),
             entity:getEntityType(),
-            entity:getSynchronizedState()),
+            entity:getSynchronizedState(),
+            self.lastSyncNum[connectionId][entity:getNetworkId()]),
         self:buildEntityChannelString(entity),
         connectionId)
     self.updatedSinceSync[connectionId][entity:getNetworkId()] = nil
@@ -349,6 +378,10 @@ function Class:addConnection(connectionId)
   self.connections[connectionId] = true
   table.insert(self.connectionIds, connectionId)
   self.updatedSinceSync[connectionId] = {}
+  self.lastSyncNum[connectionId] = {}
+  for entityId in self:allEntityIds() do
+    self.lastSyncNum[connectionId][entityId] = 1
+  end
 end
 
 --
@@ -364,6 +397,7 @@ function Class:removeConnection(connectionId)
     end
   end
   self.updatedSinceSync[connectionId] = {}
+  self.lastSyncNum[connectionId] = nil
 end
 
 --

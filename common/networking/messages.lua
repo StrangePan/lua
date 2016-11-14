@@ -82,30 +82,33 @@ function messages.entityUpdate.delete(id)
   }
 end
 
-function messages.entityUpdate.sync(id, entityType, params)
+function messages.entityUpdate.sync(id, entityType, params, syncNum)
   return {
     t=MessageType.ENTITY_UPDATE,
     i=id,
     u=EntityUpdateType.SYNCHRONIZING,
     e=entityType,
     d=params,
+    n=syncNum,
   }
 end
 
-function messages.entityUpdate.inc(id, params)
+function messages.entityUpdate.inc(id, params, baseSync)
   return {
     t=MessageType.ENTITY_UPDATE,
     i=id,
     u=EntityUpdateType.INCREMENTING,
     d=params,
+    n=baseSync,
   }
 end
 
-function messages.entityUpdate.outOfSync(id)
+function messages.entityUpdate.outOfSync(id, baseSync)
   return {
     t=MessageType.ENTITY_UPDATE,
     i=id,
     u=EntityUpdateType.OUT_OF_SYNC,
+    n=baseSync,
   }
 end
 

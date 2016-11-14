@@ -9,6 +9,7 @@ local PRINT_DEBUG = false
 
 local F_NETWORK_ENTITY_ID = "i"
 local F_ENTITY_UPDATE_TYPE = "u"
+local F_SYNC_NUM = "n"
 
 ServerNetworkedEntityManager = buildClass(CustomNetworkedEntityManager)
 local Class = ServerNetworkedEntityManager
@@ -57,7 +58,6 @@ end
 --
 function Class:broadcastEntityUpdate(entity, update)
   local entityId = entity:getNetworkId()
-  local recipients = {}
   for connectionId in self:allConnectionIds() do
     local connection = self.connectionManager:getConnection(connectionId)
     if connection and connection.status == ConnectionStatus.STALLED then
@@ -70,10 +70,10 @@ function Class:broadcastEntityUpdate(entity, update)
 
   for recipient in self:allConnectionIds() do
     self.updatedSinceSync[recipient][entity:getNetworkId()] = true
-    table.insert(recipients, recipient)
+    local message = messages.entityUpdate.inc(
+        entity:getNetworkId(), update, self.lastSyncNum[recipient][entityId])
+    self.connectionManager:sendMessage(message, recipient)
   end
-  local message = messages.entityUpdate.inc(entity:getNetworkId(), update)
-  self.connectionManager:sendMessage(message, unpack(recipients))
 end
 
 --
@@ -85,23 +85,26 @@ function Class:onReceiveEntityUpdate(message, connectionId)
 
   local t = message[F_ENTITY_UPDATE_TYPE]
   local id = message[F_NETWORK_ENTITY_ID]
+  local n = message[F_SYNC_NUM]
   if not t or not id then return end
   local entity = self:getEntity(id)
   if not entity then return end
 
   if PRINT_DEBUG then print("t:"..t, "id:"..id, "own:"..entity:getOwnerId()) end
   
-  if t == EntityUpdateType.INCREMENTING then
-    if entity and entity:getOwnerId() == connectionId then
-      Class.superclass.onReceiveEntityUpdate(self, message, connectionId)
+  if t == EntityUpdateType.INCREMENTING
+      and entity and entity:getOwnerId() == connectionId
+      and n == self.lastSyncNum[connectionId][entity:getNetworkId()] then
+    local inSync = Class.superclass.onReceiveEntityUpdate(self, message, connectionId)
 
+    if inSync then
       local destinations = {}
       for destination in self:allConnectionIds() do
         if destination ~= connectionId then
           table.insert(destinations, destination)
         end
       end
-      self.connectionManager:sendMessage(message, unpack(destinations)) 
+      self.connectionManager:sendMessage(message, unpack(destinations))
     end
   elseif t == EntityUpdateType.OUT_OF_SYNC then
     Class.superclass.onReceiveEntityUpdate(self, message, connectionId)
@@ -113,11 +116,14 @@ end
 --
 function Class:onEntityIncUpdateFail(entity, connectionId)
   if self.updatedSinceSync[connectionId][entity:getNetworkId()] then
+    self.lastSyncNum[connectionId][entity:getNetworkId()] =
+        self.lastSyncNum[connectionId][entity:getNetworkId()] + 1
     self.connectionManager:sendMessageWithAckReset(
         messages.entityUpdate.sync(
             entity:getNetworkId(),
             entity:getEntityType(),
-            entity:getSynchronizationParams()),
+            entity:getSynchronizationParams(),
+            self.lastSyncNum[connectionId][entity:getNetworkId()]),
         self:buildEntityChannelString(entity),
         connectionId)
     self.updatedSinceSync[connectionId][entity:getNetworkId()] = nil
