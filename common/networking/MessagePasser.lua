@@ -209,7 +209,7 @@ function Class:releaseMessageBundle()
     if outgoing[1] then
       local data = Serializer.serialize(messages.bundle(unpack(outgoing)))
       if PRINT_MESSAGES then
-        print("sending bundle", address..":"..port, "("..string.len(data)..")")
+        print("sending bundle", outbox.address..":"..outbox.port, "("..string.len(data)..")")
         print(data)
       end
       self.udp:sendto(data, outbox.address, outbox.port)
