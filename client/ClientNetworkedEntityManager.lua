@@ -30,7 +30,7 @@ end
 function Class:onReceiveEntityInc(message, connectionId)
   local entity = self:getEntity(message[F_NETWORK_ENTITY_ID])
 
-  if Class.superclass.onReceiveEntityInc(message, connectionId)
+  if Class.superclass.onReceiveEntityInc(self, message, connectionId)
       and entity
       and not self:_isInSync(connectionId, entity) then
     self:_sendEntityUpdate(
