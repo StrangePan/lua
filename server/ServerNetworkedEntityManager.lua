@@ -68,6 +68,12 @@ function Class:onReceiveEntityUpdate(message, connectionId)
       local params = message[F_INC_DATA]
       self:_broadcastEntityUpdate(
           entity, EntityUpdateType.INCREMENTING, params, connectionId)
+    else
+      self:_sendEntityUpdate(
+          entity,
+          EntityUpdateType.SYNCHRONIZING,
+          entity:getSynchronizedState(),
+          connectionId)
     end
   elseif t == EntityUpdateType.OUT_OF_SYNC then
     Class.superclass.onReceiveEntityUpdate(self, message, connectionId)
