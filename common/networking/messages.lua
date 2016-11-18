@@ -74,7 +74,7 @@ function messages.entityUpdate.create(id, entityType, params)
   }
 end
 
-function messages.entityUpdate.delete(id)
+function messages.entityUpdate.destroy(id)
   return {
     t=MessageType.ENTITY_UPDATE,
     i=id,

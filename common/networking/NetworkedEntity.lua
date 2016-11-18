@@ -100,7 +100,9 @@ end
 -- entityType: The type of entity to instantiate
 -- ...: The instantiation params to use when creating the new entity in the
 --   form of multiple unspecified arguments. These arguments will be passed to
---   the newly created local instance.
+--   the newly created local instance. See `createNewInstanceWithParams` to
+--   create a new entity with instantiation params received from a remote
+--   instance.
 --
 function Class.createNewInstance(manager, id, entityType, ...)
   assertType(id, "id", "number")
@@ -259,7 +261,7 @@ end
 function Class:sendIncrementalUpdate(update)
   if self:isLocked() then return end
   if PRINT_DEBUG then print("NetworkedEntity:sendIncrementalUpdate()") end
-  return self:getManager():broadcastEntityUpdate(self, update)
+  return self:getManager():publishIncrementalUpdate(self, update)
 end
 
 --
@@ -278,7 +280,7 @@ function Class:delete()
   self.entity = nil
   self.manager = nil
   entity:destroy()
-  manager:deleteEntity(self)
+  manager:destroyEntity(self)
 end
 
 --

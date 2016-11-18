@@ -7,7 +7,7 @@ require "NetworkedEntity"
 require "EventCoordinator"
 require "Serializer"
 
-local PRINT_DEBUG = false
+local PRINT_DEBUG = true
 
 local F_NETWORK_ENTITY_ID = "i"
 local F_ENTITY_UPDATE_TYPE = "u"
@@ -28,11 +28,16 @@ function Class:_init(connectionManager)
   Class.superclass._init(self)
   assertType(connectionManager, "connectionManager", ConnectionManager)
   self.connectionManager = connectionManager
+
+  -- Sparse array containing metadata on entities.
+  -- key: entity ID
+  -- val: table containing {
+  --   entitiy: the entity
+  --   idIndex: index of entity id in entityIds table
+  -- }
   self.entities = {}
   self.entityIds = {n = 0}
   self.nextId = 1
-  self.updatedSinceSync = {}
-  self.lastSyncNum = {}
 
   self.connectionManager:registerMessageListener(
     MessageType.ENTITY_UPDATE,
@@ -42,10 +47,139 @@ function Class:_init(connectionManager)
   self.entityCreateCoordinators = EventCoordinator()
   self.entityDeleteCoordinators = EventCoordinator()
 
-  -- Tracking connected instances
+  -- Sparse containing metadata on all connections.
+  -- key: connection ID. See table `connectionIds` to get non-sparse list of
+  --      tracked connection IDs.
+  -- value: connection metadata table {
+  --   id = connection id (redundant, equal to key)
+  --   entities = table of entity metadata for connection.
+  --     key: entity ID
+  --     value: {
+  --       syncNum = number of last sync sent/received to/from connection
+  --       updated = boolean if this was updated since last sync
+  --       inSync = flag tracking if the entity is still in sync
+  --   }
+  -- }
   self.connections = {}
+
+  -- Array containing all IDs of connections.
+  -- Key: arbitrary numerical index
+  -- Value: connection ID
   self.connectionIds = {}
 end
+
+
+
+--------------------------------------------------------------------------------
+--                               LOCAL METHODS                                --
+--------------------------------------------------------------------------------
+
+--
+-- Builds an entity string.
+--
+local function buildEntityChannelString(id)
+  id = instanceOf(id, NetworkedEntity) and id:getNetworkId() or id
+  return string.format("entity:%s", id)
+end
+
+
+
+--------------------------------------------------------------------------------
+--                             CONNECTION METHODS                             --
+--------------------------------------------------------------------------------
+
+--
+-- Gets the existing connection metadata object for the supplied arguments.
+-- Arguments can be either an existing connection metadata object or a
+-- connection ID.
+--
+function Class:getConnection(connection)
+  if type(connection) == "number" then
+    return self.connections[connection]
+  end
+  if type(connection) == "table" then
+    if connection.id and self.connections[connection.id] == connection then
+      return connection
+    end
+  end
+end
+
+--
+-- Adds a connection ID to receive entity updates.
+--
+function Class:addConnection(connectionId)
+  assertType(connectionId, "number")
+  local connection = self:getConnection(connectionId)
+  if connection then return end
+
+  -- Create connection metadata and store
+  connection = {
+    id = connectionId,
+    entities = {}
+  }
+  self.connections[connection.id] = connection
+
+  if PRINT_DEBUG then
+    print("adding connection "..connection.id.." to NetworkedEntityManager")
+  end
+
+  -- Append connection ID to list of existing connection IDs
+  table.insert(self.connectionIds, connection.id)
+
+  for entity in self:allEntities() do
+    self:_sendEntityUpdate(
+        entity,
+        EntityUpdateType.CREATING,
+        entity:getInstantiationParams(),
+        connection.id)
+  end
+end
+
+--
+-- Removes a connection from receiving entity updates.
+--
+function Class:removeConnection(connectionId)
+  assertType(connectionId, "number")
+  local connection = self:getConnection(connectionId)
+  if not connection then return end
+
+  -- Delete all metadata on connection
+  self.connections[connection.id] = nil
+  for k,v in ipairs(self.connectionIds) do
+    if v == connection.id then
+      table.remove(self.connectionIds, k)
+      break
+    end
+  end
+end
+
+--
+-- Iterator function that loops through all existing connection Ids.
+--
+function Class:allConnectionIds()
+  local i = 0
+  return function()
+    i = i + 1
+    return self.connectionIds[i]
+  end
+end
+
+--
+-- Iterator function that loops through all existing connection metadatas.
+--
+function Class:allConnections()
+  local i =0
+  return function()
+    i = i + 1
+    return self.connections[self.connectionIds[i]]
+  end
+end
+
+
+
+--------------------------------------------------------------------------------
+--                               ENTITY METHODS                               --
+--------------------------------------------------------------------------------
 
 --
 -- Gets an existing entity. Parameters can be:
@@ -59,30 +193,59 @@ function Class:getEntity(entity)
   if instanceOf(entity, NetworkedEntity) then
     
     -- Verify entity is managed by this instance
-    if self.entities[entity:getNetworkId()] == entity then
+    local e = self.entities[entity:getNetworkId()]
+    if e and e.entity == entity then
       return entity
     else
-      if PRINT_DEBUG then print("NetworkedEntityManager:getEntity f1", entity:getNetworkId()) end
       return nil -- Not managed by this instance; return nil.
     end
   elseif type(entity) == "number" then -- Search for entity by ID.
-    return self.entities[entity]
-  else
-    if PRINT_DEBUG then print("NetworkedEntityManager:getEntity f2", entity.." ("..type(entity)..")") end
+    local e = self.entities[entity]
+    return e and e.entity
   end
 end
 
-function Class:getNextId()
-  return self.nextId
-end
-
+--
+-- Claims a specific ID or a new ID if none is specified for a new entity and
+-- returns the id. If an entity already exists with the same ID, destroys that
+-- entity. Adds the claimed ID to the end of the entityIds array.
+--
 function Class:claimId(id)
+  id = id or self.nextId
   if self.nextId <= id then
     self.nextId = id + 1
+  end
+  if self:getEntity(id) then
+    self:destroyEntity(id)
   end
   self.entityIds.n = self.entityIds.n + 1
   self.entityIds[self.entityIds.n] = id
   return id
+end
+
+--
+-- Internal method for adding an existing method to this class and optionally
+-- broadcasts its creation to connected instances. Does not validate arguments.
+--
+function Class:_addEntity(entity, broadcast)
+  local id = entity:getNetworkId()
+  self.entities[id] = {
+    entity = entity,
+    idIndex = self.entityIds.n,
+  }
+  entity:getLocalEntity():registerWithSecretary(self:getSecretary())
+
+  for connection in self:allConnections() do
+    self:_setInSync(connection, id, true)
+  end
+
+  if broadcast then
+    self:_broadcastEntityUpdate(
+        entity, EntityUpdateType.CREATING, entity:getInstantiationParams())
+  end
+
+  self:notifyEntityCreateListeners(entity)
+  return entity
 end
 
 --
@@ -91,28 +254,21 @@ end
 -- This method should be used to create a local representation of an existing
 -- network entity.
 --
+-- Returns the newly created `NetworkedEntity`. Will delete any previous entity
+-- using the provided ID.
+--
 function Class:createEntityWithParams(id, entityType, params)
   assertType(id, "id", "number")
   assert(NetworkedEntityType.fromId(entityType),
       "entityType: "..entityType.." is not a valid NetworkedEntityType")
-  
-  -- If an entity already exists with the given ID, then fail
-  if self:getEntity(id) then
-    return
-  else
-    self:claimId(id)
-  end
+
+  -- Claim an ID. Will destroy the previous entity at that ID.
+  id = self:claimId(id)
   
   -- Instantiate a new entity and hook everything up
   local entity = NetworkedEntity.createNewInstanceWithParams(
       self, id, entityType, params)
-  for connectionId in self:allConnectionIds() do
-    self.lastSyncNum[connectionId][id] = 1
-  end
-  self.entities[id] = entity
-  entity:getLocalEntity():registerWithSecretary(self:getSecretary())
-  self:notifyEntityCreateListeners(entity)
-  return entity
+  return self:_addEntity(entity, false)
 end
 
 --
@@ -126,225 +282,68 @@ function Class:spawnEntity(entityType, ...)
       "entityType: "..entityType.." is not a valid NetworkedEntityType")
 
   -- Generate an ID.
-  local id = self:claimId(self:getNextId())
+  local id = self:claimId()
+
+  if PRINT_DEBUG then
+    print("spawning entity of type "..entityType.." with params:", ...)
+  end
 
   -- Instantiate a new entity and hook everything up.
   local entity = NetworkedEntity.createNewInstance(
       self, id, entityType, ...)
-  self.entities[id] = entity
-  entity:getLocalEntity():registerWithSecretary(self:getSecretary())  
-  self.connectionManager:sendMessageWithAckReset(
-      messages.entityUpdate.create(
-          entity:getNetworkId(),
-          entity:getEntityType(),
-          entity:getInstantiationParams()),
-      self:buildEntityChannelString(entity),
-      unpack(self.connectionIds))
-  for connectionId in self:allConnectionIds() do
-    self.lastSyncNum[connectionId][id] = 1
+  return self:_addEntity(entity, true)
+end
+
+--
+-- Removes the entity from this instance. Optionally notifies connections of
+-- destruction. Calls :destroy() on provided entity. Returns the destroyed
+-- entity or `nil` if the entity was already destroyed.
+--
+function Class:_removeEntity(entity, broadcast)
+  entity = self:getEntity(entity)
+  if not entity then return nil end
+
+  local id = entity:getNetworkId()
+
+  if broadcast then
+    self:_broadcastEntityUpdate(entity, EntityUpdateType.DESTROYING, nil)
   end
-  self:notifyEntityCreateListeners(entity)
+
+  -- DELETE RECORD OF ENTITY BEFORE PROPOGATING DESTRUCTION CALL
+  -- TO AVOID INFINITE RECURSION
+  self.entityIds[self.entities[id].idIndex] = nil
+  self.entities[id] = nil
+  for connection in self:allConnections() do
+    connection.entities[id] = nil
+  end
+
+  self:notifyEntityDeleteListeners(entity)
+  entity:delete()
   return entity
 end
 
 --
--- Delete an existing entity immediately; skips any animations and forces the
--- entity to cease existing.
+-- Deletes the entity from this entity manager and calls :destroy() on the
+-- supplied entity. Does nothing if this manager does not recognize the entity.
 --
-function Class:deleteEntity(entity)
-  entity = self:getEntity(entity)
-  if not entity then return end
-  
-  local entityId = entity:getNetworkId()
-  local channelString = self:buildEntityChannelString(entity)
-  
-  -- DELETE RECORD OF ENTITY BEFORE PROPOGATING DESTRUCTION CALL
-  -- TO AVOID INFINITE RECURSION
-  self.entities[entityId] = nil
-  for i = 1,self.entityIds.n do
-    if self.entityIds[i] == entityId then
-      self.entityIds[i] = nil
-      break
-    end
-  end
-  for connectionId in self:allConnectionIds() do
-    self.lastSyncNum[connectionId][entityId] = nil
-  end
-  entity:delete()
-
-  -- Notify connected instances
-  self.connectionManager:sendMessageWithAckReset(
-      messages.entityUpdate.delete(entityId), channelString, unpack(self.connectionIds))
-
-  self:notifyEntityDeleteListeners(entity)
+function Class:destroyEntity(entity)
+  return self:_removeEntity(entity, true)
 end
 
 --
--- Sends an incremental entity update to all connected remote instances.
+-- Loops through all entities, cleaning up any sparseness in the array.
 --
-function Class:broadcastEntityUpdate(entity, update)
-  for recipient in self:allConnectionIds() do
-    self.updatedSinceSync[recipient][entity:getNetworkId()] = true
-    local message = messages.entityUpdate.inc(
-        entity:getNetworkId(),
-        update,
-        self.lastSyncNum[recipient][entity:getNetworkId()])
-    self.connectionManager:sendMessage(message, recipient)
-  end
-end
-
---
--- Called to process and handle incoming entity update messages. Accepts
--- the message that was received as well as the ID of the connection that
--- sent the message.
---
-function Class:onReceiveEntityUpdate(message, connectionId)
-  local t = message[F_ENTITY_UPDATE_TYPE]
-  
-  if t == EntityUpdateType.CREATING then
-    self:onReceiveEntityCreate(message, connectionId)
-  elseif t == EntityUpdateType.DESTROYING then
-    self:onReceiveEntityDestroy(message, connectionId)
-  elseif t == EntityUpdateType.SYNCHRONIZING then
-    self:onReceiveEntitySync(message, connectionId)
-  elseif t == EntityUpdateType.INCREMENTING then
-    return self:onReceiveEntityInc(message, connectionId)
-  elseif t == EntityUpdateType.OUT_OF_SYNC then
-    self:onReceiveEntityOutOfSync(message, connectionId)
-  else
-    print("Unknown entity update type "..t)
-  end
-end
-
---
--- Handles an EntityUpdateType.CREATING message. Performs any necessary
--- validation and initiates the entity creation process.
---
-function Class:onReceiveEntityCreate(message, connectionId)
-  local id = message[F_NETWORK_ENTITY_ID]
-  
-  -- Verify that the entity doesn't already exist. If it does, then destroy it
-  -- and create a new one with the same ID.
-  local entity = self:getEntity(id)
-  if entity then
-    self:deleteEntity(entity)
-  end
-  
-  -- Extract relevant information from message.
-  local entityType = message[F_ENTITY_TYPE]
-  local params = message[F_CREATE_PARAMS]
-
-  self:createEntityWithParams(id, entityType, params)
-end
-
---
--- Handles an EntityUpdateType.DELETE message. Performs any necessary
--- validation and cleanup and destroys the underlying entity.
---
-function Class:onReceiveEntityDestroy(message, connectionId)
-  local id = message[F_NETWORK_ENTITY_ID]
-
-  -- Verify that the entity already exists. If not, cancel; there's nothing
-  -- left to do.
-  local entity = self:getEntity(id)
-  if not entity then return end
-
-  -- Destroy the entity
-  self:deleteEntity(entity)
-end
-
---
--- Handles an EntityUpdateType.SYNCHRONIZING message. Performs any necessary
--- validation and causes the associated entity to resynchronize state with the
--- contents of the received message.
---
-function Class:onReceiveEntitySync(message, connectionId)
-  local id = message[F_NETWORK_ENTITY_ID]
-
-  -- Verify that the entity already exists. If not, cancel; there's nothing
-  -- left to do.
-  local entity = self:getEntity(id)
-  if not entity then return end
-
-  if self.lastSyncNum[connectionId][entity:getNetworkId()] >=
-        message[F_SYNC_NUM] then
-    return
-  end
-
-  self.lastSyncNum[connectionId][entity:getNetworkId()] = message[F_SYNC_NUM]
-  entity:setSynchronizedState(message[F_SYNC_DATA])
-end
-
---
--- Handles an EntityUpdateType.INCREMENTING message. Performs any nessary
--- validation and causes the associated entity to incrementally change state
--- as long as the received state is in the correctly received order (i.e. no
--- incremental message was skipped since the last received update message).
---
-function Class:onReceiveEntityInc(message, connectionId)
-  local id = message[F_NETWORK_ENTITY_ID]
-  
-  -- Verify that the entity already exists. If not, cancel; there's nothing
-  -- left to do.
-  local entity = self:getEntity(id)
-  if not entity or message[F_SYNC_NUM] ~=
-      self.lastSyncNum[connectionId][entity:getNetworkId()] then
-    return
-  end
-  
-  local inSync = entity:performIncrementalUpdate(message[F_INC_DATA])
-
-  if not inSync then
-    self:onEntityIncUpdateFail(entity, connectionId)
-  end
-  return inSync
-end
-
---
--- Handles an entity inc update failing locally. This implementation sends
--- an out-of-date message to the connection with connectionId.
---
-function Class:onEntityIncUpdateFail(entity, connectionId)
-  self.connectionManager:sendMessage(
-      messages.entityUpdate.outOfSync(
-          entity:getNetworkId(),
-          self.lastSyncNum[connectionId][entity:getNetworkId()]),
-      connectionId)
-end
-
---
--- Handles an EntityUpdateType.OUT_OF_SYNC message. Sends the current state of
--- the entity.
---
-function Class:onReceiveEntityOutOfSync(message, connectionId)
-  local id = message[F_NETWORK_ENTITY_ID]
-  local entity = self:getEntity(id)
-
-  if self.updatedSinceSync[connectionId][entity:getNetworkId()]
-      and self.lastSyncNum[connectionId][entity:getNetworkId()] 
-          == message[F_SYNC_NUM] then
-    self.lastSyncNum[connectionId][entity:getNetworkId()] =
-        self.lastSyncNum[connectionId][entity:getNetworkId()] + 1
-    self.connectionManager:sendMessageWithAckReset(
-        messages.entityUpdate.sync(
-            entity:getNetworkId(),
-            entity:getEntityType(),
-            entity:getSynchronizedState(),
-            self.lastSyncNum[connectionId][entity:getNetworkId()]),
-        self:buildEntityChannelString(entity),
-        connectionId)
-    self.updatedSinceSync[connectionId][entity:getNetworkId()] = nil
-  end
-end
-
 function Class:allEntities()
   local nextId = self:allEntityIds()
   return function()
     local id = nextId()
-    return id and self.entities[id] or nil
+    return id and self.entities[id].entity or nil
   end
 end
 
+--
+-- Loops through all entity IDs, cleaning up any sparseness in the array.
+--
 function Class:allEntityIds()
   local i = 0
   local j = 0
@@ -357,59 +356,349 @@ function Class:allEntityIds()
       self.entityIds.n = self.entityIds.n - 1
     end
     self.entityIds[i] = self.entityIds[j]
+    if self.entityIds[i] then
+      self.entities[self.entityIds[i]].idIndex = i
+    end
     return self.entityIds[i]
   end
 end
 
-function Class:buildEntityChannelString(entity)
+
+
+--------------------------------------------------------------------------------
+--                               HELPER METHODS                               --
+--------------------------------------------------------------------------------
+
+function Class:_incrementSyncNum(connection, entity)
+  connection = self:getConnection(connection)
   entity = self:getEntity(entity)
-  return string.format("entity:%s", entity:getNetworkId())
+  local id = entity:getNetworkId()
+  if not connection.entities[id] then
+    connection.entities[id] = {}
+  end
+  if not connection.entities[id].syncNum then
+    connection.entities[id].syncNum = 1
+  end
+  connection.entities[id].syncNum = connection.entities[id].syncNum + 1
+end
+
+function Class:_getSyncNum(connection, entity)
+  connection = self:getConnection(connection)
+  entity = self:getEntity(entity)
+  local id = entity:getNetworkId()
+  if not connection.entities[id] or not connection.entities[id].syncNum then
+    return 1
+  end
+  return connection.entities[id].syncNum
+end
+
+function Class:_setSyncNum(connection, entity, value)
+  connection = self:getConnection(connection)
+  entity = self:getEntity(entity)
+  local id = entity:getNetworkId()
+  if not connection.entities[id] then
+    connection.entities[id] = {}
+  end
+  connection.entities[id].syncNum = value
+end
+
+function Class:_isUpdated(connection, entity, value)
+  connection = self:getConnection(connection)
+  entity = self:getEntity(entity)
+  local id = entity:getNetworkId()
+  if not connection.entities[id] then
+    connection.entities[id] = {}
+  end
+  return connection.entities[id].updated == true
+end
+
+function Class:_setUpdated(connection, entity, value)
+  connection = self:getConnection(connection)
+  entity = self:getEntity(entity)
+  local id = entity:getNetworkId()
+  if not connection.entities[id] then
+    connection.entities[id] = {}
+  end
+  connection.entities[id].updated = true
+end
+
+function Class:_isInSync(connection, entity)
+  connection = self:getConnection(connection)
+  entity = self:getEntity(entity)
+  local id = entity:getNetworkId()
+  if not connection.entities[id] then
+    connection.entities[id] = {}
+  end
+  return connection.entities[id].inSync == true
+end
+
+function Class:_setInSync(connection, entity, value)
+  connection = self:getConnection(connection)
+  entity = self:getEntity(entity)
+  local id = entity:getNetworkId()
+  if not connection.entities[id] then
+    connection.entities[id] = {}
+  end
+  connection.entities[id].inSync = value
+end
+
+
+
+--------------------------------------------------------------------------------
+--                           SENDING ENTITY UPDATES                           --
+--------------------------------------------------------------------------------
+
+--
+-- Sends an incremental entity update to all connected remote instances.
+-- Can include any number of optional connection IDs to exclude when
+-- broadcasting.
+--
+function Class:publishIncrementalUpdate(entity, update, ...)
+  self:_broadcastEntityUpdate(
+    entity, EntityUpdateType.INCREMENTING, update, ...)
 end
 
 --
--- Adds a connection ID to receive entity updates.
+-- Internal. Send the supplied update data to all known connections except for
+-- the ones supplied as optional arguments. Performs validation.
 --
-function Class:addConnection(connectionId)
-  assertType(connectionId, "number")
-  if self.connections[connectionId] then
+function Class:_broadcastEntityUpdate(entity, updateType, update, ...)
+
+  -- Mark supplied optional excluded IDs in table for quick lookup
+  local excluded = {}
+  for _,i in ipairs({...}) do
+    excluded[i] = true
+  end
+
+  -- Compile destination table
+  local destinations = {}
+  for connectionId in self:allConnectionIds() do
+    if not excluded[connectionId] then
+      table.insert(destinations, connectionId)
+    end
+  end
+
+  -- Send the message
+  return self:_sendEntityUpdate(
+      entity, updateType, update, unpack(destinations))
+end
+
+--
+-- Internal. Send thesupplied update data to all listed connections. Performs
+-- validation.
+--
+function Class:_sendEntityUpdate(entity, updateType, update, ...)
+  entity = self:getEntity(entity)
+  assert(entity, "entity not of supported type or not recognized by manager")
+  assert(
+      EntityUpdateType.fromId(updateType),
+      updateType.." not valid EntityUpdateType")
+  if updateType == EntityUpdateType.CREATING
+      or updateType == EntityUpdateType.SYNCHRONIZING
+      or updateType == EntityUpdateType.INCREMENTING then
+    assertType(update, "table")
+  end
+
+  -- Establish up some local variables
+  local id = entity:getNetworkId()
+  local entityType
+  if updateType == EntityUpdateType.CREATING
+      or updateType == EntityUpdateType.SYNCHRONIZING then
+    entityType = entity:getEntityType()
+  end
+
+  -- Loop through all known IDs, constructing and sending messages to each
+  -- and updating tracking variables for each based on message type.
+  for _,connection in ipairs({...}) do
+    connection = self:getConnection(connection)
+    if connection then
+      local message
+      local syncNum
+      local requiresAck = false
+
+      -- Build message
+      if updateType == EntityUpdateType.CREATING then
+        self:_setInSync(connection, entity, true)
+        message = messages.entityUpdate.create(id, entityType, update)
+        requiresAck = true
+      elseif updateType == EntityUpdateType.DESTROYING then
+        self:_setUpdated(connection, entity, false)
+        self:_setInSync(connection, entity, true)
+        message = messages.entityUpdate.destroy(id)
+        requiresAck = true
+      elseif updateType == EntityUpdateType.SYNCHRONIZING then
+        self:_setUpdated(connection, entity, false)
+        self:_setInSync(connection, entity, true)
+        syncNum = self:_incrementSyncNum(connection, entity)
+        message = messages.entityUpdate.sync(id, entityType, update, syncNum)
+        requiresAck = true
+      elseif updateType == EntityUpdateType.INCREMENTING then
+        self:_setUpdated(connection, entity, true)
+        syncNum = self:_getSyncNum(connection, entity)
+        message = messages.entityUpdate.inc(id, update, syncNum)
+      elseif updateType == EntityUpdateType.OUT_OF_SYNC then
+        syncNum = self:_getSyncNum(connection, entity)
+        message = messages.entityUpdate.outOfSync(id, syncNum)
+      end
+
+      -- Send message
+      if requiresAck then
+        self.connectionManager:sendMessageWithAckReset(
+            message, buildEntityChannelString(id), connection.id)
+      else
+        self.connectionManager:sendMessage(message, connection.id)
+      end
+    end
+  end
+end
+
+
+
+--------------------------------------------------------------------------------
+--                          RECEIVING ENTITY UPDATES                          --
+--------------------------------------------------------------------------------
+
+--
+-- Handles any incoming entity update messages. Is responsible for extracting
+-- the inner data from the network message before processing.
+--
+function Class:onReceiveEntityUpdate(message, connectionId)
+  local t = message[F_ENTITY_UPDATE_TYPE]
+  
+  if t == EntityUpdateType.CREATING then
+    return self:onReceiveEntityCreate(message, connectionId)
+  elseif t == EntityUpdateType.DESTROYING then
+    return self:onReceiveEntityDestroy(message, connectionId)
+  elseif t == EntityUpdateType.SYNCHRONIZING then
+    return self:onReceiveEntitySync(message, connectionId)
+  elseif t == EntityUpdateType.INCREMENTING then
+    return self:onReceiveEntityInc(message, connectionId)
+  elseif t == EntityUpdateType.OUT_OF_SYNC then
+    return self:onReceiveEntityOutOfSync(message, connectionId)
+  else
+    print("Unknown entity update type "..t)
+  end
+end
+
+--
+-- Handles an EntityUpdateType.CREATING message. Performs any necessary
+-- validation and initiates the entity creation process.
+--
+function Class:onReceiveEntityCreate(message, connectionId)
+
+  -- Extract relevant information from message.
+  local id = message[F_NETWORK_ENTITY_ID]
+  local entityType = message[F_ENTITY_TYPE]
+  local params = message[F_CREATE_PARAMS]
+
+  -- Create the new entity. Do not worry about colliding IDs, since ths method
+  -- will destroy any local entities with matching IDs.
+  self:createEntityWithParams(id, entityType, params)
+end
+
+--
+-- Handles an EntityUpdateType.DESTROYING message. Performs any necessary
+-- validation and cleanup and destroys the underlying entity.
+--
+function Class:onReceiveEntityDestroy(message, connectionId)
+  local id = message[F_NETWORK_ENTITY_ID]
+
+  -- Remove the entity. Manually handle broadcast of destruction message.
+  local entity = self:_removeEntity(id)
+  if entity then
+    self:_broadcastEntityUpdate(
+        entity, EntityUpdateType.DESTROYING, nil, connectionId)
+  end
+
+  return entity ~= nil
+end
+
+--
+-- Handles an EntityUpdateType.SYNCHRONIZING message. Performs any necessary
+-- validation and causes the associated entity to resynchronize state with the
+-- contents of the received message.
+--
+function Class:onReceiveEntitySync(message, connectionId)
+  local id = message[F_NETWORK_ENTITY_ID]
+  local syncNum = message[F_SYNC_NUM]
+  local params = message[F_SYNC_DATA]
+
+  -- Verify that the entity already exists. If not, cancel; there's nothing
+  -- left to do.
+  local entity = self:getEntity(id)
+  if not entity then return end
+
+  if self:_getSyncNum(connectionId, id) >= syncNum then
     return
   end
 
-  self.connections[connectionId] = true
-  table.insert(self.connectionIds, connectionId)
-  self.updatedSinceSync[connectionId] = {}
-  self.lastSyncNum[connectionId] = {}
-  for entityId in self:allEntityIds() do
-    self.lastSyncNum[connectionId][entityId] = 1
-  end
+  self:_setSyncNum(connectionId, id, syncNum)
+  entity:setSynchronizedState(params)
+  self:_setInSync(connectionId, id, true)
+  self:_setUpdated(connectionId, id, false)
 end
 
 --
--- Removes a connection from receiving entity updates.
+-- Handles an EntityUpdateType.INCREMENTING message. Performs any nessary
+-- validation and causes the associated entity to incrementally change state.
+-- If the received update's base sync number is not equal to the most recently
+-- received sync num, then thism ethod does nothing.
 --
-function Class:removeConnection(connectionId)
-  assertType(connectionId, "number")
-  self.connections[connectionId] = nil
-  for k,v in ipairs(self.connectionIds) do
-    if v == connectionId then
-      table.remove(self.connectionIds, k)
-      break
+-- Returns true if the entity was notified of the update.
+--
+function Class:onReceiveEntityInc(message, connectionId)
+  local id = message[F_NETWORK_ENTITY_ID]
+  local syncNum = message[F_SYNC_NUM]
+  local params = message[F_INC_DATA]
+
+  -- Verify that the entity already exists and that the message's base sync
+  -- number matches the local one.
+  local entity = self:getEntity(id)
+  if not entity
+      or self:_getSyncNum(connectionId, id) ~= syncNum
+      or not self:_isInSync(connectionId, id) then
+    return false
+  end
+
+  local inSync = entity:performIncrementalUpdate(params)
+  self:_setInSync(connectionId, id, inSync)
+
+  for connection in self:allConnections() do
+    if connection.id ~= connectionId then
+      self:_setUpdated(connection.id, entity, true)
     end
   end
-  self.updatedSinceSync[connectionId] = {}
-  self.lastSyncNum[connectionId] = nil
+
+  return true
 end
 
 --
--- Iterator function that automatically cleans out removed connections.
+-- Handles an EntityUpdateType.OUT_OF_SYNC message. Sends the current state of
+-- the entity.
 --
-function Class:allConnectionIds()
-  local i = 0
-  return function()
-    i = i + 1
-    return self.connectionIds[i]
+function Class:onReceiveEntityOutOfSync(message, connectionId)
+  local id = message[F_NETWORK_ENTITY_ID]
+  local syncNum = message[F_SYNC_NUM]
+
+  -- Short circuit if we don't know that entity or if we've already sent a sync
+  local entity = self:getEntity(id)
+  if not entity or self:_getSyncNum(connectionId, id) ~= syncNum then
+    return false
   end
+
+  self:_sendEntityUpdate(
+    entity,
+    EntityUpdateType.SYNCRONIZING,
+    entity:getSynchronizedState(),
+    connectionId)
+  return true
 end
+
+
+
+--------------------------------------------------------------------------------
+--                            ENTITY NOTIFICATIONS                            --
+--------------------------------------------------------------------------------
 
 --
 -- Listeners receive the NetworkedEntityManager triggering event and the entity
@@ -417,7 +706,7 @@ end
 -- all entities if entityType is nil.
 --
 function Class:registerEntityCreateListener(listener, callback, entityType)
-  self:registerEntityEventListener(
+  self:_registerEntityEventListener(
       listener, callback, entityType, self.entityCreateCoordinators)
 end
 
@@ -427,11 +716,15 @@ end
 -- all entities if entityType is nil.
 --
 function Class:registerEntityDeleteListener(listener, callback, entityType)
-  self:registerEntityEventListener(
+  self:_registerEntityEventListener(
       listener, callback, entityType, self.entityDeleteCoordinators)
 end
 
-function Class:registerEntityEventListener(
+--
+-- Registers an entity listener for the given entity update type or all entity
+-- update types.
+--
+function Class:_registerEntityEventListener(
     listener, callback, entityType, coordinators)
   if entityType then
     assert(NetworkedEntityType.fromId(entityType),
@@ -451,17 +744,20 @@ end
 -- Notifies listeners of entity creation.
 --
 function Class:notifyEntityCreateListeners(entity)
-  self:notifyEntityEventListeners(entity, self.entityCreateCoordinators)
+  self:_notifyEntityEventListeners(entity, self.entityCreateCoordinators)
 end
 
 --
 -- Notifies listeners of entity deletion.
 --
 function Class:notifyEntityDeleteListeners(entity)
-  self:notifyEntityEventListeners(entity, self.entityDeleteCoordinators)
+  self:_notifyEntityEventListeners(entity, self.entityDeleteCoordinators)
 end
 
-function Class:notifyEntityEventListeners(entity, coordinators)
+--
+-- Notifies listeners of any type of entity event.
+--
+function Class:_notifyEntityEventListeners(entity, coordinators)
   entity = self:getEntity(entity)
   if not entity then return end
   local entityType = entity:getEntityType()
@@ -479,7 +775,7 @@ end
 -- Removes a registered listener.
 --
 function Class:unregisterEntityCreateListener(listener, callback)
-  self:unregisterEntityEventListener(
+  self:_unregisterEntityEventListener(
       listener, callback, self.entityCreateCoordinator)
 end
 
@@ -487,11 +783,14 @@ end
 -- Removes a registered listener.
 --
 function Class:unregisterEntityDeleteListener(listener, callback)
-  self:unregisterEntityEventListener(
+  self:_unregisterEntityEventListener(
       listener, callback, self.entityDeleteCoordinator)
 end
 
-function Class:unregisterEntityEventListeners(listener, callback, coordinators)
+--
+-- Unregisters a listener of the given type.
+--
+function Class:_unregisterEntityEventListener(listener, callback, coordinators)
   entity = self:getEntity(entity)
   if not entity then return end
   local entityType = entity:getEntityType()

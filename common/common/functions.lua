@@ -4,6 +4,10 @@
 -- Returns `true` or `false`
 --
 function instanceOf(object, class)
+  if type(class) == "string" then
+    return type(object) == class
+  end
+
   while object ~= nil and class ~= nil do
     if object == class then
       return true
@@ -12,6 +16,7 @@ function instanceOf(object, class)
       object = getmetatable(object)
     end
   end
+
   --No match found
   return false
 end

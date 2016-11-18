@@ -6,7 +6,7 @@ require "messages"
 require "Queue"
 require "Serializer"
 
-local PRINT_MESSAGES = true
+local PRINT_MESSAGES = false
 
 --
 -- Class that handles the sending and receiving of messages of UDP and
