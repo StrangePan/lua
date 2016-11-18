@@ -507,6 +507,10 @@ function Class:_sendEntityUpdate(entity, updateType, update, ...)
     entityType = entity:getEntityType()
   end
 
+  if PRINT_DEBUG and updateType == EntityUpdateType.SYNCHRONIZING then
+    print("sending sync of entity "..id.." to:", ...)
+  end
+
   -- Loop through all known IDs, constructing and sending messages to each
   -- and updating tracking variables for each based on message type.
   for _,connection in ipairs({...}) do
@@ -602,14 +606,15 @@ end
 --
 function Class:onReceiveEntityDestroy(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
+  local entity = self:getEntity(id)
 
   -- Remove the entity. Manually handle broadcast of destruction message.
-  local entity = self:_removeEntity(id)
   if entity then
     self:_broadcastEntityUpdate(
         entity, EntityUpdateType.DESTROYING, nil, connectionId)
   end
 
+  entity = self:_removeEntity(id)
   return entity ~= nil
 end
 
@@ -622,6 +627,11 @@ function Class:onReceiveEntitySync(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
   local syncNum = message[F_SYNC_NUM]
   local params = message[F_SYNC_DATA]
+
+  if PRINT_DEBUG then
+    print("received sync for "..id.." from "..connectionId)
+    print(Serializer.serialize(message))
+  end
 
   -- Verify that the entity already exists. If not, cancel; there's nothing
   -- left to do.
@@ -663,9 +673,11 @@ function Class:onReceiveEntityInc(message, connectionId)
   local inSync = entity:performIncrementalUpdate(params)
   self:_setInSync(connectionId, id, inSync)
 
-  for connection in self:allConnections() do
-    if connection.id ~= connectionId then
-      self:_setUpdated(connection.id, entity, true)
+  if inSync then
+    for connection in self:allConnections() do
+      if connection.id ~= connectionId then
+        self:_setUpdated(connection.id, entity, true)
+      end
     end
   end
 
