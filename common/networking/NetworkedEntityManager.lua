@@ -380,6 +380,7 @@ function Class:_incrementSyncNum(connection, entity)
     connection.entities[id].syncNum = 1
   end
   connection.entities[id].syncNum = connection.entities[id].syncNum + 1
+  return connection.entities[id].syncNum
 end
 
 function Class:_getSyncNum(connection, entity)
@@ -630,6 +631,7 @@ function Class:onReceiveEntitySync(message, connectionId)
 
   if PRINT_DEBUG then
     print("received sync for "..id.." from "..connectionId)
+    print("syncNum: ", syncNum, "local syncNum:", self:_getSyncNum(connectionId, id))
     print(Serializer.serialize(message))
   end
 
