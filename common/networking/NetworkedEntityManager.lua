@@ -628,7 +628,7 @@ function Class:onReceiveEntitySync(message, connectionId)
   local entity = self:getEntity(id)
   if not entity then return end
 
-  if self:_getSyncNum(connectionId, id) >= syncNum then
+  if not syncNum or self:_getSyncNum(connectionId, id) >= syncNum then
     return
   end
 
@@ -688,7 +688,7 @@ function Class:onReceiveEntityOutOfSync(message, connectionId)
 
   self:_sendEntityUpdate(
     entity,
-    EntityUpdateType.SYNCRONIZING,
+    EntityUpdateType.SYNCHRONIZING,
     entity:getSynchronizedState(),
     connectionId)
   return true
