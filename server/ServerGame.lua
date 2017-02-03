@@ -1,9 +1,9 @@
-require "Game"
+require "NetworkGame"
 require "ServerConnectionManager"
 require "ServerNetworkedEntityManager"
 require "NetworkedEntityType"
 
-ServerGame = buildClass(Game)
+ServerGame = buildClass(NetworkGame)
 local Class = ServerGame
 
 function Class:_init(secretary, connectionManager, entityManager)

@@ -1,4 +1,4 @@
-require "Game"
+require "NetworkGame"
 require "Camera"
 require "Actor"
 require "Player"
@@ -7,7 +7,7 @@ require "ClientConnectionManager"
 require "CommandMap"
 require "LocalPlayerController"
 
-ClientGame = buildClass(Game)
+ClientGame = buildClass(NetworkGame)
 local Class = ClientGame
 
 function Class:_init(secretary, connectionManager, entityManager)
