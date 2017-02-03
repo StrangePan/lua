@@ -3,7 +3,8 @@ require "CustomNetworkedEntityManager"
 require "Connection"
 require "ServerConnectionManager"
 require "ConnectionStatus"
-require "Serializer"
+
+local Serializer = require "Serializer"
 
 local PRINT_DEBUG = false
 

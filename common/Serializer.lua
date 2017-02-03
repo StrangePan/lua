@@ -1,9 +1,46 @@
 --
--- Static class for serializing and deserializing objects
+-- Utility class for serializing and deserializing objects
 --
-Serializer = {}
 
 local referenceTable
+
+local referenceCharacters = {
+  "1", "2", "3", "4", "5", "6",
+  "7", "8", "9", "0"
+}
+
+local numberCharacters = {
+  "1", "2", "3", "4", "5", "6",
+  "7", "8", "9", "0", ".", "-"
+}
+
+local labelCharacters = {
+  "a", "b", "c", "d", "e", "f",
+  "g", "h", "i", "j", "k", "l",
+  "m", "n", "o", "p", "q", "r",
+  "s", "t", "u", "v", "w", "x",
+  "y", "z", "A", "B", "C", "D",
+  "E", "F", "G", "H", "I", "J",
+  "K", "L", "M", "N", "O", "P",
+  "Q", "R", "S", "T", "U", "V",
+  "W", "X", "Y", "Z", "0", "1",
+  "2", "3", "4", "5", "6", "7",
+  "8", "9", "_"
+}
+
+local quotedStringEscapedCharacters = {
+  "\"", "\\"
+}
+
+local function flipArray(array)
+  for _,v in ipairs(array) do
+    array[v] = true
+  end
+end
+flipArray(referenceCharacters)
+flipArray(numberCharacters)
+flipArray(labelCharacters)
+flipArray(quotedStringEscapedCharacters)
 
 
 
@@ -45,30 +82,6 @@ local function parseQuotedString(data, start)
     return nil,start
   end
 end
-
-local referenceCharacters = {
-  "1", "2", "3", "4", "5", "6",
-  "7", "8", "9", "0"
-}
-
-local numberCharacters = {
-  "1", "2", "3", "4", "5", "6",
-  "7", "8", "9", "0", ".", "-"
-}
-
-local labelCharacters = {
-  "a", "b", "c", "d", "e", "f",
-  "g", "h", "i", "j", "k", "l",
-  "m", "n", "o", "p", "q", "r",
-  "s", "t", "u", "v", "w", "x",
-  "y", "z", "A", "B", "C", "D",
-  "E", "F", "G", "H", "I", "J",
-  "K", "L", "M", "N", "O", "P",
-  "Q", "R", "S", "T", "U", "V",
-  "W", "X", "Y", "Z", "0", "1",
-  "2", "3", "4", "5", "6", "7",
-  "8", "9", "_"
-}
 
 local function parseLabel(data,start)
   local i = start
@@ -259,14 +272,9 @@ end
 
 
 
-
 ------------------------------------------ SERIALIZATION -------------------------------------------
 
 
-
-local quotedStringEscapedCharacters = {
-  "\"", "\\"
-}
 
 local function serializeQuotedString(object)
   assert(type(object)=="string")
@@ -396,6 +404,8 @@ end
 
 
 
+local Serializer = {}
+
 --
 -- Creates a table out of a string of data that has been created by the serialize() function
 --
@@ -414,14 +424,4 @@ function Serializer.serialize(object)
   return serializeTable(object)
 end
 
-
-
-local function flipArray(array)
-  for _,v in ipairs(array) do
-    array[v] = true
-  end
-end
-flipArray(referenceCharacters)
-flipArray(numberCharacters)
-flipArray(labelCharacters)
-flipArray(quotedStringEscapedCharacters)
+return Serializer

@@ -5,7 +5,8 @@ require "NetworkedEntityType"
 require "EntityUpdateType"
 require "NetworkedEntity"
 require "EventCoordinator"
-require "Serializer"
+
+local Serializer = require "Serializer"
 
 local PRINT_DEBUG = true
 

@@ -4,7 +4,8 @@ require "EventCoordinator"
 require "MessageType"
 require "messages"
 require "Queue"
-require "Serializer"
+
+local Serializer = require "Serializer"
 
 local PRINT_MESSAGES = false
 
