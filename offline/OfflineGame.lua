@@ -2,6 +2,7 @@ require "Game"
 require "Camera"
 require "Actor"
 require "Player"
+require "Switch"
 require "Secretary"
 require "CommandMap"
 require "LocalPlayerController"
@@ -14,11 +15,17 @@ function Class:_init(secretary)
 
   self.commandMap = CommandMap()
   local commandMap = self.commandMap
+  commandMap:mapCommandToKeyboardKey(CommandType.QUIT, "escape")
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_UP, "up")
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_RIGHT, "right")
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_DOWN, "down")
   commandMap:mapCommandToKeyboardKey(CommandType.MOVE_LEFT, "left")
   commandMap:mapCommandToKeyboardKey(CommandType.EMOTE_SPIN, "space")
+  
+  commandMap:registerCommandListener(CommandType.QUIT, self, function(self)
+      self:stop()
+      love.event.quit()
+    end)
 end
 
 function Class:start()
@@ -53,7 +60,7 @@ function Class:setUpLevel()
     {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
-    {1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1},
+    {1, 0, 0, 1, 0, 3, 0, 0, 0, 1, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -73,6 +80,8 @@ function Class:setUpLevel()
         local controller = LocalPlayerController(player, self.commandMap)
         self.camera:setSubject(player)
         self.camera:jumpToSubject(player)
+      elseif mapCode == 3 then
+        Switch(realX, realY):registerWithSecretary(secretary)
       end
     end
   end
