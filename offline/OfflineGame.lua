@@ -62,8 +62,8 @@ function Class:setUpLevel()
   local secretary = self:getSecretary()
   for mapY,row in ipairs(mapCodes) do
     for mapX,mapCode in ipairs(row) do
-      local realX = (mapX - 1) * 32
-      local realY = (mapY - 1) * 32
+      local realX = (mapX - 1)
+      local realY = (mapY - 1)
       
       if mapCode == 1 then
         Wall(realX, realY):registerWithSecretary(secretary)

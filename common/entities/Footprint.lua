@@ -1,18 +1,19 @@
 require "common/class"
 require "Entity"
+require "MazerinoTranslations"
 
 Footprint = buildClass(Entity)
 
-function Footprint:_init(r, g, b, x, y, w, h)
+function Footprint:_init(r, g, b, x, y)
   Footprint.superclass._init(self)
   
   self.r = r
   self.g = g
   self.b = b
-  self.x = x
-  self.y = y
-  self.w = w
-  self.h = h
+  self.x = toScreen(x)
+  self.y = toScreen(y)
+  self.w = toScreen(1)
+  self.h = toScreen(1)
   
   self.a = 191
 end

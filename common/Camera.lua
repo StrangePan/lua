@@ -1,6 +1,7 @@
 require "common/functions"
 require "Entity"
 require "PhysObject"
+require "MazerinoTranslations"
 
 --
 -- Camera class for handling motion and keeping a subject within view.
@@ -46,8 +47,8 @@ end
 --
 function Class:jumpToSubject(subject)
   assertType(subject, "subject", PhysObject)
-  local px, py = subject:getPosition()
-  local pw, ph = subject:getSize()
+  local px, py = toScreen(subject:getPosition())
+  local pw, ph = toScreen(subject:getSize())
   self:jumpTo(px + pw / 2, py + ph / 2)
 end
 
@@ -128,8 +129,8 @@ function Class:onStep()
     return
   end
   
-  local ox,oy = self.subject:getPosition()
-  local ow,oh = self.subject:getSize()
+  local ox,oy = toScreen(self.subject:getPosition())
+  local ow,oh = toScreen(self.subject:getSize())
   
   self.x = ox + ow/2
   self.y = oy + oh/2

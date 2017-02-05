@@ -2,6 +2,7 @@ require "PhysObject"
 require "Footprint"
 require "EventCoordinator"
 require "Color"
+require "MazerinoTranslations"
 
 Actor = buildClass(PhysObject)
 
@@ -10,13 +11,13 @@ function Actor:_init()
   
   self.angle = 0
   self.drawAngle = self.angle
-  self.xStep = 32
-  self.yStep = 32
+  self.xStep = 1
+  self.yStep = 1
   
   self.color = Color(127, 127, 255)
 
-  self:setSize(32, 32)
-  self:setPosition(self.xStep, self.yStep)
+  self:setSize(1, 1)
+  self:setPosition(0, 0)
   
   self.moveEventCoordinator = EventCoordinator()
   self.spinEventCoordinator = EventCoordinator()
@@ -137,9 +138,8 @@ function Actor:tryMove(direction, force)
     end
   end
   
-  local w, h = self:getSize()
   local r, g, b = self:getColor():getRGBA()
-  Footprint(r, g, b, x, y, w, h):registerWithSecretary(secretary)
+  Footprint(r, g, b, x, y):registerWithSecretary(secretary)
   self:setPosition(xNext, yNext)
   return true
 end
@@ -226,10 +226,10 @@ end
 
 function Actor:draw()
   love.graphics.push()
-  local x, y = self:getPosition()
+  local x, y = toScreen(self:getPosition())
   x = x + self.bumpOffsetX
   y = y + self.bumpOffsetY
-  local w, h = self:getSize()
+  local w, h = toScreen(self:getSize())
   local ox = w/2
   local oy = h/2
   love.graphics.setColor(self:getColor():getRGBA())

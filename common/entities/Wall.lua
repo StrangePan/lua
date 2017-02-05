@@ -1,6 +1,7 @@
 require "common/class"
 require "Direction"
 require "PhysObject"
+require "MazerinoTranslations"
 
 Wall = buildClass(PhysObject)
 
@@ -8,7 +9,7 @@ function Wall:_init(x, y)
   Wall.superclass._init(self)
   
   self:setPosition(x or 0, y or 0)
-  self:setSize(32, 32)
+  self:setSize(1, 1)
   
   self.xOffset = 0
   self.yOffset = 0
@@ -63,10 +64,10 @@ end
 
 function Wall:draw()
   love.graphics.setColor(255, 255, 255)
-  local x, y = self:getPosition()
+  local x, y = toScreen(self:getPosition())
   x = x + self.xOffset
   y = y + self.yOffset
-  local w, h = self:getSize()
+  local w, h = toScreen(self:getSize())
   local scale = self.drawScale
   love.graphics.rectangle("fill", x + (w/2 - w/2 * scale), y + (h/2 - h/2 * scale), w * scale, h * scale)
 end

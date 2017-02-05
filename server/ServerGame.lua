@@ -37,8 +37,8 @@ function Class:onPlayerConnected(connectionId)
   entityManager:addConnection(connectionId)
 
   -- Assign new player a spawn location.
-  local spawnX = 64
-  local spawnY = 64
+  local spawnX = 2
+  local spawnY = 2
 
   -- Create player entity.
   local entity = entityManager:spawnEntity(
@@ -109,10 +109,7 @@ function Class:buildWalls()
   for wallY,row in ipairs(wallCodes) do
     for wallX,wallCode in ipairs(row) do
       if wallCode == 1 then
-        entityManager:spawnEntity(
-            NetworkedEntityType.WALL,
-            (wallX - 1) * 32,
-            (wallY - 1) * 32)
+        entityManager:spawnEntity(NetworkedEntityType.WALL, (wallX - 1), (wallY - 1))
       end
     end
   end
