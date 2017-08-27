@@ -1,4 +1,4 @@
-require "ConnectionManager"
+require "networking.ConnectionManager"
 
 --
 -- Connection handler for servers; maintains connections to multiple clients.

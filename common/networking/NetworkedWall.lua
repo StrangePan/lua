@@ -1,5 +1,5 @@
-require "NetworkedEntity"
-require "Wall"
+require "networking.NetworkedEntity"
+require "entities.Wall"
 
 -- Message fields.
 local F_X = "x"

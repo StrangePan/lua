@@ -1,7 +1,7 @@
-require "common/class"
-require "common/functions"
-require "Player"
-require "Direction"
+require "strangepan.util.class"
+require "strangepan.util.functions"
+require "entities.Player"
+require "entities.Direction"
 
 PlayerController = buildClass()
 local Class = PlayerController

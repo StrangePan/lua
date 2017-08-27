@@ -1,7 +1,7 @@
 require "Game"
-require "Secretary"
-require "ConnectionManager"
-require "NetworkedEntityManager"
+require "strangepan.secretary.Secretary"
+require "networking.ConnectionManager"
+require "networking.NetworkedEntityManager"
 
 NetworkGame = buildClass(Game)
 local Class = NetworkGame

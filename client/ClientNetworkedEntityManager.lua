@@ -1,5 +1,5 @@
-require "common/functions"
-require "CustomNetworkedEntityManager"
+require "strangepan.util.functions"
+require "networking.CustomNetworkedEntityManager"
 require "ClientConnectionManager"
 
 local F_NETWORK_ENTITY_ID = "i"

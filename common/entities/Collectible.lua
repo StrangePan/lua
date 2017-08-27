@@ -1,11 +1,11 @@
-require "PhysObject"
+require "strangepan.secretary.PhysObject"
 require "Color"
-require "MazerinoTranslations"
+require "entities.MazerinoTranslations"
 
-Switch = buildClass(PhysObject)
+Collectible = buildClass(PhysObject)
 
-function Switch:_init(x, y)
-  Switch.superclass._init(self)
+function Collectible:_init(x, y)
+  Collectible.superclass._init(self)
   self:setPosition(x, y)
   self:setSize(1, 1)
   self.animationTime = 0
@@ -13,20 +13,20 @@ function Switch:_init(x, y)
   self.color = Color(255, 255, 255)
 end
 
-function Switch:registerWithSecretary(secretary)
-  Switch.superclass.registerWithSecretary(self, secretary)
+function Collectible:registerWithSecretary(secretary)
+  Collectible.superclass.registerWithSecretary(self, secretary)
   secretary:registerEventListener(self, self.step, EventType.STEP)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
 end
 
-function Switch:step()
+function Collectible:step()
   self.animationTime = self.animationTime + self.animationStep
   while self.animationTime >= 1 do
     self.animationTime = self.animationTime - 1
   end
 end
 
-function Switch:draw()
+function Collectible:draw()
   love.graphics.push()
   local x, y = toScreen(self:getPosition())
   local w, h = toScreen(self:getSize())

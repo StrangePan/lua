@@ -1,4 +1,4 @@
-require "common/enum"
+require "strangepan.util.enum"
 
 -- Enum
 -- Defines depth for drawing layers

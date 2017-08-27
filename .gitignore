@@ -1,3 +1,6 @@
 .DS_Store
 *.bat
+offline/common
+client/common
+server/common
 

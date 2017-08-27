@@ -1,8 +1,8 @@
-require "common/functions"
-require "common/class"
+require "strangepan.util.functions"
+require "strangepan.util.class"
 require "EventCoordinator"
-require "MessageType"
-require "messages"
+require "networking.MessageType"
+require "networking.messages"
 require "Queue"
 
 local Serializer = require "Serializer"

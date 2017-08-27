@@ -1,6 +1,6 @@
-require "common/functions"
-require "common/class"
-require "Entity"
+require "strangepan.util.functions"
+require "strangepan.util.class"
+require "strangepan.secretary.Entity"
 
 EventCoordinator = buildClass(Entity)
 

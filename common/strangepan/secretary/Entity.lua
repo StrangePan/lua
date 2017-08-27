@@ -1,4 +1,4 @@
-require "common/class"
+require "strangepan.util.class"
 
 Entity = buildClass()
 local Class = Entity

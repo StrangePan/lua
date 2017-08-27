@@ -1,8 +1,8 @@
-require "common/functions"
-require "CustomNetworkedEntityManager"
-require "Connection"
+require "strangepan.util.functions"
+require "networking.CustomNetworkedEntityManager"
+require "networking.Connection"
 require "ServerConnectionManager"
-require "ConnectionStatus"
+require "networking.ConnectionStatus"
 
 local Serializer = require "Serializer"
 

@@ -1,5 +1,5 @@
-require "common/class"
-require "NetworkedEntityType"
+require "strangepan.util.class"
+require "networking.NetworkedEntityType"
 
 local PRINT_DEBUG = false
 

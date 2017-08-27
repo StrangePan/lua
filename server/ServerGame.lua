@@ -1,7 +1,7 @@
 require "NetworkGame"
 require "ServerConnectionManager"
 require "ServerNetworkedEntityManager"
-require "NetworkedEntityType"
+require "networking.NetworkedEntityType"
 
 ServerGame = buildClass(NetworkGame)
 local Class = ServerGame

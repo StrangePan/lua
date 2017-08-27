@@ -1,4 +1,4 @@
-require "Entity"
+require "strangepan.secretary.Entity"
 require "Set"
 
 Map = buildClass(Entity)

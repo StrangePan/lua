@@ -1,5 +1,5 @@
-require "common/class"
-require "Secretary"
+require "strangepan.util.class"
+require "strangepan.secretary.Secretary"
 
 Game = buildClass()
 local Class = Game

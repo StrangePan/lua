@@ -1,5 +1,5 @@
-require "NetworkedEntity"
-require "Actor"
+require "networking.NetworkedEntity"
+require "entities.Actor"
 require "Color"
 
 -- Message fields.

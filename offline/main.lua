@@ -1,8 +1,8 @@
-package.path = package.path..";./common/?.lua;./common/entities/?.lua"
+package.path = package.path..";../common/?.lua"
 
-require "LoveSecretary"
-require "Player"
-require "Wall"
+require "strangepan.secretary.LoveSecretary"
+require "entities.Player"
+require "entities.Wall"
 require "OfflineGame"
 
 function love.load()

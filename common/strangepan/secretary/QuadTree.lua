@@ -1,5 +1,5 @@
-require "common/class"
-require "common/functions"
+require "strangepan.util.class"
+require "strangepan.util.functions"
 
 QuadTree = buildClass()
 

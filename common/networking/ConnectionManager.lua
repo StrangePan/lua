@@ -1,7 +1,7 @@
-require "common/class"
-require "MessagePasser"
-require "Connection"
-require "ConnectionStatus"
+require "strangepan.util.class"
+require "networking.MessagePasser"
+require "networking.Connection"
+require "networking.ConnectionStatus"
 
 local PRINT_DEBUG = true
 

@@ -1,8 +1,8 @@
-require "PhysObject"
-require "Footprint"
+require "strangepan.secretary.PhysObject"
+require "entities.Footprint"
 require "EventCoordinator"
 require "Color"
-require "MazerinoTranslations"
+require "entities.MazerinoTranslations"
 
 Actor = buildClass(PhysObject)
 

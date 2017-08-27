@@ -1,4 +1,4 @@
-require "ConnectionManager"
+require "networking.ConnectionManager"
 
 --
 -- Message handler and coordinator for clients.

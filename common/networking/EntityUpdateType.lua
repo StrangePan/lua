@@ -1,4 +1,4 @@
-require "common/enum"
+require "strangepan.util.enum"
 
 EntityUpdateType = buildEnum(
   -- When an entity is created, its initial state communicated.

@@ -1,4 +1,3 @@
-
 --
 -- Test if argument 1 is an instance of argument 2
 -- Returns `true` or `false`

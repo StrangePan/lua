@@ -1,4 +1,4 @@
-require "common/enum"
+require "strangepan.util.enum"
 
 -- Enum
 -- Event types; used for event registration

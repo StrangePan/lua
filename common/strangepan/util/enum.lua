@@ -1,4 +1,4 @@
-require "common/functions"
+require "strangepan.util.functions"
 
 function buildEnum(...)
   local enum = {...}

@@ -1,4 +1,4 @@
-require "common/class.lua"
+require "strangepan.util.class"
 
 Set = buildClass()
 

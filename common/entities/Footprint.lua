@@ -1,6 +1,6 @@
-require "common/class"
-require "Entity"
-require "MazerinoTranslations"
+require "strangepan.util.class"
+require "strangepan.secretary.Entity"
+require "entities.MazerinoTranslations"
 
 Footprint = buildClass(Entity)
 

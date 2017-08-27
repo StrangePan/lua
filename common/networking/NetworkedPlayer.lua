@@ -1,5 +1,5 @@
-require "NetworkedActor"
-require "Player"
+require "networking.NetworkedActor"
+require "entities.Player"
 
 local PRINT_DEBUG = false
 

@@ -1,5 +1,5 @@
-require "common/class"
-require "Entity"
+require "strangepan.util.class"
+require "strangepan.secretary.Entity"
 
 --
 -- PhysObject

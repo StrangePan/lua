@@ -1,8 +1,8 @@
-package.path = package.path .. ";./common/?.lua;./common/entities/?.lua;./common/networking/?.lua"
+package.path = package.path..";../common/?.lua"
 
-require "LoveSecretary"
-require "Player"
-require "Wall"
+require "strangepan.secretary.LoveSecretary"
+require "entities.Player"
+require "entities.Wall"
 require "ClientGame"
 require "ClientConnectionManager"
 require "ClientNetworkedEntityManager"

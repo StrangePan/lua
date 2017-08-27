@@ -1,5 +1,5 @@
-require "MessageType"
-require "EntityUpdateType"
+require "networking.MessageType"
+require "networking.EntityUpdateType"
 
 messages = {}
 

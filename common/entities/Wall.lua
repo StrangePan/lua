@@ -1,7 +1,7 @@
-require "common/class"
-require "Direction"
-require "PhysObject"
-require "MazerinoTranslations"
+require "strangepan.util.class"
+require "entities.Direction"
+require "strangepan.secretary.PhysObject"
+require "entities.MazerinoTranslations"
 
 Wall = buildClass(PhysObject)
 

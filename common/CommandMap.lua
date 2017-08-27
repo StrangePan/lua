@@ -1,4 +1,4 @@
-require "common/class"
+require "strangepan.util.class"
 require "CommandType"
 require "InputMethod"
 require "EventCoordinator"

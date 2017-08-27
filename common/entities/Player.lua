@@ -1,4 +1,4 @@
-require "Actor"
+require "entities.Actor"
 
 Player = buildClass(Actor)
 

@@ -1,5 +1,5 @@
-require "common/Object"
-require "common/functions"
+require "strangepan.util.Object"
+require "strangepan.util.functions"
 
 --
 -- Builds a new class using the supplied table as a superclass..

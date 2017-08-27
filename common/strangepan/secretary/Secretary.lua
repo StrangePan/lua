@@ -1,10 +1,10 @@
-require "common/class"
-require "common/functions"
-require "QuadTree"
-require "EventType"
-require "DrawLayer"
-require "Entity"
-require "PhysObject"
+require "strangepan.util.class"
+require "strangepan.util.functions"
+require "strangepan.secretary.QuadTree"
+require "strangepan.secretary.EventType"
+require "strangepan.secretary.DrawLayer"
+require "strangepan.secretary.Entity"
+require "strangepan.secretary.PhysObject"
 
 Secretary = buildClass()
 local Class = Secretary

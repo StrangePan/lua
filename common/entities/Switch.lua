@@ -1,6 +1,6 @@
-require "PhysObject"
+require "strangepan.secretary.PhysObject"
 require "Color"
-require "MazerinoTranslations"
+require "entities.MazerinoTranslations"
 
 Switch = buildClass(PhysObject)
 

@@ -1,4 +1,4 @@
-require "Secretary"
+require "strangepan.secretary.Secretary"
 
 --
 -- Secretary object that is specifically compatible with Love2D and

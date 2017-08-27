@@ -1,6 +1,6 @@
-require "common/class"
-require "common/functions"
-require "ConnectionStatus"
+require "strangepan.util.class"
+require "strangepan.util.functions"
+require "networking.ConnectionStatus"
 
 --
 -- Class for maintaining information on connections. Rather than using a

@@ -1,4 +1,4 @@
-require "common/class"
+require "strangepan.util.class"
 
 --
 -- Class for storing color values.
