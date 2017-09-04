@@ -28,11 +28,6 @@ function class:_init()
 
   -- sorted table of integers representing indexes into self.callbacks[EventType.DRAW] table.
   self.layers = SortedSet()
-  
-  -- Prepare callback lists
-  for t in EventType.values() do
-    self.callbacks[t] = {n = 0}
-  end
 end
 
 
@@ -223,18 +218,23 @@ function class:registerEventListener(object, listener, eventType, ...)
   assert(eventType ~= nil, "eventType must be a valid EventType")
   
   -- Verify optional arguments
-  local drawLayer = class.DEFAULT_PRIORITY
+  local priority = class.DEFAULT_PRIORITY
   local watchObject = object
   
-  if eventType == EventType.DRAW and arg[1] ~= nil then
-    
-    -- User is registering for drawing, optional parameter can be layer
-    assertType(drawLayer, 'optional parameter 1', 'integer')
-  elseif eventType == EventType.DESTROY and arg[1] ~= nil then
-    
+  if eventType == EventType.DESTROY and arg[1] ~= nil then
     -- Users is registering for desruction, optional parameter can be object to watch
+    assertType(arg[1], 'optional parameter 1', Entity)
     watchObject = arg[1]
-    assertType(watchObject, "watchObject", Entity)
+    
+    -- second optional parameter can be priority
+    if arg[2] ~= nil then
+      assertType(arg[2], 'optional parameter 2', 'integer')
+      priority = arg[2]
+    end
+  elseif arg[1] ~= nil then
+    -- Optional parameter can be layer
+    assertType(arg[1], 'optional parameter 1', 'integer')
+    priority = arg[1]
   end
   
   -- Postpone if processing events
@@ -250,37 +250,41 @@ function class:registerEventListener(object, listener, eventType, ...)
     object = object,
     listener = listener,
     eventType = eventType,
-    index = 0
+    index = 0,
+    priority = priority,
+    watchObject = eventType == EventType.DESTROY and watchObject or nil
   }
   
-  -- Customize callback object based on callback type
-  if eventType == EventType.DRAW then
-    callback.drawLayer = drawLayer
-  elseif eventType == EventType.DESTROY then
-    callback.watchObject = watchObject
-  end
-  
   -- Insert callback into callback table indexed by event type
+  if not self.callbacks[eventType] then
+    self.callbacks[eventType] = {}
+  end
   local callbacks = self.callbacks[eventType]
-  if eventType == EventType.DRAW then
-    if not callbacks[drawLayer] then
-      callbacks[drawLayer] = {n = 0}
-    end
-    callbacks = callbacks[drawLayer]
-    self.layers:insert(drawLayer)
-  elseif eventType == EventType.DESTROY then
-    if callbacks[callback.watchObject] == nil then
-      callbacks[callback.watchObject] = {n = 0}
+
+  if eventType == EventType.DESTROY then
+    if not callbacks[callback.watchObject] then
+      callbacks[callback.watchObject] = {}
     end
     callbacks = callbacks[callback.watchObject]
   end
+  
+  if not callbacks.priorities then
+    callbacks.priorities = SortedSet()
+  end
+
+  if not callbacks[priority] then
+    callbacks[priority] = {n = 0}
+    callbacks.priorities:insert(priority)
+  end
+  callbacks = callbacks[priority]
+
   local n = callbacks.n + 1
   callbacks[n] = callback
-  callbacks.n = n
   callback.index = n
-  
+  callbacks.n = n
+
   -- Create table entry for object if none exists
-  if self.callbacks[object] == nil then
+  if not self.callbacks[object] then
     self.callbacks[object] = {n = 0}
   end
   
@@ -301,45 +305,62 @@ Moves an object's draw callback(s) to a new draw layer.
   object has multiple draw callbacks registered
 ]]
 function class:setDrawLayer(object, drawLayer, listener)
+  self:setEventPriority(object, listener, EventType.DRAW, drawLayer)
+end
+
+function class:setEventPriority(object, listener, eventType, priority, watchObject)
   
   -- Validate arguments
   assertType(object, "object", "table")
-  assertType(drawLayer, "drawLayer", "integer")
+  if listener then
+    assertType(listener, "listener", "function")
+  end
+  assert(EventType.fromId(eventType), "eventType must be a valid EventType: "..eventType.." received.")
+  assertType(priority, "priority", "integer")
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue:push(self.setDrawLayer, self, object, drawLayer, listener)
+    self.queue:push(self.setDrawLayer, self, object, listener, priority, watchObject)
     return
   end
   
   -- Make sure callbacks exist for the given object
   local callbacks = self.callbacks[object]
-  if callbacks == nil then
+  if not callbacks then
     return
   end
   
   -- Search through object's callbacks for a match with parameters
   for i, callback in ipairs(callbacks) do
-    if callback and
-       callback.eventType == EventType.DRAW and
-       (listener == nil or callback.listener == listener) and
-       callback.drawLayer ~= drawLayer then
+    if callback
+        and callback.eventType == eventType
+        and (listener == nil or callback.listener == listener)
+        and (watchObject == nil or callback.watchObject == watchObject) then
       
-      -- Remove from old drawing layer
-      self.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
-      
-      -- Insert into new layer at end of list
-      if not self.callbacks[callback.eventType][drawLayer] then
-        self.callbacks[callback.eventType][drawLayer] = {n = 0}
-        self.layers:insert(drawLayer)
+      -- Remove from old priority layer
+      local oldCallbacks = self.callbacks[callback.eventType]
+      if callback.eventType == EventType.DESTROY then
+        oldCallbacks = oldCallbacks[callback.watchObject]
       end
-      local newCallbacks = self.callbacks[callback.eventType][drawLayer]
+      oldCallbacks = oldCallbacks[callback.priority]
+      oldCallbacks[callback.index] = nil
+      
+      -- Insert into new priority layer at end of list
+      local newCallbacks = self.callbacks[callback.eventType]
+      if callback.eventType == EventType.DESTROY then
+        newCallbacks = newCallbacks[callback.watchObject]
+      end
+      if not newCallbacks[priority] then
+        newCallbacks[priority] = {n = 0}
+        newCallbacks.priorities:insert(priority)
+      end
+      newCallbacks = newCallbacks[priority]
       newCallbacks.n = newCallbacks.n + 1
       newCallbacks[newCallbacks.n] = callback
       
       -- Update values in callback
       callback.index = newCallbacks.n
-      callback.drawLayer = drawLayer
+      callback.priority = priority
     end
   end
 end
@@ -369,27 +390,27 @@ function class:unregisterAllListeners(object)
   end
   
   -- Enqueue destroy callbacks for current object
-  local destroyCallbacks = self.callbacks[EventType.DESTROY][object]
-  if destroyCallbacks ~= nil then
-    for i,callback in ipairs(destroyCallbacks) do
-      if callback then
-        self.queue:push(callback.listener, callback.object, callback.watchObject)
+  local destroyCallbacks = (self.callbacks[EventType.DESTROY]
+      and self.callbacks[EventType.DESTROY][object])
+  if destroyCallbacks then
+    for priority in destroyCallbacks.priorities:values() do
+      for i,callback in ipairs(destroyCallbacks[priority]) do
+        if callback then
+          self.queue:push(callback.listener, callback.object, callback.watchObject)
+        end
       end
     end
     self.callbacks[EventType.DESTROY][object] = nil
   end
   
-  -- Remove each callback from it's eventType table
+  -- Remove each callback from its eventType table
   for i,callback in ipairs(callbacks) do
     if callback then
-      if callback.eventType == EventType.DRAW then
-        self.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
-      elseif callback.eventType == EventType.DESTROY then
-        if self.callbacks[callback.eventType][callback.watchObject] ~= nil then
-          self.callbacks[callback.eventType][callback.watchObject][callback.index] = nil
-        end
+      if callback.eventType == EventType.DESTROY
+          and self.callbacks[callback.eventType][callback.watchObject] then
+        self.callbacks[callback.eventType][callback.watchObject][callback.priority][callback.index] = nil
       else
-        self.callbacks[callback.eventType][callback.index] = nil
+        self.callbacks[callback.eventType][callback.priority][callback.index] = nil
       end
     end
   end
@@ -429,19 +450,7 @@ end
 
 -- Called every draw step
 function class:onDraw()
-  local emptyLayers = {}
-
-  for layer in self.layers:values() do
-    self:executeCallbacks(self.callbacks[EventType.DRAW][layer])
-    if self.callbacks[EventType.DRAW][layer].n == 0 then
-      table.insert(emptyLayers, layer)
-    end
-  end
-  
-  for _,layer in ipairs(emptyLayers) do
-    self.layers:remove(layer)
-    self.callbacks[EventType.DRAW][layer] = nil
-  end
+  self:executeCallbacks(self.callbacks[EventType.DRAW])
 end
 
 -- Called every game step
@@ -565,46 +574,62 @@ them along to the callbacks.
 function class:executeCallbacks(callbacks, ...)
   local arg = {...}
   
+  if not callbacks then return end
+  
   -- Prevent concurrent modification
   self.postpone = true
   
-  -- Execute all registered callbacks registered with Secretary
-  local lastIndex = 0
-  for i = 1,callbacks.n do
-    local callback = callbacks[i]
+  -- Empty priority layers that will be cleaned up after execution
+  local emptyLayers = {}
+  
+  -- Execute all callbacks registered with Secretary
+  for priority in callbacks.priorities:values() do
     
-    -- Ensure callback exists
-    if callback then
+    local lastIndex = 0
+    for i = 1,callbacks[priority].n do
+      local callback = callbacks[priority][i]
       
-      -- Attempt to fill any gaps in table (in event of deleted objects)
-      lastIndex = lastIndex + 1
-      if lastIndex < i then
-        callbacks[lastIndex] = callback
-        callback.index = lastIndex
-        callbacks[i] = nil
-      end
-      
-      -- Convenience variables
-      local listener = callback.listener
-      local object = callback.object
-      
-      -- Use xpcall to prevent errors from destroying everything
-      local success, errmessage = xpcall(
-          function() return listener(object, unpack(arg)) end,
-          catchError --[[ function to handle errors ]])
-      
-      -- If error occured, display traceback and continue
-      if success == false then
-        print("Caused by:", errmessage)
+      -- Ensure callback exists
+      if callback then
+        -- Attempt to fill any gaps in table (in event of deleted objects)
+        lastIndex = lastIndex + 1
+        if lastIndex < i then
+          callbacks[priority][lastIndex] = callback
+          callback.index = lastIndex
+          callbacks[priority][i] = nil
+        end
+        
+        -- Convenience variables
+        local listener = callback.listener
+        local object = callback.object
+        
+        -- Use xpcall to prevent errors from destroying everything
+        local success, errmessage = xpcall(
+            function() return listener(object, unpack(arg)) end,
+            catchError --[[ function to handle errors ]])
+        
+        -- If error occured, display traceback and continue
+        if success == false then
+          print("Caused by:", errmessage)
+        end
       end
     end
+  
+  -- If gaps were detected and closed, decrease size of callback table
+    callbacks[priority].n = lastIndex
+    if callbacks[priority].n == 0 then
+      table.insert(emptyLayers, priority)
+    end
+  end
+  
+  -- Clean up any empty priority layers
+  for _,priority in ipairs(emptyLayers) do
+    callbacks.priorities:remove(priority)
+    callbacks[priority] = nil
   end
   
   -- Enable direct modification of callback lists
   self.postpone = false
-  
-  -- If gaps were detected and closed, decrease size of callback table
-  callbacks.n = lastIndex
   
   -- Empty any event queue we got
   self.queue:executeAll()
