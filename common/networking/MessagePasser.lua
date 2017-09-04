@@ -3,7 +3,7 @@ require "strangepan.util.class"
 require "EventCoordinator"
 require "networking.MessageType"
 require "networking.messages"
-require "Queue"
+require "strangepan.util.Queue"
 
 local Serializer = require "Serializer"
 

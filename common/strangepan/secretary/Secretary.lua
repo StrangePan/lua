@@ -6,17 +6,16 @@ require "strangepan.secretary.PhysObject"
 require "strangepan.util.class"
 require "strangepan.util.functions"
 require "strangepan.util.SortedSet"
+require "strangepan.util.FunctionQueue"
 
 Secretary = buildClass()
-local Class = Secretary
+local class = Secretary
 
-Class.DEFAULT_DRAW_LAYER = 1
+class.DEFAULT_PRIORITY = 1
 
 
---[[
-CONSTRUCTOR
-]]
-function Class:_init( )
+
+function class:_init()
   
   -- Collision detection data structure
   self.tree = QuadTree(1, -1000, 1000, 1000, -1000)
@@ -24,12 +23,12 @@ function Class:_init( )
   self.paused = false
   self.objectNodes = {}  -- table containing direct references to object quadtree nodes
   self.callbacks = {}    -- table containing all callbacks
-  self.queue = {n = 0}
+  self.queue = FunctionQueue()
   self.postpone = false
 
   -- sorted table of integers representing indexes into self.callbacks[EventType.DRAW] table.
   self.layers = SortedSet()
-
+  
   -- Prepare callback lists
   for t in EventType.values() do
     self.callbacks[t] = {n = 0}
@@ -49,7 +48,7 @@ Registers a new PhysObject with the Secretary.
 
 object: The new object to track collisions with.
 ]]
-function Class:registerPhysObject(object)
+function class:registerPhysObject(object)
   
   -- Validate arguments
   assertType(object, "object", PhysObject)
@@ -57,11 +56,7 @@ function Class:registerPhysObject(object)
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue.n = self.queue.n + 1
-    self.queue[self.queue.n] = {
-      func = self.registerPhysObject,
-      args = {self, object}
-    }
+    self.queue:push(self.registerPhysObject, self, object)
     return
   end
   
@@ -75,18 +70,14 @@ checks and data structures.
 
 object: The object to unregister.
 ]]
-function Class:unregisterPhysObject(object)
+function class:unregisterPhysObject(object)
   
   -- Validate arguments
   assertType(object, "object", PhysObject)
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue.n = self.queue.n + 1
-    self.queue[self.queue.n] = {
-      func = self.unregisterPhysObject,
-      args = {self, object}
-    }
+    self.queue:push(self.unregisterPhysObject, self, object)
     return
   end
   
@@ -100,7 +91,7 @@ and indexes for fast access.
 
 object: The object to update information for.
 ]]
-function Class:updateObject(object)
+function class:updateObject(object)
   local path = self.tree:getFullIndex(object:getBoundingBox())
   
   if path ~= self.objectNodes[object] then
@@ -128,7 +119,7 @@ supplied bounds.
 - Table containing indexed array of objects whose bounding boxes intersect
   with the supplied coordinates.
 ]]
-function Class:getCollisions(top, right, bottom, left, front, back, ...)
+function class:getCollisions(top, right, bottom, left, front, back, ...)
   local arg = {...}
   assert(top and right and bottom and left, "parameter(s) cannot be nil")
   
@@ -161,7 +152,7 @@ function Class:getCollisions(top, right, bottom, left, front, back, ...)
   return list
 end
 
-function Class:remove(object)
+function class:remove(object)
   if object:instanceOf(PhysObject) then
     self:unregisterPhysObject(object)
   end
@@ -170,7 +161,7 @@ end
 
 
 
-function Class:registerChildSecretary(child)
+function class:registerChildSecretary(child)
   
   -- Validate parameters
   assertType(child, "child", Secretary)
@@ -221,18 +212,18 @@ a previously registered object whose destruction is to be monitered.
   required for the given event type.
 - eventType: type of event the listener is listening for.
 ]]
-function Class:registerEventListener(object, listener, eventType, ...)
+function class:registerEventListener(object, listener, eventType, ...)
   local arg = {...}
   
   -- Verify arguments
   assertType(object, "object", "table")
-  assert (listener ~= nil, "Argument 'listener' cannot be nil")
-  assert (eventType ~= nil, "Argument 'eventType' cannot be nil")
+  assert(listener ~= nil, "Argument 'listener' cannot be nil")
+  assert(eventType ~= nil, "Argument 'eventType' cannot be nil")
   eventType = EventType.fromId(eventType)
-  assert (eventType ~= nil, "eventType must be a valid EventType")
+  assert(eventType ~= nil, "eventType must be a valid EventType")
   
   -- Verify optional arguments
-  local drawLayer = Class.DEFAULT_DRAW_LAYER
+  local drawLayer = class.DEFAULT_PRIORITY
   local watchObject = object
   
   if eventType == EventType.DRAW and arg[1] ~= nil then
@@ -248,11 +239,7 @@ function Class:registerEventListener(object, listener, eventType, ...)
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue.n = self.queue.n + 1
-    self.queue[self.queue.n] = {
-      func = self.registerEventListener,
-      args = {self, object, listener, eventType, unpack(arg)}
-    }
+    self.queue:push(self.registerEventListener, self, object, listener, eventType, unpack(arg))
     return
   end
   
@@ -313,7 +300,7 @@ Moves an object's draw callback(s) to a new draw layer.
 - listener (optional): specific draw function to move to drawLayer in case 
   object has multiple draw callbacks registered
 ]]
-function Class:setDrawLayer(object, drawLayer, listener)
+function class:setDrawLayer(object, drawLayer, listener)
   
   -- Validate arguments
   assertType(object, "object", "table")
@@ -321,11 +308,7 @@ function Class:setDrawLayer(object, drawLayer, listener)
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue.n = self.queue.n + 1
-    self.queue[self.queue.n] = {
-      func = self.setDrawLayer,
-      args = {self, object, drawLayer, listener}
-    }
+    self.queue:push(self.setDrawLayer, self, object, drawLayer, listener)
     return
   end
   
@@ -368,18 +351,14 @@ Deletes all callbacks associated with the given object.
 
 - object: The object to delete all registered callbacks for.
 ]]
-function Class:unregisterAllListeners(object)
+function class:unregisterAllListeners(object)
   
   -- Validate arguments
   assertType(object, "object", "table")
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue.n = self.queue.n + 1
-    self.queue[self.queue.n] = {
-      func = self.unregisterAllListeners,
-      args = {self, object}
-    }
+    self.queue:push(self.unregisterAllListeners, self, object)
     return
   end
   
@@ -394,11 +373,7 @@ function Class:unregisterAllListeners(object)
   if destroyCallbacks ~= nil then
     for i,callback in ipairs(destroyCallbacks) do
       if callback then
-        self.queue.n = self.queue.n + 1
-        self.queue[self.queue.n] = {
-          func = callback.listener,
-          args = {callback.object, callback.watchObject}
-        }
+        self.queue:push(callback.listener, callback.object, callback.watchObject)
       end
     end
     self.callbacks[EventType.DESTROY][object] = nil
@@ -430,7 +405,7 @@ Sets the current pause status of the secretary
 
 - paused: `true` if the secretary should be paused, `false` if it should become unpaused.
 ]]
-function Class:setPaused(paused)
+function class:setPaused(paused)
   self.paused = paused
 end
 
@@ -441,7 +416,7 @@ Gets whether the secretary is currently paused.
 
 - returns: `true` if the secretary is paused, `false` if not.
 ]]
-function Class:isPaused()
+function class:isPaused()
   return self.paused
 end
 
@@ -453,7 +428,7 @@ end
 
 
 -- Called every draw step
-function Class:onDraw()
+function class:onDraw()
   local emptyLayers = {}
 
   for layer in self.layers:values() do
@@ -470,113 +445,113 @@ function Class:onDraw()
 end
 
 -- Called every game step
-function Class:onPreStep()
+function class:onPreStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PRE_STEP])
 end
 
 -- Called every game step
-function Class:onStep()
+function class:onStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.STEP])
 end
 
 -- Called every game step
-function Class:onPostStep()
+function class:onPostStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.POST_STEP])
 end
 
 -- Called before every physics event
-function Class:onPrePhysics()
+function class:onPrePhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PRE_PHYSICS])
 end
 
 -- CAlled every step to execute physics
-function Class:onPhysics()
+function class:onPhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PHYSICS])
 end
 
 -- Called after physics event
-function Class:onPostPhysics()
+function class:onPostPhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.POST_PHYSICS])
 end
 
 -- Called when framework is shutting down
-function Class:onShutdown()
+function class:onShutdown()
   self:executeCallbacks(self.callbacks[EventType.SHUTDOWN])
 end
 
 -- Called when a keyboard button is pressed
-function Class:onKeyboardDown(key, scancode, isrepeat)
+function class:onKeyboardDown(key, scancode, isrepeat)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.KEYBOARD_DOWN], key, scancode, isrepeat)
 end
 
 -- Called when a keyboard button is released
-function Class:onKeyboardUp(key, scancode)
+function class:onKeyboardUp(key, scancode)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.KEYBOARD_UP], key, scancode )
 end
 
 -- Called when a mouse button is pressed
-function Class:onMouseDown(x, y, button, istouch)
+function class:onMouseDown(x, y, button, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_DOWN], x, y, button, istouch)
 end
 
 -- Called when a mouse button is released
-function Class:onMouseUp(x, y, button, istouch)
+function class:onMouseUp(x, y, button, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_UP], x, y, button, istouch)
 end
 
 -- Called when the mouse is moved
-function Class:onMouseMove(x, y, dx, dy, istouch)
+function class:onMouseMove(x, y, dx, dy, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_MOVE], x, y, dx, dy, istouch)
 end
 
 -- Called when the mouse wheel moves
-function Class:onMouseWheelMove(x, y)
+function class:onMouseWheelMove(x, y)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_WHEEL], x, y)
 end
 
 -- Called when a joystick button is pressed
-function Class:onJoystickDown(joystick, button)
+function class:onJoystickDown(joystick, button)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_DOWN], joystick, button)
 end
 
 -- Called when a joystick button is released
-function Class:onJoystickUp(joystick, button)
+function class:onJoystickUp(joystick, button)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_UP], joystick, button)
 end
 
 -- Called when a joystick is connected
-function Class:onJoystickAdd(joystick)
+function class:onJoystickAdd(joystick)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_ADD], joystick)
 end
 
 -- Called when a joystick is released
-function Class:onJoystickRemove(joystick)
+function class:onJoystickRemove(joystick)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_REMOVE], joystick)
 end
 
 -- Called when the game window is resized
-function Class:onWindowResize(w, h)
+function class:onWindowResize(w, h)
   self:executeCallbacks(self.callbacks[EventType.WINDOW_RESIZE], w, h)
 end
 
 -- Called before draw events are executed
-function Class:onPreDraw()
+function class:onPreDraw()
   self:executeCallbacks(self.callbacks[EventType.PRE_DRAW])
 end
 
@@ -587,7 +562,7 @@ Generic function that executes callbacks for a given event type.
 Handles errors and takes any variable number of arguments and passes
 them along to the callbacks.
 ]]
-function Class:executeCallbacks(callbacks, ...)
+function class:executeCallbacks(callbacks, ...)
   local arg = {...}
   
   -- Prevent concurrent modification
@@ -615,9 +590,8 @@ function Class:executeCallbacks(callbacks, ...)
       
       -- Use xpcall to prevent errors from destroying everything
       local success, errmessage = xpcall(
-        function() return listener(object, unpack(arg)) end,
-        catchError    -- function to handle errors
-      )
+          function() return listener(object, unpack(arg)) end,
+          catchError --[[ function to handle errors ]])
       
       -- If error occured, display traceback and continue
       if success == false then
@@ -633,11 +607,5 @@ function Class:executeCallbacks(callbacks, ...)
   callbacks.n = lastIndex
   
   -- Empty any event queue we got
-  while self.queue.n > 0 do
-    local queue = self.queue
-    self.queue = {n = 0}
-    for i = 1,queue.n do
-      queue[i].func(unpack(queue[i].args))
-    end
-  end
+  self.queue:executeAll()
 end

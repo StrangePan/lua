@@ -77,8 +77,7 @@ function Actor:registerWithSecretary(secretary)
   
   -- Register for event callbacks
   secretary:registerEventListener(self, self.onStep, EventType.STEP)
-  secretary:registerEventListener(self, self.draw, EventType.DRAW)
-  secretary:setDrawLayer(self, DrawLayer.MAIN)
+  secretary:registerEventListener(self, self.draw, EventType.DRAW, DrawLayer.MAIN)
   
   return self
 end

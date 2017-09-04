@@ -1,5 +1,5 @@
 require "PlayerController"
-require "Queue"
+require "strangepan.util.Queue"
 
 RemotePlayerController = buildClass(PlayerController)
 local Class = RemotePlayerController
