@@ -1,19 +1,21 @@
-require "strangepan.util.class"
-require "strangepan.util.functions"
 require "strangepan.secretary.QuadTree"
 require "strangepan.secretary.EventType"
 require "strangepan.secretary.DrawLayer"
 require "strangepan.secretary.Entity"
 require "strangepan.secretary.PhysObject"
+require "strangepan.util.class"
+require "strangepan.util.functions"
+require "strangepan.util.SortedSet"
 
 Secretary = buildClass()
 local Class = Secretary
 
+Class.DEFAULT_DRAW_LAYER = 1
 
 
---
--- CONSTRUCTOR
---
+--[[
+CONSTRUCTOR
+]]
 function Class:_init( )
   
   -- Collision detection data structure
@@ -25,19 +27,14 @@ function Class:_init( )
   self.queue = {n = 0}
   self.postpone = false
 
+  -- sorted table of integers representing indexes into self.callbacks[EventType.DRAW] table.
+  self.layers = SortedSet()
+
   -- Prepare callback lists
   for t in EventType.values() do
     self.callbacks[t] = {n = 0}
   end
-
-  for l in DrawLayer.values() do
-    self.callbacks[EventType.DRAW][l] = {n = 0}
-    if self.callbacks[EventType.DRAW][l].n < l then
-      self.callbacks[EventType.DRAW][l].n = l
-    end
-  end
 end
-
 
 
 
@@ -47,11 +44,11 @@ end
 --                            COLLISION SYSTEM                                --
 --------------------------------------------------------------------------------
 
---
--- Registers a new PhysObject with the Secretary.
---
--- object: The new object to track collisions with.
---
+--[[
+Registers a new PhysObject with the Secretary.
+
+object: The new object to track collisions with.
+]]
 function Class:registerPhysObject(object)
   
   -- Validate arguments
@@ -72,12 +69,12 @@ function Class:registerPhysObject(object)
   self.objectNodes[object] = self.tree:insert(object)
 end
 
---
--- Unregisters a PhysObject with the Secretary, removing them from collision
--- checks and data structures.
---
--- object: The object to unregister.
---
+--[[
+Unregisters a PhysObject with the Secretary, removing them from collision
+checks and data structures.
+
+object: The object to unregister.
+]]
 function Class:unregisterPhysObject(object)
   
   -- Validate arguments
@@ -97,12 +94,12 @@ function Class:unregisterPhysObject(object)
   self.tree:remove(object, self.objectNodes[object])
 end
 
---
--- Updates an object's status in the quadtree and other lists, updating caches
--- and indexes for fast access.
---
--- object: The object to update information for.
---
+--[[
+Updates an object's status in the quadtree and other lists, updating caches
+and indexes for fast access.
+
+object: The object to update information for.
+]]
 function Class:updateObject(object)
   local path = self.tree:getFullIndex(object:getBoundingBox())
   
@@ -113,24 +110,24 @@ function Class:updateObject(object)
   end
 end
 
---
--- Gets a list of all registered objets whose bouding boxes intersect with the
--- supplied bounds.
---
--- Parameters
---   top - required - number
---     Top coordinate of the bouding box to check.
---   right - required - number
---     Right coordinate of the bouding box to check.
---   bottom - required - number
---     Bottom coordinate of the bounding box to check.
---   left - required - number
---     Left coordinate of the bounding box to check.
---
--- Return
---   Table containing indexed array of objects whose bounding boxes intersect
---     with the supplied coordinates.
---
+--[[
+Gets a list of all registered objets whose bouding boxes intersect with the
+supplied bounds.
+
+#Parameters
+- top - required - number  
+  Top coordinate of the bouding box to check.
+- right - required - number  
+  Right coordinate of the bouding box to check.
+- bottom - required - number  
+  Bottom coordinate of the bounding box to check.
+- left - required - number  
+  Left coordinate of the bounding box to check.
+
+#Return
+- Table containing indexed array of objects whose bounding boxes intersect
+  with the supplied coordinates.
+]]
 function Class:getCollisions(top, right, bottom, left, front, back, ...)
   local arg = {...}
   assert(top and right and bottom and left, "parameter(s) cannot be nil")
@@ -207,23 +204,23 @@ end
 --                              EVENT SYSTEM                                  --
 --------------------------------------------------------------------------------
 
---
--- Adds a function to the callback table, indexing by event type and by owning
--- object.
---
--- Additional parameters can be supplied that are context-sensitive. If
--- `eventType` is `DRAW`, then only one additional optional parameter will be
--- accepted: the layer at which to draw the object.
---
--- If `eventType` is `DESTROY`, then only one optional paramter wll be accepted:
--- a previously registered object whose destruction is to be monitered.
---
--- object: Table that "owns" the listener function
--- listener: Function to be called on event trigger. The "object" parameter will
---           be passed as the first argument, followed by any other parameters
---           that are required for the given event type.
--- eventType: type of event the listener is listening for.
---
+--[[
+Adds a function to the callback table, indexing by event type and by owning
+object.
+
+Additional parameters can be supplied that are context-sensitive. If
+`eventType` is `DRAW`, then only one additional optional parameter will be
+accepted: the layer at which to draw the object.
+
+If `eventType` is `DESTROY`, then only one optional paramter will be accepted:
+a previously registered object whose destruction is to be monitered.
+
+- object: Table that "owns" the listener function
+- listener: Function to be called on event trigger. The "object" parameter will
+  be passed as the first argument, followed by any other parameters that are
+  required for the given event type.
+- eventType: type of event the listener is listening for.
+]]
 function Class:registerEventListener(object, listener, eventType, ...)
   local arg = {...}
   
@@ -235,14 +232,13 @@ function Class:registerEventListener(object, listener, eventType, ...)
   assert (eventType ~= nil, "eventType must be a valid EventType")
   
   -- Verify optional arguments
-  local drawLayer = DrawLayer.MAIN
+  local drawLayer = Class.DEFAULT_DRAW_LAYER
   local watchObject = object
   
   if eventType == EventType.DRAW and arg[1] ~= nil then
     
     -- User is registering for drawing, optional parameter can be layer
-    drawLayer = DrawLayer.fromId(arg[1])
-    assert (drawLayer ~= nil, "optional parameter 1 must be a valid DrawLayer")
+    assertType(drawLayer, 'optional parameter 1', 'integer')
   elseif eventType == EventType.DESTROY and arg[1] ~= nil then
     
     -- Users is registering for desruction, optional parameter can be object to watch
@@ -280,7 +276,11 @@ function Class:registerEventListener(object, listener, eventType, ...)
   -- Insert callback into callback table indexed by event type
   local callbacks = self.callbacks[eventType]
   if eventType == EventType.DRAW then
-    callbacks = callbacks[callback.drawLayer]
+    if not callbacks[drawLayer] then
+      callbacks[drawLayer] = {n = 0}
+    end
+    callbacks = callbacks[drawLayer]
+    self.layers:insert(drawLayer)
   elseif eventType == EventType.DESTROY then
     if callbacks[callback.watchObject] == nil then
       callbacks[callback.watchObject] = {n = 0}
@@ -305,19 +305,19 @@ end
 
 
 
---
--- Moves an object's draw callback(s) to a new draw layer.
---
--- object: Object whose draw function to move to drawLayer
--- drawLayer: New layer to move draw callback to
--- listener (optional): specific draw function to move to drawLayer
---     in case object has multiple draw callbacks registered
---
+--[[
+Moves an object's draw callback(s) to a new draw layer.
+
+- object: Object whose draw function to move to drawLayer
+- drawLayer: New layer to move draw callback to
+- listener (optional): specific draw function to move to drawLayer in case 
+  object has multiple draw callbacks registered
+]]
 function Class:setDrawLayer(object, drawLayer, listener)
   
   -- Validate arguments
   assertType(object, "object", "table")
-  assert(DrawLayer.fromId(drawLayer) ~= nil, "drawLayer must be a valid DrawLayer value")
+  assertType(drawLayer, "drawLayer", "integer")
   
   -- Postpone if processing events
   if self.postpone then
@@ -335,17 +335,21 @@ function Class:setDrawLayer(object, drawLayer, listener)
     return
   end
   
-  -- Search through object's calbacks for a match with parameters
+  -- Search through object's callbacks for a match with parameters
   for i, callback in ipairs(callbacks) do
     if callback and
        callback.eventType == EventType.DRAW and
-       (listener == nil or callback.listener == nil) and
+       (listener == nil or callback.listener == listener) and
        callback.drawLayer ~= drawLayer then
       
       -- Remove from old drawing layer
       self.callbacks[callback.eventType][callback.drawLayer][callback.index] = nil
       
       -- Insert into new layer at end of list
+      if not self.callbacks[callback.eventType][drawLayer] then
+        self.callbacks[callback.eventType][drawLayer] = {n = 0}
+        self.layers:insert(drawLayer)
+      end
       local newCallbacks = self.callbacks[callback.eventType][drawLayer]
       newCallbacks.n = newCallbacks.n + 1
       newCallbacks[newCallbacks.n] = callback
@@ -359,11 +363,11 @@ end
 
 
 
---
--- Deletes all callbacks associated with the given object.
---
--- object: The object to delete all registered callbacks for.
---
+--[[
+Deletes all callbacks associated with the given object.
+
+- object: The object to delete all registered callbacks for.
+]]
 function Class:unregisterAllListeners(object)
   
   -- Validate arguments
@@ -421,22 +425,22 @@ end
 
 
 
---
--- Sets the current pause status of the secretary
---
--- paused: `true` if the secretary should be paused, `false` if it should become unpaused.
---
+--[[
+Sets the current pause status of the secretary
+
+- paused: `true` if the secretary should be paused, `false` if it should become unpaused.
+]]
 function Class:setPaused(paused)
   self.paused = paused
 end
 
 
 
---
--- Gets whether the secretary is currently paused.
---
--- returns: `true` if the secretary is paused, `false` if not.
---
+--[[
+Gets whether the secretary is currently paused.
+
+- returns: `true` if the secretary is paused, `false` if not.
+]]
 function Class:isPaused()
   return self.paused
 end
@@ -450,8 +454,18 @@ end
 
 -- Called every draw step
 function Class:onDraw()
-  for l in DrawLayer.values() do
-    self:executeCallbacks(self.callbacks[EventType.DRAW][l])
+  local emptyLayers = {}
+
+  for layer in self.layers:values() do
+    self:executeCallbacks(self.callbacks[EventType.DRAW][layer])
+    if self.callbacks[EventType.DRAW][layer].n == 0 then
+      table.insert(emptyLayers, layer)
+    end
+  end
+  
+  for _,layer in ipairs(emptyLayers) do
+    self.layers:remove(layer)
+    self.callbacks[EventType.DRAW][layer] = nil
   end
 end
 
@@ -568,9 +582,11 @@ end
 
 
 
--- Generic function that executes callbacks for a given event type
--- Handles errors and takes any variable number of arguments and passes
--- them along to the callbacks.
+--[[
+Generic function that executes callbacks for a given event type.
+Handles errors and takes any variable number of arguments and passes
+them along to the callbacks.
+]]
 function Class:executeCallbacks(callbacks, ...)
   local arg = {...}
   

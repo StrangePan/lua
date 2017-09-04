@@ -60,13 +60,19 @@ function assertType(value, name, t)
       end
     end
   elseif type(t) == "string" then
-    if type(value) ~= t then
+    if type(value) ~= t and t ~= "integer" then
       if name then
         errMsg = "Unexpected type for "..name..": "..t.." expected, "
             ..type(object).." received."
       else
         errMsg = "Unexpected type: "..t.." expected, "
             ..type(object).." received."
+      end
+    elseif t == "integer" and type(value) == "number" and math.floor(value) ~= value then
+      if name then
+        errMsg = "Unexpected number format for "..name..": integer expected, non-integer received."
+      else
+        errMsg = "Unexpected number format: integer expected, non-integer received."
       end
     end
   end

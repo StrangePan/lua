@@ -22,7 +22,7 @@ function Footprint:registerWithSecretary(secretary)
   Footprint.superclass.registerWithSecretary(self, secretary)
   
   secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
-  secretary:registerEventListener(self, self.draw, EventType.DRAW)
+  secretary:registerEventListener(self, self.draw, EventType.DRAW, DrawLayer.BACKGROUND_PROPS)
   
   return self
 end
