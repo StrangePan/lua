@@ -1,5 +1,5 @@
 require "strangepan.util.class"
-require "strangepan.util.functions"
+require "strangepan.util.type"
 
 QuadTree = buildClass()
 
@@ -133,7 +133,7 @@ end
 function QuadTree:insert( object, top, right, bottom, left )
   
   -- Verify parameters
-  assertType(object, "object", PhysObject)
+  assertClass(object, PhysObject, "object")
   
   -- Optional arguments
   if left == nil then
@@ -309,7 +309,7 @@ function QuadTree:retrieve( list, top, right, bottom, left, ... )
         
         -- Scan buckets for matching buckets
         for _,a in ipairs(arg) do
-          if instanceOf(key, a) then
+          if checkType(key, a) then
             for _,obj in ipairs(val) do
               table.insert(list, obj)
             end

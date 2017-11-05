@@ -33,7 +33,7 @@ end
 function Class:registerWithSecretary(secretary)
   
   -- Ensure secretary is of correct type
-  assertType(secretary, "secretary", Secretary)
+  assertClass(secretary, Secretary, "secretary")
   
   -- Make sure we're not already registered with a secretary
   if self.secretary ~= nil then

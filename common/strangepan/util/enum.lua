@@ -1,4 +1,4 @@
-require "strangepan.util.functions"
+require "strangepan.util.type"
 
 function buildEnum(...)
   local enum = {...}
@@ -19,7 +19,7 @@ function buildEnum(...)
   end
 
   enum.fromId = function(id)
-    assertType(id, "id", "number")
+    assertNumber(id, "id")
     if id > enum.n or id < 1 then
       return nil
     else

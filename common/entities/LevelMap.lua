@@ -1,4 +1,5 @@
 require "strangepan.secretary.Entity"
+require "strangepan.util.type"
 require "Set"
 
 Map = buildClass(Entity)
@@ -10,7 +11,7 @@ function LevelMap:_init()
 end
 
 function LevelMap:addEntity(entity)
-  assertType(entity, "entity", Entity)
+  assertClass(entity, Entity, "entity")
   self.entities:add(entity)
 end
 

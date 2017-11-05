@@ -16,7 +16,7 @@ Returns `true` if the number was not previously in the set and was inserted and
 `false` if it was already in the set.
 ]]
 function class:insert(number)
-  assertType(number, 'number')
+  assertNumber(number)
   
   local n = #self.contents
   if n == 0 or self.contents[1] > number then
@@ -61,7 +61,7 @@ Returns `true` if the number was in the set and was removed and `false` if it wa
 in the set.
 ]]
 function class:remove(number)
-  assertType(number, 'number')
+  assertNumber(number)
   
   local n = #self.contents
   if n == 0 or self.contents[1] > number or self.contents[n] < number then
@@ -99,7 +99,7 @@ end
 Checks whether the set contains the given number.
 ]]
 function class:contains(number)
-  assertType(number, 'number')
+  assertNumber(number)
   
   local n = #self.contents
   if n == 0 then

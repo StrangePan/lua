@@ -1,12 +1,13 @@
-require "strangepan.util.class"
 require "strangepan.secretary.Secretary"
+require "strangepan.util.class"
+require "strangepan.util.type"
 
 Game = buildClass()
 local Class = Game
 
 function Class:_init(secretary)
   Class.superclass._init(self)
-  self.secretary = assertType(secretary, Secretary)
+  self.secretary = assertClass(secretary, Secretary, "secretary")
 end
 
 function Class:start()

@@ -26,7 +26,7 @@ local registeredEntities = {}
 --
 function Class.registerEntityType(entityType, entityClass)
   assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
-  assertType(entityClass, "entityClass", NetworkedEntity)
+  assertClass(entityClass, NetworkedEntity, "entityClass")
   assert(entityClass ~= Class, "Cannot register NetworkedEntity with itself!")
   if registeredEntities[entityType] then
     return false
@@ -57,7 +57,7 @@ end
 --   entity with individual construction params.
 --
 function Class.createNewInstanceWithParams(manager, id, entityType, params)
-  assertType(id, "id", "number")
+  assertNumber(id, "id")
   
   -- Ensure supplied entityType is indeed an NetworkedEntityType.
   assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
@@ -105,7 +105,7 @@ end
 --   instance.
 --
 function Class.createNewInstance(manager, id, entityType, ...)
-  assertType(id, "id", "number")
+  assertNumber(id, "id")
   
   -- Ensure supplied entityType is indeed an NetworkedEntityType.
   assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
@@ -132,10 +132,10 @@ end
 --
 function Class:_init(manager, networkId, entityType, params, entity)
   Class.superclass._init(self)
-  assertType(manager, "manager", NetworkedEntityManager)
-  assertType(networkId, "networkId", "number")
+  assertClass(manager, NetworkedEntityManager, "manager")
+  assertNumber(networkId, "networkId")
   assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
-  assertType(entity, "entity", Entity)
+  assertClass(entity, Entity, "entity")
 
   self.manager = manager
   self.id = networkId

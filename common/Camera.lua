@@ -1,6 +1,6 @@
-require "strangepan.util.functions"
 require "strangepan.secretary.Entity"
 require "strangepan.secretary.PhysObject"
+require "strangepan.util.type"
 require "entities.MazerinoTranslations"
 
 --
@@ -27,10 +27,8 @@ end
 -- over multiple draw cycles at an ease value set with `setEasing()`.
 --
 function Class:moveTowards(x, y)
-  assertType(x, "x", "number")
-  assertType(y, "y", "number")
-  self.x = x
-  self.y = y
+  self.x = assertNumber(x, "x")
+  self.y = assertNumber(y, "y")
 end
 
 --
@@ -46,7 +44,7 @@ end
 -- Immediately moves camera to be centered on the specified subject.
 --
 function Class:jumpToSubject(subject)
-  assertType(subject, "subject", PhysObject)
+  assertClass(subject, PhysObject, "subject")
   local px, py = toScreen(subject:getPosition())
   local pw, ph = toScreen(subject:getSize())
   self:jumpTo(px + pw / 2, py + ph / 2)
@@ -61,8 +59,7 @@ function Class:setSubject(subject)
     self.subject = nil
     return
   end
-  assertType(subject, "subject", PhysObject)
-  self.subject = subject
+  self.subject = assertClass(subject, PhysObject, "subject")
 end
 
 --
@@ -72,7 +69,7 @@ end
 -- or equal to 1.
 --
 function Class:setEasing(easeRatio)
-  assertType(easeRatio, "number")
+  assertNumber(easeRatio)
   assert(0 < easeRatio and easeRatio <= 1, "number must be (0..1]")
   self.easeRatio = easeRatio
 end

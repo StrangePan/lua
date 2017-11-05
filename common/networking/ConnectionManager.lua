@@ -1,4 +1,5 @@
 require "strangepan.util.class"
+require "strangepan.util.type"
 require "networking.MessagePasser"
 require "networking.Connection"
 require "networking.ConnectionStatus"
@@ -119,8 +120,8 @@ end
 -- Automatically assigns an ID.
 --
 function Class:createConnection(address, port)
-  assertType(address, "address", "string")
-  assertType(port, "port", "number")
+  assertString(address, "address")
+  assertNumber(port, "port")
   if self:getConnection(address, port) then return end
   
   local id = self.connectionIds.nxt
@@ -145,7 +146,7 @@ function Class:terminateConnection(connection, sendDisconnect)
   local connection = self:getConnection(connection)
   if not connection then return end
   if sendDisconnect then
-    assertType(sendDisconnect, "boolean")
+    assertBoolean(sendDisconnect)
     self:sendMessage(messages.disconnect(), connection)
   end
   self:setConnectionStatus(connection, ConnectionStatus.DISCONNECTED)
@@ -183,7 +184,7 @@ function Class:getConnection(...)
   local id = nil
   
   
-  if instanceOf(args[1], Connection) then
+  if checkType(args[1], Connection) then
     return args[1]
   end
   

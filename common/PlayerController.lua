@@ -1,5 +1,5 @@
 require "strangepan.util.class"
-require "strangepan.util.functions"
+require "strangepan.util.type"
 require "entities.Player"
 require "entities.Direction"
 
@@ -12,7 +12,7 @@ end
 
 function Class:setPlayer(player)
   if player then
-    assertType(player, "player", Player)
+    assertClass(player, Player, "player")
   end
 
   self.player = player

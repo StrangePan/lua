@@ -1,5 +1,5 @@
-require "strangepan.util.functions"
 require "strangepan.util.class"
+require "strangepan.util.type"
 require "EventCoordinator"
 require "networking.MessageType"
 require "networking.messages"
@@ -44,9 +44,9 @@ end
 -- Sends message object to the specified IP address and port number.
 --
 function Class:sendMessage(message, address, port)
-  assertType(message, "message", "table")
-  assertType(address, "address", "string")
-  assertType(port, "port", "number")
+  assertTable(message, "message")
+  assertString(address, "address")
+  assertNumber(port, "port")
   local outString = string.format("%s:%s", address, port)
   if not self.outbox[outString] then
     self.outbox[outString] = {
@@ -60,8 +60,7 @@ function Class:sendMessage(message, address, port)
   
   -- Debug
   if PRINT_MESSAGES then
-    print("enqueued message to "..address..":"..port,
-        Serializer.serialize(message))
+    print("enqueued message to "..address..":"..port, Serializer.serialize(message))
   end
 end
 
@@ -72,10 +71,10 @@ end
 -- client sends acknowledgement.
 --
 function Class:sendMessageWithAck(message, channel, address, port)
-  assertType(message, "message", "table")
-  assertType(channel, "channel", "string")
-  assertType(address, "address", "string")
-  assertType(port, "port", "number")
+  assertTable(message, "message")
+  assertString(channel, "channel")
+  assertString(address, "address")
+  assertNumber(port, "port")
   return self:_sendMessageWithAck(
     MessageType.ACK_REQUEST, message, channel, address, port)
 end
@@ -87,10 +86,10 @@ end
 -- client sends acknowledgement.
 --
 function Class:sendMessageWithAckReset(message, channel, address, port)
-  assertType(message, "message", "table")
-  assertType(channel, "channel", "string")
-  assertType(address, "address", "string")
-  assertType(port, "port", "number")
+  assertTable(message, "message")
+  assertString(channel, "channel")
+  assertString(address, "address")
+  assertNumber(port, "port")
   return self:_sendMessageWithAck(
     MessageType.ACK_REQUEST_RESET, message, channel, address, port)
 end
@@ -423,7 +422,7 @@ function Class:registerListener(messageType, listener, callback)
     messageType = MessageType.fromId(messageType)
     assert(messageType ~= nil)
   end
-  assertType(callback, "callback", "function")
+  assertFunction(callback, "callback")
   
   -- Lazily instantiate event coordinators.
   if not self.coordinators[messageType] then

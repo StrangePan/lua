@@ -1,5 +1,5 @@
 require "strangepan.util.class"
-require "strangepan.util.functions"
+require "strangepan.util.type"
 require "networking.ConnectionStatus"
 
 --
@@ -11,19 +11,16 @@ Connection = buildClass()
 local Class = Connection
 
 function Class:_init(networkId, address, port, initTime)
-  assertType(networkId, "networkId", "number")
-  assertType(address, "address", "string")
-  assertType(port, "port", "number")
-  
+
   -- The unique identifier of this connection. Should never change.
-  self.id = networkId
+  self.id = assertNumber(networkId, "networkId")
   
   -- The IP address of this connection. Should never change.
-  self.address = address
+  self.address = assertString(address, "address")
   
   -- The port number of this connection. Should never change.
-  self.port = port
-  
+  self.port = assertNumber(port, "port")
+
   -- The connection status; defaults to ConnectionStatus.DISCONNECTED.
   self.status = ConnectionStatus.DISCONNECTED
   

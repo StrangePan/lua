@@ -1,5 +1,6 @@
 require "PlayerController"
 require "CommandMap"
+require "strangepan.util.type"
 
 LocalPlayerController = buildClass(PlayerController)
 
@@ -10,7 +11,7 @@ end
 
 function LocalPlayerController:setCommandMap(commandMap)
   if commandMap then
-    assertType(commandMap, "commandMap", CommandMap)
+    assertClass(commandMap, CommandMap, "commandMap")
   end
   
   if self.commandMap then

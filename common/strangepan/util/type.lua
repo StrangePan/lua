@@ -128,7 +128,7 @@ function assertThread(value, name)
 end
 
 
---[
+--[[
 -- Convenience function for asserting that a value is a userdata.
 --
 -- value: Required. The value to check the type of.

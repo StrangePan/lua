@@ -5,6 +5,7 @@ require "strangepan.secretary.Entity"
 require "strangepan.secretary.PhysObject"
 require "strangepan.util.class"
 require "strangepan.util.functions"
+require "strangepan.util.type"
 require "strangepan.util.SortedSet"
 require "strangepan.util.FunctionQueue"
 
@@ -46,7 +47,7 @@ object: The new object to track collisions with.
 function class:registerPhysObject(object)
   
   -- Validate arguments
-  assertType(object, "object", PhysObject)
+  assertClass(object, PhysObject, "object")
   assert(self.objectNodes[object] == nil, "Object already registered with the secretary")
   
   -- Postpone if processing events
@@ -68,7 +69,7 @@ object: The object to unregister.
 function class:unregisterPhysObject(object)
   
   -- Validate arguments
-  assertType(object, "object", PhysObject)
+  assertClass(object, PhysObject, "object")
   
   -- Postpone if processing events
   if self.postpone then
@@ -148,7 +149,7 @@ function class:getCollisions(top, right, bottom, left, front, back, ...)
 end
 
 function class:remove(object)
-  if object:instanceOf(PhysObject) then
+  if object:checkType(PhysObject) then
     self:unregisterPhysObject(object)
   end
   self:unregisterAllListeners(object)
@@ -159,7 +160,7 @@ end
 function class:registerChildSecretary(child)
   
   -- Validate parameters
-  assertType(child, "child", Secretary)
+  assertClass(child, Secretary, "child")
   assert(child ~= self, "A Secretary cannot register itself as a child, unless you're a sadist and WANT infinite loops")
   
   -- Register event methods of child with self
@@ -211,7 +212,7 @@ function class:registerEventListener(object, listener, eventType, ...)
   local arg = {...}
   
   -- Verify arguments
-  assertType(object, "object", "table")
+  assertTable(object, "object")
   assert(listener ~= nil, "Argument 'listener' cannot be nil")
   assert(eventType ~= nil, "Argument 'eventType' cannot be nil")
   eventType = EventType.fromId(eventType)
@@ -223,17 +224,17 @@ function class:registerEventListener(object, listener, eventType, ...)
   
   if eventType == EventType.DESTROY and arg[1] ~= nil then
     -- Users is registering for desruction, optional parameter can be object to watch
-    assertType(arg[1], 'optional parameter 1', Entity)
+    assertClass(arg[1], Entity, 'optional parameter 1')
     watchObject = arg[1]
     
     -- second optional parameter can be priority
     if arg[2] ~= nil then
-      assertType(arg[2], 'optional parameter 2', 'integer')
+      assertInteger(arg[2], 'optional parameter 2')
       priority = arg[2]
     end
   elseif arg[1] ~= nil then
     -- Optional parameter can be layer
-    assertType(arg[1], 'optional parameter 1', 'integer')
+    assertInteger(arg[1], 'optional parameter 1')
     priority = arg[1]
   end
   
@@ -311,12 +312,12 @@ end
 function class:setEventPriority(object, listener, eventType, priority, watchObject)
   
   -- Validate arguments
-  assertType(object, "object", "table")
+  assertTable(object, "object")
   if listener then
-    assertType(listener, "listener", "function")
+    assertFunction(listener, "listener")
   end
   assert(EventType.fromId(eventType), "eventType must be a valid EventType: "..eventType.." received.")
-  assertType(priority, "priority", "integer")
+  assertInteger(priority, "priority")
   
   -- Postpone if processing events
   if self.postpone then
@@ -375,7 +376,7 @@ Deletes all callbacks associated with the given object.
 function class:unregisterAllListeners(object)
   
   -- Validate arguments
-  assertType(object, "object", "table")
+  assertTable(object, "object")
   
   -- Postpone if processing events
   if self.postpone then

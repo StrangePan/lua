@@ -8,7 +8,7 @@ function Set:_init()
 end
 
 function Set:add(item)
-  assertType(item, "item", "table")
+  assertTable(item, "item")
   if not self.contents[item] then
     self.contents[item] = true
     self.num_contents = self.num_contents + 1
@@ -16,7 +16,7 @@ function Set:add(item)
 end
 
 function Set:remove(item)
-  assertType(item, "item", "table")
+  assertTable(item, "item")
   if self.contents[item] then
     self.contents[item] = nil
     self.num_contents = self.num_contents - 1

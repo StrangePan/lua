@@ -3,6 +3,7 @@ require "Camera"
 require "entities.Actor"
 require "entities.Player"
 require "strangepan.secretary.Secretary"
+require "strangepan.util.type"
 require "ClientConnectionManager"
 require "CommandMap"
 require "LocalPlayerController"
@@ -12,7 +13,7 @@ local Class = ClientGame
 
 function Class:_init(secretary, connectionManager, entityManager)
   Class.superclass._init(self, secretary, connectionManager, entityManager)
-  assertType(connectionManager, ClientConnectionManager)
+  assertClass(connectionManager, ClientConnectionManager, "connectionManager")
 
   self.lastSpinTime = love.timer.getTime()
   self.idleActor = Actor()

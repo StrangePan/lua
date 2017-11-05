@@ -1,5 +1,6 @@
 require "Game"
 require "strangepan.secretary.Secretary"
+require "strangepan.util.type"
 require "networking.ConnectionManager"
 require "networking.NetworkedEntityManager"
 
@@ -8,8 +9,8 @@ local Class = NetworkGame
 
 function Class:_init(secretary, connectionManager, entityManager)
   Class.superclass._init(self, secretary)
-  self.connections = assertType(connectionManager, ConnectionManager)
-  self.entities = assertType(entityManager, NetworkedEntityManager)
+  self.connections = assertClass(connectionManager, ConnectionManager)
+  self.entities = assertClass(entityManager, NetworkedEntityManager)
 end
 
 function Class:start()

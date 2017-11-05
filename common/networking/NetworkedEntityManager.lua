@@ -1,4 +1,4 @@
-require "strangepan.util.functions"
+require "strangepan.util.type"
 require "networking.ConnectionManager"
 require "strangepan.secretary.Entity"
 require "networking.NetworkedEntityType"
@@ -27,7 +27,7 @@ local Class = NetworkedEntityManager
 
 function Class:_init(connectionManager)
   Class.superclass._init(self)
-  assertType(connectionManager, "connectionManager", ConnectionManager)
+  assertClass(connectionManager, ConnectionManager, "connectionManager")
   self.connectionManager = connectionManager
 
   -- Sparse array containing metadata on entities.
@@ -79,7 +79,7 @@ end
 -- Builds an entity string.
 --
 local function buildEntityChannelString(id)
-  id = instanceOf(id, NetworkedEntity) and id:getNetworkId() or id
+  id = checkType(id, NetworkedEntity) and id:getNetworkId() or id
   return string.format("entity:%s", id)
 end
 
@@ -109,7 +109,7 @@ end
 -- Adds a connection ID to receive entity updates.
 --
 function Class:addConnection(connectionId)
-  assertType(connectionId, "number")
+  assertNumber(connectionId)
   local connection = self:getConnection(connectionId)
   if connection then return end
 
@@ -140,7 +140,7 @@ end
 -- Removes a connection from receiving entity updates.
 --
 function Class:removeConnection(connectionId)
-  assertType(connectionId, "number")
+  assertNumber(connectionId)
   local connection = self:getConnection(connectionId)
   if not connection then return end
 
@@ -191,7 +191,7 @@ end
 function Class:getEntity(entity)
 
   -- If parameter is already a NetworkedEntity
-  if instanceOf(entity, NetworkedEntity) then
+  if checkType(entity, NetworkedEntity) then
     
     -- Verify entity is managed by this instance
     local e = self.entities[entity:getNetworkId()]
@@ -259,7 +259,7 @@ end
 -- using the provided ID.
 --
 function Class:createEntityWithParams(id, entityType, params)
-  assertType(id, "id", "number")
+  assertNumber(id, "id")
   assert(NetworkedEntityType.fromId(entityType),
       "entityType: "..entityType.." is not a valid NetworkedEntityType")
 
@@ -498,7 +498,7 @@ function Class:_sendEntityUpdate(entity, updateType, update, ...)
   if updateType == EntityUpdateType.CREATING
       or updateType == EntityUpdateType.SYNCHRONIZING
       or updateType == EntityUpdateType.INCREMENTING then
-    assertType(update, "table")
+    assertTable(update)
   end
 
   -- Establish up some local variables

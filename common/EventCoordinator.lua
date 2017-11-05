@@ -1,4 +1,4 @@
-require "strangepan.util.functions"
+require "strangepan.util.type"
 require "strangepan.util.class"
 require "strangepan.secretary.Entity"
 
@@ -24,7 +24,7 @@ function EventCoordinator:registerListener(object, callback)
     self.listeners[object][self.listeners[object].n] = callback
     
     -- register for destroy callbacks with the secretary
-    if instanceOf(object, Entity) then
+    if checkType(object, Entity) then
       local secretary = self:getSecretary()
       if secretary ~= nil then
         secretary:registerEventListener(self, self.unregisterListener, EventType.DESTROY, object)

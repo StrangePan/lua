@@ -1,5 +1,6 @@
 require "PlayerController"
 require "strangepan.util.Queue"
+require "strangepan.util.type"
 
 RemotePlayerController = buildClass(PlayerController)
 local Class = RemotePlayerController
@@ -13,7 +14,7 @@ end
 
 function Class:setConnection(connection)
   if connection ~= nil then
-    assertType(connection, "connection", ConnectionManager)
+    assertClass(connection, ConnectionManager, "connection")
   end
   
   if self.connection ~= nil then

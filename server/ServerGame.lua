@@ -8,8 +8,8 @@ local Class = ServerGame
 
 function Class:_init(secretary, connectionManager, entityManager)
   Class.superclass._init(self, secretary, connectionManager, entityManager)
-  assertType(connectionManager, ServerConnectionManager)
-  assertType(entityManager, ServerNetworkedEntityManager)
+  assertClass(connectionManager, ServerConnectionManager)
+  assertClass(entityManager, ServerNetworkedEntityManager)
 
   -- Register for network callbacks
   local connections = self:getConnectionManager()

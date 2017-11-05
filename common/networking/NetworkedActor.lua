@@ -52,7 +52,7 @@ Class.registerEntityType(NetworkedEntityType.ACTOR, Class)
 
 function Class:_init(manager, networkedId, entityType, params, actor)
   Class.superclass._init(self, manager, networkedId, entityType, params, actor)
-  assertType(actor, "actor", Actor)
+  assertClass(actor, Actor, "actor")
   self:setActorState(params)
 end
 

@@ -1,5 +1,5 @@
 require "strangepan.util.Object"
-require "strangepan.util.functions"
+require "strangepan.util.type"
 
 --
 -- Builds a new class using the supplied table as a superclass..
@@ -8,7 +8,7 @@ require "strangepan.util.functions"
 --
 function buildClass(superclass)
   if superclass ~= nil then
-    assertType(superclass, "superclass", "table")
+    assertTable(superclass, "superclass")
   end
   
   local newClass = {}

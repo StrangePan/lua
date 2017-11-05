@@ -1,5 +1,6 @@
 require "networking.NetworkedActor"
 require "entities.Player"
+require "strangepan.util.type"
 
 local PRINT_DEBUG = false
 
@@ -22,7 +23,7 @@ local Class = NetworkedPlayer
 --
 function Class.createNewInstanceWithParams(manager, id, entityType, params)
   if PRINT_DEBUG then print("NetworkedPlayer.createNewInstanceWithParams") end
-  local ownerId = assertType(params[F_OWNER], "number")
+  local ownerId = assertNumber(params[F_OWNER])
   return Class(manager, id, entityType, params, Player(), ownerId)
 end
 
@@ -50,8 +51,8 @@ Class.registerEntityType(NetworkedEntityType.PLAYER, Class)
 
 function Class:_init(manager, networkedId, entityType, params, player, ownerId)
   Class.superclass._init(self, manager, networkedId, entityType, params, player)
-  assertType(player, Player)
-  assertType(ownerId, "number")
+  assertClass(player, Player)
+  assertNumber(ownerId)
   self.ownerId = ownerId
 end
 

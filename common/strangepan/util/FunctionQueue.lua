@@ -1,6 +1,6 @@
 require "strangepan.util.class"
-require "strangepan.util.functions"
 require "strangepan.util.Queue"
+require "strangepan.util.type"
 
 --[[
 Specialized queue for enqueuing function calls and executing them.
@@ -13,7 +13,7 @@ function class:_init()
 end
 
 function class:push(func, ...)
-  assertType(func, 'func', 'function')
+  assertFunction(func, 'func')
   self.queue:push({f = func, a = {...}})
 end
 

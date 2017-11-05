@@ -1,4 +1,4 @@
-require "strangepan.util.functions"
+require "strangepan.util.type"
 require "networking.CustomNetworkedEntityManager"
 require "networking.Connection"
 require "ServerConnectionManager"
@@ -18,7 +18,7 @@ local Class = ServerNetworkedEntityManager
 
 function Class:_init(connectionManager)
   Class.superclass._init(self, connectionManager)
-  assertType(connectionManager, "connectionManager", ServerConnectionManager)
+  assertClass(connectionManager, ServerConnectionManager, "connectionManager")
   connectionManager:registerConnectionStatusListener(
       self, self.onConnectionStatusChanged)
 end

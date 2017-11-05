@@ -1,4 +1,5 @@
 require "strangepan.util.class"
+require "strangepan.util.type"
 
 --
 -- Class for storing color values.
@@ -32,20 +33,16 @@ end
 -- Sets the red, green, blue, and alpha values for the color.
 --
 function Class:setRGBA(r, g, b, a)
-  if r then
-    assertType(r, "r", "number")
-    self.r = r
+  if r ~= nil then
+    self.r = assertNumber(r, "r")
   end
-  if g then
-    assertType(g, "g", "number")
-    self.g = g
+  if g ~= nil then
+    self.g = assertNumber(g, "g")
   end
-  if b then
-    assertType(b, "b", "number")
-    self.b = b
+  if b ~= nil then
+    self.b = assertNumber(b, "b")
   end
-  if a then
-    assertType(a, "a", "number")
-    self.a = a
+  if a ~= nil then
+    self.a = assertNumber(a, "a")
   end
 end
