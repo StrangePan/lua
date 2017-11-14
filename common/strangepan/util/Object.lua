@@ -42,6 +42,6 @@ end
 --
 -- Return: `true` if this object is a subclass of the supplied object.
 --
-function Object:checkType(other)
+function Object:instanceOf(other)
   return checkType(self, other)
 end

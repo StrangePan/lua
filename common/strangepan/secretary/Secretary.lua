@@ -149,7 +149,7 @@ function class:getCollisions(top, right, bottom, left, front, back, ...)
 end
 
 function class:remove(object)
-  if object:checkType(PhysObject) then
+  if object:instanceOf(PhysObject) then
     self:unregisterPhysObject(object)
   end
   self:unregisterAllListeners(object)
