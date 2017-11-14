@@ -15,6 +15,7 @@ local TEST_THREAD = coroutine.create(function ()
   print('it\'s hard to overstate my satisfaction')
 end)
 local TEST_CLASS = buildClass()
+local TEST_SUBCLASS = buildClass(TEST_CLASS)
 local TEST_INTEGER = 761
 
 function TestType:test_checkType_BOOLEAN_whenBoolean_isTrue()
@@ -134,11 +135,11 @@ function TestType:test_assertFunction_whenNil_withName_didThrowError_withNamedMe
 end
 
 
-function TestType:test_assertNil_whenNil_didReturnFunction()
+function TestType:test_assertNil_whenNil_didReturnNil()
   luaunit.assertEquals(assertNil(TEST_NIL), TEST_NIL)
 end
 
-function TestType:test_assertNil_whenNil_withName_didReturnFunction()
+function TestType:test_assertNil_whenNil_withName_didReturnNil()
   luaunit.assertEquals(assertNil(TEST_NIL , 'TEST_NIL'), TEST_NIL)
 end
 
@@ -155,6 +156,176 @@ function TestType:test_assertNil_whenNumber_withName_didThrowError_withNamedMess
       assertNil,
       TEST_FLOAT,
       'TEST_FLOAT')
+end
+
+
+function TestType:test_assertNumber_whenFloat_didReturnFunction()
+  luaunit.assertEquals(assertNumber(TEST_FLOAT), TEST_FLOAT)
+end
+
+function TestType:test_assertNumber_whenFloat_withName_didReturnFunction()
+  luaunit.assertEquals(assertNumber(TEST_FLOAT , 'TEST_FLOAT'), TEST_FLOAT)
+end
+
+function TestType:test_assertNumber_whenString_didThrowError_withDefaultMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type: number expected, string received.',
+      assertNumber,
+      TEST_STRING)
+end
+
+function TestType:test_assertNumber_whenString_withName_didThrowError_withNamedMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for TEST_STRING: number expected, string received.',
+      assertNumber,
+      TEST_STRING,
+      'TEST_STRING')
+end
+
+
+function TestType:test_assertString_whenString_didReturnFunction()
+  luaunit.assertEquals(assertString(TEST_STRING), TEST_STRING)
+end
+
+function TestType:test_assertString_whenString_withName_didReturnFunction()
+  luaunit.assertEquals(assertString(TEST_STRING , 'TEST_STRING'), TEST_STRING)
+end
+
+function TestType:test_assertString_whenTable_didThrowError_withDefaultMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type: string expected, table received.',
+      assertString,
+      TEST_TABLE)
+end
+
+function TestType:test_assertString_whenTable_withName_didThrowError_withNamedMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for TEST_TABLE: string expected, table received.',
+      assertString,
+      TEST_TABLE,
+      'TEST_TABLE')
+end
+
+
+function TestType:test_assertTable_whenTable_didReturnFunction()
+  luaunit.assertEquals(assertTable(TEST_TABLE), TEST_TABLE)
+end
+
+function TestType:test_assertTable_whenTable_withName_didReturnFunction()
+  luaunit.assertEquals(assertTable(TEST_TABLE , 'TEST_TABLE'), TEST_TABLE)
+end
+
+function TestType:test_assertTable_whenThread_didThrowError_withDefaultMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type: table expected, thread received.',
+      assertTable,
+      TEST_THREAD)
+end
+
+function TestType:test_assertTable_whenThread_withName_didThrowError_withNamedMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for TEST_THREAD: table expected, thread received.',
+      assertTable,
+      TEST_THREAD,
+      'TEST_THREAD')
+end
+
+
+function TestType:test_assertThread_whenThread_didReturnFunction()
+  luaunit.assertEquals(assertThread(TEST_THREAD), TEST_THREAD)
+end
+
+function TestType:test_assertThread_whenThread_withName_didReturnFunction()
+  luaunit.assertEquals(assertThread(TEST_THREAD , 'TEST_THREAD'), TEST_THREAD)
+end
+
+function TestType:test_assertThread_whenClass_didThrowError_withDefaultMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type: thread expected, table received.',
+      assertThread,
+      TEST_CLASS)
+end
+
+function TestType:test_assertThread_whenClass_withName_didThrowError_withNamedMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for TEST_CLASS: thread expected, table received.',
+      assertThread,
+      TEST_CLASS,
+      'TEST_CLASS')
+end
+
+
+function TestType:test_assertClass_whenSameClass_didReturnClass()
+  luaunit.assertIs(assertClass(TEST_CLASS, TEST_CLASS), TEST_CLASS)
+end
+
+function TestType:test_assertClass_whenSameClass_withName_didReturnClass()
+  luaunit.assertIs(assertClass(TEST_CLASS, TEST_CLASS, 'TEST_CLASS'), TEST_CLASS)
+end
+
+function TestType:test_assertClass_whenSubclass_didReturnSubclass()
+  luaunit.assertIs(assertClass(TEST_SUBCLASS, TEST_CLASS), TEST_SUBCLASS)
+end
+
+function TestType:test_assertClass_whenInstance_didReturnInstance()
+  local instance = TEST_CLASS()
+  luaunit.assertIs(assertClass(instance, TEST_CLASS), instance)
+end
+
+function TestType:test_assertClass_whenSubclassInstance_didReturnInstance()
+  local instance = TEST_SUBCLASS()
+  luaunit.assertIs(assertClass(instance, TEST_CLASS), instance)
+end
+
+function TestType:test_assertClass_whenObjectIsNumber_didThrowError_withDefaultMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for value: table expected, number received.',
+      assertClass,
+      TEST_FLOAT,
+      TEST_CLASS)
+end
+
+function TestType:test_assertClass_whenObjectIsNumber_withName_didThrowError_withNamedMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for value: table expected, number received.',
+      assertClass,
+      TEST_FLOAT,
+      TEST_CLASS,
+      'TEST_FLOAT')
+end
+
+function TestType:test_assertClass_whenClassIsNumber_didThrowError_withDefaultMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for class: table expected, number received.',
+      assertClass,
+      TEST_CLASS,
+      TEST_FLOAT)
+end
+
+function TestType:test_assertClass_whenClassIsNumber_withName_didThrowError_withNamedMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for class: table expected, number received.',
+      assertClass,
+      TEST_CLASS,
+      TEST_FLOAT,
+      'TEST_CLASS')
+end
+
+function TestType:test_assertClass_whenObjectIsTable_didThrowError_withDefaultMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type: Object not an instance of the expected class.',
+      assertClass,
+      TEST_TABLE,
+      TEST_CLASS)
+end
+
+function TestType:test_assertClass_whenObjectIsTable_withName_didThrowError_withNamedMessage()
+  luaunit.assertErrorMsgContains(
+      'Unexpected type for TEST_TABLE: Object not an instance of the expected class.',
+      assertClass,
+      TEST_TABLE,
+      TEST_CLASS,
+      'TEST_TABLE')
 end
 
 
