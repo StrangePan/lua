@@ -26,7 +26,7 @@ Type = {
 -- return: `true` if the type of `value` matches `expectedType`, `false` otherwise.
  ]]
 function checkType(value, expectedType)
-  if type(value) == 'string' then
+  if type(expectedType) == 'string' then
     return type(value) == expectedType
   end
 
