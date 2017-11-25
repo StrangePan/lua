@@ -1,7 +1,7 @@
 require "strangepan.secretary.Entity"
 require "strangepan.secretary.PhysObject"
 require "strangepan.util.type"
-require "entities.MazerinoTranslations"
+require "mazerino.util.translation"
 
 --
 -- Camera class for handling motion and keeping a subject within view.

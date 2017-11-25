@@ -1,4 +1,4 @@
-GRID_SIZE = 32
+local GRID_SIZE = 32
 
 -- Converts any number of game coordinates to screen coordinates.
 function toScreen(...)

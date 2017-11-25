@@ -2,7 +2,7 @@ require "strangepan.secretary.PhysObject"
 require "entities.Footprint"
 require "EventCoordinator"
 require "Color"
-require "entities.MazerinoTranslations"
+require "mazerino.util.translation"
 
 Actor = buildClass(PhysObject)
 
