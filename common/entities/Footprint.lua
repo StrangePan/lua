@@ -1,6 +1,6 @@
 require "strangepan.util.class"
 require "strangepan.secretary.Entity"
-require "mazerino.util.translation"
+local translation = require "mazerino.util.translation"
 
 Footprint = buildClass(Entity)
 
@@ -10,10 +10,10 @@ function Footprint:_init(r, g, b, x, y)
   self.r = r
   self.g = g
   self.b = b
-  self.x = toScreen(x)
-  self.y = toScreen(y)
-  self.w = toScreen(1)
-  self.h = toScreen(1)
+  self.x = translation.toScreen(x)
+  self.y = translation.toScreen(y)
+  self.w = translation.toScreen(1)
+  self.h = translation.toScreen(1)
   
   self.a = 191
 end

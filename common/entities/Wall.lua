@@ -1,7 +1,7 @@
 require "strangepan.util.class"
 require "entities.Direction"
 require "strangepan.secretary.PhysObject"
-require "mazerino.util.translation"
+local translation = require "mazerino.util.translation"
 
 Wall = buildClass(PhysObject)
 
@@ -64,10 +64,10 @@ end
 
 function Wall:draw()
   love.graphics.setColor(255, 255, 255)
-  local x, y = toScreen(self:getPosition())
+  local x, y = translation.toScreen(self:getPosition())
   x = x + self.xOffset
   y = y + self.yOffset
-  local w, h = toScreen(self:getSize())
+  local w, h = translation.toScreen(self:getSize())
   local scale = self.drawScale
   love.graphics.rectangle("fill", x + (w/2 - w/2 * scale), y + (h/2 - h/2 * scale), w * scale, h * scale)
 end

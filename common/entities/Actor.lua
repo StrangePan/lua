@@ -2,7 +2,7 @@ require "strangepan.secretary.PhysObject"
 require "entities.Footprint"
 require "EventCoordinator"
 require "Color"
-require "mazerino.util.translation"
+local translation = require "mazerino.util.translation"
 
 Actor = buildClass(PhysObject)
 
@@ -225,10 +225,10 @@ end
 
 function Actor:draw()
   love.graphics.push()
-  local x, y = toScreen(self:getPosition())
+  local x, y = translation.toScreen(self:getPosition())
   x = x + self.bumpOffsetX
   y = y + self.bumpOffsetY
-  local w, h = toScreen(self:getSize())
+  local w, h = translation.toScreen(self:getSize())
   local ox = w/2
   local oy = h/2
   love.graphics.setColor(self:getColor():getRGBA())

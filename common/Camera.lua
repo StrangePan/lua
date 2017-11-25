@@ -1,7 +1,7 @@
 require "strangepan.secretary.Entity"
 require "strangepan.secretary.PhysObject"
 require "strangepan.util.type"
-require "mazerino.util.translation"
+local translation = require "mazerino.util.translation"
 
 --
 -- Camera class for handling motion and keeping a subject within view.
@@ -45,8 +45,8 @@ end
 --
 function Class:jumpToSubject(subject)
   assertClass(subject, PhysObject, "subject")
-  local px, py = toScreen(subject:getPosition())
-  local pw, ph = toScreen(subject:getSize())
+  local px, py = translation.toScreen(subject:getPosition())
+  local pw, ph = translation.toScreen(subject:getSize())
   self:jumpTo(px + pw / 2, py + ph / 2)
 end
 
@@ -126,8 +126,8 @@ function Class:onStep()
     return
   end
   
-  local ox,oy = toScreen(self.subject:getPosition())
-  local ow,oh = toScreen(self.subject:getSize())
+  local ox,oy = translation.toScreen(self.subject:getPosition())
+  local ow,oh = translation.toScreen(self.subject:getSize())
   
   self.x = ox + ow/2
   self.y = oy + oh/2

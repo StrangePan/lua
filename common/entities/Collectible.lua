@@ -1,6 +1,6 @@
 require "strangepan.secretary.PhysObject"
 require "Color"
-require "mazerino.util.translation"
+local translation = require "mazerino.util.translation"
 
 Collectible = buildClass(PhysObject)
 
@@ -28,8 +28,8 @@ end
 
 function Collectible:draw()
   love.graphics.push()
-  local x, y = toScreen(self:getPosition())
-  local w, h = toScreen(self:getSize())
+  local x, y = translation.toScreen(self:getPosition())
+  local w, h = translation.toScreen(self:getSize())
   local ow = w/2
   local oh = h/2
   love.graphics.setColor(self.color:getRGBA())
