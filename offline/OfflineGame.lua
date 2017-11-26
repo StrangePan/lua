@@ -6,6 +6,7 @@ require "entities.Switch"
 require "strangepan.secretary.Secretary"
 require "CommandMap"
 require "LocalPlayerController"
+local GameMap = require "mazerino.map.GameMap"
 
 OfflineGame = buildClass(Game)
 local Class = OfflineGame
@@ -51,38 +52,17 @@ function Class:start()
 end
 
 function Class:setUpLevel()
-  local mapCodes = {
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1},
-    {1, 0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 1},
-    {1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
-    {1, 0, 0, 1, 0, 3, 0, 0, 0, 1, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-  }
-
+  local gameMap = GameMap.createFromFile('../maps/test.mmap')
   local secretary = self:getSecretary()
-  for mapY,row in ipairs(mapCodes) do
-    for mapX,mapCode in ipairs(row) do
-      local realX = (mapX - 1)
-      local realY = (mapY - 1)
-      
-      if mapCode == 1 then
-        Wall(realX, realY):registerWithSecretary(secretary)
-      elseif mapCode == 2 then
-        local player = Player():registerWithSecretary(secretary)
-        player:setPosition(realX, realY)
-        local controller = LocalPlayerController(player, self.commandMap)
-        self.camera:setSubject(player)
-        self.camera:jumpToSubject(player)
-      elseif mapCode == 3 then
-        Switch(realX, realY):registerWithSecretary(secretary)
-      end
+
+  for _,entity in ipairs(gameMap.entities) do
+    entity:registerWithSecretary(secretary)
+
+    -- Set up the player.
+    if checkType(entity, Player) then
+      LocalPlayerController(entity, self.commandMap)
+      self.camera:setSubject(entity)
+      self.camera:jumpToSubject(entity)
     end
   end
 
