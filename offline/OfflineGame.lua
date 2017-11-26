@@ -52,7 +52,7 @@ function Class:start()
 end
 
 function Class:setUpLevel()
-  local gameMap = GameMap.createFromFile('../maps/test.mmap')
+  local gameMap = GameMap.createFromFile('../maps/offline_test.mmap')
   local secretary = self:getSecretary()
 
   for _,entity in ipairs(gameMap.entities) do
