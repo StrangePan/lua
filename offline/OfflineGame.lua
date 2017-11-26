@@ -3,7 +3,6 @@ require "Camera"
 require "entities.Actor"
 require "entities.Player"
 require "entities.Switch"
-require "entities.Collectible"
 require "strangepan.secretary.Secretary"
 require "CommandMap"
 require "LocalPlayerController"
@@ -57,13 +56,13 @@ function Class:setUpLevel()
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1},
     {1, 0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 1},
     {1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 4, 1},
+    {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 4, 0, 0, 0, 0, 0, 0, 1, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
     {1, 0, 0, 1, 0, 3, 0, 0, 0, 1, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
   }
 
@@ -83,8 +82,6 @@ function Class:setUpLevel()
         self.camera:jumpToSubject(player)
       elseif mapCode == 3 then
         Switch(realX, realY):registerWithSecretary(secretary)
-      elseif mapCode == 4 then
-        Collectible(realX, realY):registerWithSecretary(secretary)
       end
     end
   end
