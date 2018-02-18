@@ -1,5 +1,5 @@
 local class = require 'me.strangepan.lua.v1.class'
-local assert_that = require 'me.strangepan.lua.v1.assert_that'
+local assert_that = require 'me.strangepan.lua.truth.v1.assert_that'
 
 --[[ A handy way to require a module lazily.
 
@@ -28,7 +28,7 @@ local lazy = class.build()
 lazy.require_function = require
 
 function lazy:_init(requirement)
-  self.requirement = assert_that(requirement):is_a_string()
+  self.requirement = assert_that(requirement):is_a_string():and_return()
 
   -- Make it so that users don't even have to reference the get() method explicitly
   local new_metatable = {}

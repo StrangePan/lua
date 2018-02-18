@@ -6,6 +6,21 @@ Calling the returned table as a function will call the ._init(...) method, so ov
 in your class to use it as a constructor. Or don't.
 
 Note: superclasses are not a great practice, and so are not supported.
+
+Usage:
+    local class = require 'me.strangepan.lua.v1.class'
+
+    local my_class = class.build()
+
+    function my_class:_init(bar)
+      self._bar = bar
+    end
+
+    function my_class:print()
+      print(self._bar)
+    end
+
+    return my_class
 ]]
 
 local class = {}
