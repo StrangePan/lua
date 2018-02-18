@@ -1,15 +1,32 @@
 local move = require('me.strangepan.libs.computercraft.turtle.v1.move')()
 local dig = require('me.strangepan.libs.computercraft.turtle.v1.dig')()
-if require 'me.strangepan.libs.computercraft.mock.v1.mocker'():mock() then
-  turtle.verbose = true
-end
+
+local debug = false
+
+-- Parse arguments
 
 local args = {...}
+for i,argv in ipairs(args) do
+  if argv == '--debug' or argv == '-d' then
+    table.remove(args, i)
+    debug = true
+    break
+  end
+end
+if debug then
+  local mock_computercraft = require 'me.strangepan.libs.computercraft.mock.v1.computercraft'
+  local mock_turtle = require 'me.strangepan.libs.computercraft.mock.v1.turtle'
+  mock_computercraft.mocker()
+      :mock_turtle(mock_turtle.mocker():enable_print_status(true):build_mocks())
+      :build_mocks()
+      :capture()
+end
+
 if #args < 2 or #args > 3 then
   print('Dig a 3x3 tunnel with 1x3 branches spaced 3 blocks apart on either side.')
   print('')
   print('Usage:')
-  print('  strip <depth> <left> [right]')
+  print('  strip <depth> <left> [right] [--debug]')
   print('  <depth> = number of blocks long to make the main 3x3 shaft.')
   print('  <left> = number of blocks long to make the branches on the left.')
   print('  [right] = number of blocks long to make the branches on the right. If ommitted, will '..
