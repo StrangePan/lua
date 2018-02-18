@@ -1,5 +1,8 @@
-local move = require('me.strangepan.libs.computercraft.turtle.v1.move')()
-local dig = require('me.strangepan.libs.computercraft.turtle.v1.dig')()
+local lazy = require 'me.strangepan.libs.lua.v1.lazy'
+local mock_computercraft = lazy 'me.strangepan.libs.computercraft.mock.v1.computercraft'
+local mock_turtle = lazy 'me.strangepan.libs.computercraft.mock.v1.turtle'
+local dig_lib = lazy 'me.strangepan.libs.computercraft.turtle.v1.dig'
+local move_lib = lazy 'me.strangepan.libs.computercraft.turtle.v1.move'
 
 local debug = false
 
@@ -14,10 +17,8 @@ for i,argv in ipairs(args) do
   end
 end
 if debug then
-  local mock_computercraft = require 'me.strangepan.libs.computercraft.mock.v1.computercraft'
-  local mock_turtle = require 'me.strangepan.libs.computercraft.mock.v1.turtle'
-  mock_computercraft.mocker()
-      :mock_turtle(mock_turtle.mocker():enable_print_status(true):build_mocks())
+  mock_computercraft().mocker()
+      :mock_turtle(mock_turtle().mocker():enable_print_status(true):build_mocks())
       :build_mocks()
       :capture()
 end
@@ -33,6 +34,9 @@ if #args < 2 or #args > 3 then
       'use <left>.')
   return
 end
+
+local dig = dig_lib()
+local move = move_lib()
 
 local function parse_numeric_argument(arg)
   local num = tonumber(arg)
