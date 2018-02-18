@@ -17,25 +17,12 @@ function mock_turtle:_init()
   self._delay = 0.5
 end
 
-function mock_turtle:_do_boolean_action(action)
-  if self._verbose then
-    local direction = (
-        self._d == NORTH and 'NORTH'
-        or self._d == EAST and 'EAST'
-        or self._d == SOUTH and 'SOUTH'
-        or self._d == WEST and 'WEST')
-    print(action..'  ('..self._x..','..self._y..','..self._z..') '..direction)
-    os.sleep(turtle.delay)
-  end
-  return true
-end
-
 function mock_turtle:forward()
   if self._d == NORTH then
     self._z =self._z - 1
-  elseif d == EAST then
+  elseif self._d == EAST then
     self._x = self._x + 1
-  elseif d == SOUTH then
+  elseif self._d == SOUTH then
     self._z = self._z + 1
   else
     self._x = self._x - 1
@@ -46,9 +33,9 @@ end
 function mock_turtle:back()
   if self._d == NORTH then
     self._z = self._z + 1
-  elseif d == EAST then
+  elseif self._d == EAST then
     self._x = self._x - 1
-  elseif d == SOUTH then
+  elseif self._d == SOUTH then
     self._z = self._z - 1
   else
     self._x = self._x + 1
@@ -91,24 +78,73 @@ function mock_turtle:digDown()
 end
 
 
+-- Internal methods
+
+function mock_turtle:_do_boolean_action(action)
+  if self._verbose then
+    local direction = (
+    self._d == NORTH and 'NORTH'
+        or self._d == EAST and 'EAST'
+        or self._d == SOUTH and 'SOUTH'
+        or self._d == WEST and 'WEST')
+    print(action..'  ('..self._x..','..self._y..','..self._z..') '..direction)
+    os.sleep(self._delay)
+  end
+  return true
+end
+
+
 -- Mocker
 
-local mock_turtle_builder = {}
+local turtle_mocker = class.build()
 
-function mock_turtle_builder.build_mocks(current_turtle)
-  if current_turtle then
-    return current_turtle, false
-  end
-  local new_mock_turtle = mock_turtle()
+function turtle_mocker:build_upon(base_turtle)
+  self._base_turtle = base_turtle
+  return self
+end
+
+function turtle_mocker:enable_print_status(enable_print_status)
+  self._enable_print_status = enable_print_status
+  return self
+end
+
+function turtle_mocker:delay(delay)
+  self._delay = delay
+  return self
+end
+
+function turtle_mocker:maybe_build_mocks()
+  if self.current_turtle then return self.current_turtle end
+  return self:build_mocks()
+end
+
+function turtle_mocker:build_mocks()
   local new_turtle = {}
-  for key,val in pairs(new_mock_turtle) do
+  local new_mock_turtle = mock_turtle()
+  new_mock_turtle._verbose = self._enable_print_status
+  new_mock_turtle._delay = self._delay
+
+  -- Constructs new functions that, when called, call member methods on the mock_turtle object.
+  -- Effectively, this maps a static function to a member method.
+  for key,val in pairs(mock_turtle) do
     if type(val) == 'function' and string.sub(key, 1, 1) ~= '_' then
       new_turtle[key] = function(...)
-        return new_mock_turtle[key](new_mock_turtle, ...)
+        return val(new_mock_turtle, ...)
       end
     end
   end
-  return new_turtle, true
+
+  -- Any methods not defined on the mock should default to the base
+  if self.current_turtle then
+    setmetatable(new_turtle, {__index = self._base_turtle})
+  end
+
+  -- Return the newly constructed set of static functions instead of the mock_turtle directly.
+  return new_turtle
 end
 
-return mock_turtle_builder
+function mock_turtle.mocker()
+  return turtle_mocker():enable_print_status(false):delay(0.5)
+end
+
+return mock_turtle
