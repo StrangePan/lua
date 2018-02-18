@@ -1,6 +1,6 @@
 local class = require 'me.strangepan.libs.lua.v1.class'
-local os = require 'me.strangepan.computercraft.mock.v1.os'
-local turtle = require 'me.strangepan.computercraft.mock.v1.turtle'
+local os = require 'me.strangepan.libs.computercraft.mock.v1.os'
+local turtle = require 'me.strangepan.libs.computercraft.mock.v1.turtle'
 
 local mocker = class.build()
 

@@ -1,6 +1,6 @@
-local move = require('me.strangepan.computercraft.turtle.v1.move')()
-local dig = require('me.strangepan.computercraft.turtle.v1.dig')()
-if require 'me.strangepan.computercraft.mock.v1.mocker'():mock() then
+local move = require('me.strangepan.libs.computercraft.turtle.v1.move')()
+local dig = require('me.strangepan.libs.computercraft.turtle.v1.dig')()
+if require 'me.strangepan.libs.computercraft.mock.v1.mocker'():mock() then
   turtle.verbose = true
 end
 
