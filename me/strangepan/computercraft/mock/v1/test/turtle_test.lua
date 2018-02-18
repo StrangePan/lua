@@ -1,5 +1,5 @@
 luaunit = require 'luaunit'
-turtle = require 'strangepan.computercraft.turtle.mock'
+turtle = require 'me.strangepan.computercraft.mock.v1.turtle'
 
 TestClass = {}
 os.sleep = function() end

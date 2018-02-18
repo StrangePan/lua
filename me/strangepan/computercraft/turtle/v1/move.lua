@@ -1,4 +1,4 @@
-local class = require 'me.strangepan.lua.v1.class'
+local class = require 'me.strangepan.libs.lua.v1.class'
 
 local move = class.build()
 
