@@ -1,5 +1,5 @@
 local luaunit = require 'luaunit'
-local assert_that = require 'me.strangepan.lua.truth.v1.assert_that'
+local assert_that = require 'me.strangepan.libs.lua.truth.v1.assert_that'
 
 TestClass = {}
 local test_string = 'this was a triumph'

@@ -1,9 +1,9 @@
-local class = require 'me.strangepan.lua.v1.class'
+local class = require 'me.strangepan.libs.lua.v1.class'
 
 --[[ An easy, readable way to make various types of assertions.
 
 Example usage:
-  local assert_that = require 'me.strangepan.lua.truth.v1.assert_that'
+  local assert_that = require 'me.strangepan.libs.lua.truth.v1.assert_that'
 
   function foo(bar)
     assert_that(bar):is_a_string()

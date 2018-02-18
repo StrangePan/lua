@@ -8,7 +8,7 @@ in your class to use it as a constructor. Or don't.
 Note: superclasses are not a great practice, and so are not supported.
 
 Usage:
-    local class = require 'me.strangepan.lua.v1.class'
+    local class = require 'me.strangepan.libs.lua.v1.class'
 
     local my_class = class.build()
 
