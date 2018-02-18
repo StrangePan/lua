@@ -1,4 +1,4 @@
-local class = require 'me.strangepan.libs.lua.v1.class'
+local assertion_subject = require 'me.strangepan.libs.lua.truth.v1.assertion_subject'
 
 --[[ An easy, readable way to make various types of assertions.
 
@@ -16,19 +16,6 @@ You can even request that the result be returned:
   end
 ]]
 
-local assert_that = class.build()
-
-function assert_that:_init(value)
-  self.value = value
+return function(subject)
+  return assertion_subject(subject)
 end
-
-function assert_that:is_a_string()
-  assert(type(self.value) == 'string')
-  return self
-end
-
-function assert_that:and_return()
-  return self.value
-end
-
-return assert_that
