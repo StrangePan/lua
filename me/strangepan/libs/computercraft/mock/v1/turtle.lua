@@ -1,106 +1,114 @@
 local class = require 'me.strangepan.libs.lua.v1.class'
 
-local _turtle = class.build()
+local mock_turtle = class.build()
 
 local NORTH = 0
 local EAST = 1
 local SOUTH = 2
 local WEST = 3
-local x = 0
-local y = 0
-local z = 0
-local d = NORTH
 
-_turtle.verbose = false
-_turtle.delay = 0.5
+function mock_turtle:_init()
+  self._x = 0
+  self._y = 0
+  self._z = 0
+  self._d = NORTH
 
-function _turtle._reset()
-  x = 0
-  y = 0
-  z = 0
-  d = NORTH
+  self._verbose = false
+  self._delay = 0.5
 end
 
-local function _do_boolean_action(action)
-  if _turtle.verbose then
+function mock_turtle:_do_boolean_action(action)
+  if self._verbose then
     local direction = (
-        d == NORTH and 'NORTH'
-        or d == EAST and 'EAST'
-        or d == SOUTH and 'SOUTH'
-        or d == WEST and 'WEST')
-    print(action..'  ('..x..','..y..','..z..') '..direction)
-    os.sleep(_turtle.delay)
+        self._d == NORTH and 'NORTH'
+        or self._d == EAST and 'EAST'
+        or self._d == SOUTH and 'SOUTH'
+        or self._d == WEST and 'WEST')
+    print(action..'  ('..self._x..','..self._y..','..self._z..') '..direction)
+    os.sleep(turtle.delay)
   end
   return true
 end
 
-function _turtle.forward()
-  if d == NORTH then
-    z = z - 1
+function mock_turtle:forward()
+  if self._d == NORTH then
+    self._z =self._z - 1
   elseif d == EAST then
-    x = x + 1
+    self._x = self._x + 1
   elseif d == SOUTH then
-    z = z + 1
+    self._z = self._z + 1
   else
-    x = x - 1
+    self._x = self._x - 1
   end
-  return _do_boolean_action('forward')
+  return self:_do_boolean_action('forward')
 end
 
-function _turtle.back()
-  if d == NORTH then
-    z = z + 1
+function mock_turtle:back()
+  if self._d == NORTH then
+    self._z = self._z + 1
   elseif d == EAST then
-    x = x - 1
+    self._x = self._x - 1
   elseif d == SOUTH then
-    z = z - 1
+    self._z = self._z - 1
   else
-    x = x + 1
+    self._x = self._x + 1
   end
-  return _do_boolean_action('back')
+  return self:_do_boolean_action('back')
 end
 
-function _turtle.up()
-  y = y + 1
-  return _do_boolean_action('up')
+function mock_turtle:up()
+  self._y = self._y + 1
+  return self:_do_boolean_action('up')
 end
 
-function _turtle.down()
-  y = y - 1
-  return _do_boolean_action('down')
+function mock_turtle:down()
+  self._y = self._y - 1
+  return self:_do_boolean_action('down')
 end
 
-function _turtle.turnRight()
-  d = d + 1
-  while d > 3 do d = d - 4 end
-  return _do_boolean_action('turnRight')
+function mock_turtle:turnRight()
+  self._d = self._d + 1
+  while self._d > 3 do self._d = self._d - 4 end
+  return self:_do_boolean_action('turnRight')
 end
 
-function _turtle.turnLeft()
-  d = d - 1
-  while d < 0 do d = d + 4 end
-  return _do_boolean_action('turnLeft')
+function mock_turtle:turnLeft()
+  self._d = self._d - 1
+  while self._d < 0 do self._d = self._d + 4 end
+  return self:_do_boolean_action('turnLeft')
 end
 
-function _turtle.dig()
-  return _do_boolean_action('dig')
+function mock_turtle:dig()
+  return self:_do_boolean_action('dig')
 end
 
-function _turtle.digUp()
-  return _do_boolean_action('digUp')
+function mock_turtle:digUp()
+  return self:_do_boolean_action('digUp')
 end
 
-function _turtle.digDown()
-  return _do_boolean_action('digDown')
+function mock_turtle:digDown()
+  return self:_do_boolean_action('digDown')
 end
 
-function _turtle.mock()
-  local didMock = false
-  if not turtle then
-    turtle = _turtle
-    didMock = true
+
+-- Mocker
+
+local mock_turtle_builder = {}
+
+function mock_turtle_builder.build_mocks(current_turtle)
+  if current_turtle then
+    return current_turtle, false
   end
-  return didMock
+  local new_mock_turtle = mock_turtle()
+  local new_turtle = {}
+  for key,val in pairs(new_mock_turtle) do
+    if type(val) == 'function' and string.sub(key, 1, 1) ~= '_' then
+      new_turtle[key] = function(...)
+        return new_mock_turtle[key](new_mock_turtle, ...)
+      end
+    end
+  end
+  return new_turtle, true
 end
 
-return _turtle
+return mock_turtle_builder
