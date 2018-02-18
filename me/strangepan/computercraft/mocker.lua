@@ -1,4 +1,4 @@
-local class = require 'strangepan.lua.class'
+local class = require 'me.strangepan.lua.v1.class'
 
 local mocker = class.build()
 
