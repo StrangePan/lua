@@ -1,4 +1,22 @@
 local assert_that = require 'me.strangepan.lua.truth.v1.assert_that'
+
+--[[ Builder functions creating enums.
+
+Usage:
+    local enum = require 'me.strangepan.lua.v1.enum'
+
+    local my_enum = enum.build(
+        'ENUM_VALUE_ALPHA',
+        'ENUM_VALUE_BETA',
+        'ENUM_VALUE_CHARLIE')
+
+    function get_data()
+      local data = {}
+      data.type = my_enum.ENUM_VALUE_ALPHA
+      return data
+    end
+]]
+
 local enum = {}
 
 function enum.build(...)
