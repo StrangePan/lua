@@ -28,6 +28,20 @@ function TestClass:teardown()
   print = self.system_print or print
 end
 
+function TestClass:test_maybeBuildMocks_whenAlreadyBuilt_didNotBuild()
+  local existing_lib = {}
+
+  local maybe_mocked_lib = mock_turtle.mocker():build_upon(existing_lib):maybe_build_mocks()
+
+  luaunit.assertIs(maybe_mocked_lib, existing_lib)
+end
+
+function TestClass:test_maybeBuildMocks_whenNotBuilt_didNotBuild()
+  local maybe_mocked_lib = mock_turtle.mocker():build_upon(nil):maybe_build_mocks()
+
+  luaunit.assertNotNil(maybe_mocked_lib)
+end
+
 function TestClass:test_forward_didReturnTrue()
   luaunit.assertTrue(self.under_test.forward())
 end

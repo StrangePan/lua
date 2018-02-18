@@ -114,7 +114,7 @@ function turtle_mocker:delay(delay)
 end
 
 function turtle_mocker:maybe_build_mocks()
-  if self.current_turtle then return self.current_turtle end
+  if self._base_turtle then return self._base_turtle end
   return self:build_mocks()
 end
 
