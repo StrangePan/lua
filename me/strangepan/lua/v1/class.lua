@@ -26,19 +26,19 @@ Usage:
 local class = {}
 
 function class.build()
-  local newClass = {}
-  newClass.__index = newClass
-  newClass._init = function() end
+  local new_class = {}
+  new_class.__index = new_class
+  new_class._init = function() end
 
-  local newMetatable = {}
-  newMetatable.__call = function(thisClass, ...)
+  local new_metatable = {}
+  new_metatable.__call = function(thisClass, ...)
     local self = setmetatable({}, thisClass)
     self:_init(...)
     return self
   end
 
-  setmetatable(newClass, newMetatable)
-  return newClass
+  setmetatable(new_class, new_metatable)
+  return new_class
 end
 
 return class
