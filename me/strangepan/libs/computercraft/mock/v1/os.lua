@@ -2,9 +2,7 @@ local class = require 'me.strangepan.libs.lua.v1.class'
 
 local mock_os = class.build()
 
-function mock_os:sleep(...)
-  if self._base_os and self._base_os.sleep then return self._base_os.sleep(...) end
-end
+function mock_os:sleep() end
 
 
 -- Mocker
@@ -19,7 +17,6 @@ end
 function os_mocker:build_mocks()
   local new_os = {}
   local new_mock_os = mock_os()
-  new_mock_os._base_os = self.current_os
 
   -- Constructs new functions that, when called, call member methods on the mock_turtle object.
   -- Effectively, this maps a static function to a member method.
