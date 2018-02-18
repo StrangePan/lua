@@ -1,0 +1,1 @@
+mainFont = love.graphics.newFont("scp.ttf", 16)
