@@ -15,7 +15,7 @@ function TestClass:setup()
     self.foo_invocation_count = self.foo_invocation_count + 1
   end
 
-  self.under_test = mock_os.mocker():build_upon(self.base_os):build_mocks()
+  self.under_test = mock_os.builder():build_upon(self.base_os):build()
 end
 
 function TestClass:test_sleep_didNotInvoke()

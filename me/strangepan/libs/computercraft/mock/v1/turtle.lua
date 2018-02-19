@@ -1,4 +1,6 @@
 local class = require 'me.strangepan.libs.lua.v1.class'
+local lazy = require 'me.strangepan.libs.lua.v1.lazy'
+local builder = lazy 'me.strangepan.libs.lua.v1.builder'
 
 local mock_turtle = class.build()
 
@@ -94,57 +96,46 @@ function mock_turtle:_do_boolean_action(action)
 end
 
 
--- Mocker
+-- Builder
 
-local turtle_mocker = class.build()
+local mock_turtle_builder
 
-function turtle_mocker:build_upon(base_turtle)
-  self._base_turtle = base_turtle
-  return self
-end
+function mock_turtle.builder()
+  if not mock_turtle_builder then
+    local function builder_function(parameters)
+      local new_turtle = {}
+      local new_mock_turtle = mock_turtle()
+      new_mock_turtle._verbose = parameters.enable_print_status
+      new_mock_turtle._delay = parameters.delay
 
-function turtle_mocker:enable_print_status(enable_print_status)
-  self._enable_print_status = enable_print_status
-  return self
-end
-
-function turtle_mocker:delay(delay)
-  self._delay = delay
-  return self
-end
-
-function turtle_mocker:maybe_build_mocks()
-  if self._base_turtle then return self._base_turtle end
-  return self:build_mocks()
-end
-
-function turtle_mocker:build_mocks()
-  local new_turtle = {}
-  local new_mock_turtle = mock_turtle()
-  new_mock_turtle._verbose = self._enable_print_status
-  new_mock_turtle._delay = self._delay
-
-  -- Constructs new functions that, when called, call member methods on the mock_turtle object.
-  -- Effectively, this maps a static function to a member method.
-  for key,val in pairs(mock_turtle) do
-    if type(val) == 'function' and string.sub(key, 1, 1) ~= '_' then
-      new_turtle[key] = function(...)
-        return val(new_mock_turtle, ...)
+      -- Constructs new functions that, when called, call member methods on the mock_turtle object.
+      -- Effectively, this maps a static function to a member method.
+      for key,val in pairs(mock_turtle) do
+        if type(val) == 'function' and string.sub(key, 1, 1) ~= '_' then
+          new_turtle[key] = function(...)
+            return val(new_mock_turtle, ...)
+          end
+        end
       end
+
+      -- Any methods not defined on the mock should default to the base
+      if parameters.build_upon then
+        setmetatable(new_turtle, {__index = parameters.build_upon})
+      end
+
+      -- Return the newly constructed set of static functions instead of the mock_turtle directly.
+      return new_turtle
     end
+
+    mock_turtle_builder =
+      builder().builder()
+        :field{name = 'build_upon'}
+        :field{name = 'enable_print_status', default = false}
+        :field{name = 'delay' , default = 0.5 }
+        :builder_function(builder_function)
+        :build()
   end
-
-  -- Any methods not defined on the mock should default to the base
-  if self.current_turtle then
-    setmetatable(new_turtle, {__index = self._base_turtle})
-  end
-
-  -- Return the newly constructed set of static functions instead of the mock_turtle directly.
-  return new_turtle
-end
-
-function mock_turtle.mocker()
-  return turtle_mocker():enable_print_status(false):delay(0.5)
+  return mock_turtle_builder()
 end
 
 return mock_turtle
