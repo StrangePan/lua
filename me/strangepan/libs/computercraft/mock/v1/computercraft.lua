@@ -57,7 +57,7 @@ function mock_computercraft.builder()
               ternary( -- We don't want to overwrite the current turtle library if possible
                 parameters.mock_turtle ~= default_mock_turtle,
                 parameters.mock_turtle,
-                turtle or mock_turtle_lazy().builder():build_upon(turtle):build()))
+                turtle or mock_turtle_lazy().builder():build_upon(turtle):delay(0):build()))
           end)
         :build()
   end
