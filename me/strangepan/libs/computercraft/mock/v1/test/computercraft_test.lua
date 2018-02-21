@@ -12,13 +12,11 @@ function TestClass:setup()
   self.test_mock_turtle = {'test_mock_turtle'}
   os = self.test_os
   turtle = self.test_turtle
-  self.under_test = mock_computercraft.mocker():build_mocks()
+  self.under_test = mock_computercraft.builder():build()
 end
 
 function TestClass:teardown()
-  --noinspection GlobalCreationOutsideO
   os = self.system_os or os
-  --noinspection GlobalCreationOutsideO
   turtle = self.system_turtle or turtle
 end
 
@@ -34,7 +32,7 @@ end
 
 function TestClass:test_capture_whenTurtleNotDefined_didOverwriteTurtle()
   turtle = nil
-  self.under_test = mock_computercraft.mocker():build_mocks()
+  self.under_test = mock_computercraft.builder():build()
 
   self.under_test:capture()
 
@@ -70,7 +68,7 @@ end
 
 function TestClass:test_capture_thenRelease_whenTurtleNotDefined_didRestoreTurtle()
   turtle = nil
-  self.under_test = mock_computercraft.mocker():build_mocks()
+  self.under_test = mock_computercraft.builder():build()
 
   self.under_test:capture():release()
 
@@ -90,13 +88,13 @@ function TestClass:test_captureTwice_thenRelease_didRestoreTurtle()
 end
 
 function TestClass:test_capture_withCustomMockOs_didUseCustomOs()
-  mock_computercraft.mocker():mock_os(self.test_mock_os):build_mocks():capture()
+  mock_computercraft.builder():mock_os(self.test_mock_os):build():capture()
 
   luaunit.assertIs(os, self.test_mock_os)
 end
 
 function TestClass:test_capture_withCustonMockTurtle_didUseCustomTurtle()
-  mock_computercraft.mocker():mock_turtle(self.test_mock_turtle):build_mocks():capture()
+  mock_computercraft.builder():mock_turtle(self.test_mock_turtle):build():capture()
 
   luaunit.assertIs(turtle, self.test_mock_turtle)
 end

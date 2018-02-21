@@ -10,36 +10,18 @@ function TestClass:setup()
   self.custom_print = function(message)
     table.insert(self.messageQueue, message)
   end
-  --noinspection GlobalCreationOutsideO
   print = self.custom_print
 
   self.system_os = os
-  self.custom_os = mock_os.mocker():build_upon(self.system_os):build_mocks()
-  --noinspection GlobalCreationOutsideO
+  self.custom_os = mock_os.builder():build_upon(self.system_os):build()
   os = self.custom_os
 
-  self.under_test = mock_turtle.mocker():enable_print_status(true):delay(0):build_mocks()
+  self.under_test = mock_turtle.builder():enable_print_status(true):delay(0):build()
 end
 
 function TestClass:teardown()
-  --noinspection GlobalCreationOutsideO
   os = self.system_os or os
-  --noinspection GlobalCreationOutsideO
   print = self.system_print or print
-end
-
-function TestClass:test_maybeBuildMocks_whenAlreadyBuilt_didNotBuild()
-  local existing_lib = {}
-
-  local maybe_mocked_lib = mock_turtle.mocker():build_upon(existing_lib):maybe_build_mocks()
-
-  luaunit.assertIs(maybe_mocked_lib, existing_lib)
-end
-
-function TestClass:test_maybeBuildMocks_whenNotBuilt_didNotBuild()
-  local maybe_mocked_lib = mock_turtle.mocker():build_upon(nil):maybe_build_mocks()
-
-  luaunit.assertNotNil(maybe_mocked_lib)
 end
 
 function TestClass:test_forward_didReturnTrue()

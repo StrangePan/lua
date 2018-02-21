@@ -1,6 +1,9 @@
 local class = require 'me.strangepan.libs.lua.v1.class'
-local mock_os = require 'me.strangepan.libs.computercraft.mock.v1.os'
-local mock_turtle = require 'me.strangepan.libs.computercraft.mock.v1.turtle'
+local lazy = require 'me.strangepan.libs.lua.v1.lazy'
+local ternary = require 'me.strangepan.libs.lua.v1.ternary'
+local builder_lazy = lazy 'me.strangepan.libs.lua.v1.builder'
+local mock_os_lazy = lazy 'me.strangepan.libs.computercraft.mock.v1.os'
+local mock_turtle_lazy = lazy 'me.strangepan.libs.computercraft.mock.v1.turtle'
 
 local mock_computercraft = class.build()
 
@@ -15,9 +18,7 @@ function mock_computercraft:capture()
   self._is_captured = true
   self._real_os = os
   self._real_turtle = turtle
-  --noinspection GlobalCreationOutsideO
   os = self.os
-  --noinspection GlobalCreationOutsideO
   turtle = self.turtle
   return self
 end
@@ -25,9 +26,7 @@ end
 function mock_computercraft:release()
   if not self._is_captured then return self end
   self._is_captured = false
-  --noinspection GlobalCreationOutsideO
   os = self._real_os
-  --noinspection GlobalCreationOutsideO
   turtle = self._real_turtle
   self._real_os = nil
   self._real_turtle = nil
@@ -35,34 +34,34 @@ function mock_computercraft:release()
 end
 
 
--- Mocker
+-- Builder
 
-local computercraft_mocker = class.build()
+local mock_computercraft_builder
 
-function computercraft_mocker:mock_os(mock_os)
-  self._mock_os = mock_os
-  return self
-end
+function mock_computercraft.builder()
+  if not mock_computercraft_builder then
+    local default_mock_os = {}
+    local default_mock_turtle = {}
 
-function computercraft_mocker:mock_turtle(mock_turtle)
-  self._mock_turtle = mock_turtle
-  return self
-end
-
-function computercraft_mocker:build_mocks()
-  if not self._mock_os then
-    self._mock_os = mock_os().mocker():build_upon(os):build_mocks()
+    mock_computercraft_builder =
+      builder_lazy().builder()
+        :field{name = 'mock_os', default = default_mock_os}
+        :field{name = 'mock_turtle', default = default_mock_turtle}
+        :builder_function(
+          function(parameters)
+            return mock_computercraft(
+              ternary(
+                parameters.mock_os ~= default_mock_os,
+                parameters.mock_os,
+                mock_os_lazy().builder():build_upon(os):build()),
+              ternary( -- We don't want to overwrite the current turtle library if possible
+                parameters.mock_turtle ~= default_mock_turtle,
+                parameters.mock_turtle,
+                turtle or mock_turtle_lazy().builder():build_upon(turtle):delay(0):build()))
+          end)
+        :build()
   end
-
-  if not self._mock_turtle then
-    self._mock_turtle = mock_turtle().mocker():build_upon(turtle):maybe_build_mocks()
-  end
-
-  return mock_computercraft(self._mock_os, self._mock_turtle)
-end
-
-function mock_computercraft.mocker()
-  return computercraft_mocker()
+  return mock_computercraft_builder()
 end
 
 return mock_computercraft

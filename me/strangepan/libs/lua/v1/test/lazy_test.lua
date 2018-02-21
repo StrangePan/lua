@@ -6,7 +6,7 @@ local test_requirement = 'my.custom.requirement'
 local test_result = {x = 132}
 local test_requirement_invalid = {test_requirement}
 
-function TestClass:setUp()
+function TestClass:setup()
   self.invocation_count = 0
   lazy.require_function = function(requirement)
     self.invocation_count = self.invocation_count + 1
