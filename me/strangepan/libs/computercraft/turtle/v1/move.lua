@@ -1,6 +1,6 @@
 local class = require 'me.strangepan.libs.lua.v1.class'
 
---[[ Helper object to concisely express turtle movements.
+--[[ Class to concisely express turtle movements.
 
 Example:
     local move = require 'me.strangepan.libs.computercraft.turtle.v1.move'
