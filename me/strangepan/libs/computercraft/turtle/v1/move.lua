@@ -2,11 +2,11 @@ local class = require 'me.strangepan.libs.lua.v1.class'
 
 local move = class.build()
 
-local function _do_move(turtleFunc, times)
+local function _do_move(turtle_func, times)
   local count = 0
   times = times or 1
   for i = 1,times do
-    if turtleFunc() then
+    if turtle_func() then
       count = count + 1
     end
   end
