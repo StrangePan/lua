@@ -16,7 +16,7 @@ function mock_turtle:_init()
   self._d = NORTH
 
   self._verbose = false
-  self._delay = 0.5
+  self._delay = 0
 end
 
 function mock_turtle:forward()
@@ -85,12 +85,14 @@ end
 function mock_turtle:_do_boolean_action(action)
   if self._verbose then
     local direction = (
-    self._d == NORTH and 'NORTH'
+        self._d == NORTH and 'NORTH'
         or self._d == EAST and 'EAST'
         or self._d == SOUTH and 'SOUTH'
         or self._d == WEST and 'WEST')
     print(action..'  ('..self._x..','..self._y..','..self._z..') '..direction)
-    os.sleep(self._delay)
+    if self._delay > 0 then
+      os.sleep(self._delay)
+    end
   end
   return true
 end
@@ -131,7 +133,7 @@ function mock_turtle.builder()
       builder().builder()
         :field{name = 'build_upon'}
         :field{name = 'enable_print_status', default = false}
-        :field{name = 'delay' , default = 0.5 }
+        :field{name = 'delay' , default = 0}
         :builder_function(builder_function)
         :build()
   end
