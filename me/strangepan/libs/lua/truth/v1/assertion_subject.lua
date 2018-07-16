@@ -17,40 +17,21 @@ end
 
 -- INITIALIZER ASSERTIONS
 
+--[[ Checks if the current test subject is of type string and returns this assertion_subject. ]]
 function assertion_subject:is_a_string()
   return self:passes_assertion(assertions.is_a_string)
 end
 
+--[[ Checks if the current test subject is of type table and returns this assertion_subject. ]]
 function assertion_subject:is_a_table()
   return self:passes_assertion(assertions.is_a_table)
 end
 
+--[[ Generic assertion method to test against the current test subject and returns this
+assertion_subject. ]]
 function assertion_subject:passes_assertion(assertion)
   self:_assert_ready_for_initial_assertion()
   return self:_apply_assertion(assertion)
-end
-
--- CHAINED ASSERTIONS
-
-function assertion_subject:and_is_a_string()
-  return self:and_passes_assertion(assertions.is_a_string)
-end
-
-function assertion_subject:and_is_a_table()
-  return self:and_passes_assertion(assertions.is_a_table)
-end
-
-function assertion_subject:and_passes_assertion(assertion)
-  self:_assert_ready_for_chained_assertion()
-  return self:_apply_assertion(assertion)
-end
-
--- FINALIZERS
-
-function assertion_subject:and_return_value()
-  self:_assert_ready_for_finalization()
-  self.finalized = true
-  return self.value
 end
 
 -- INTERNAL METHODS
@@ -65,35 +46,6 @@ end
 
 function assertion_subject:_record_assertion()
   self.assertion_count = self.assertion_count + 1
-end
-
-function assertion_subject:_assert_not_finalized()
-  assert(
-      not self.finalized
-      'Improper use of assertions: assertions made after already finalized. A new assertion must '
-          ..'be started using \'assert_that()\'')
-end
-
-function assertion_subject:_assert_ready_for_initial_assertion()
-  self:_assert_not_finalized()
-  assert(
-      self.assertion_count < 1,
-      'Improper use of assertions: use the assertion methods prefixed with \'and\' when chaining '
-          ..'assertions')
-end
-
-function assertion_subject:_assertion_ready_for_chained_assertion()
-  self:_assert_not_finalized()
-  assert(
-      self.assertion_count >= 1,
-      'Improper use of assertions: do not use \'and\' prefixed assertions when starting an '
-          ..'assertion chain')
-end
-
-function assertion_subject:_assert_ready_for_finalization()
-  self:_assert_not_finalized()
-  assert(
-      self.assertion_count >= 1, 'Improper use of assertions: at least one assertion must be made')
 end
 
 return assertion_subject
