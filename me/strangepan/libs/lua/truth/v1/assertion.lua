@@ -9,10 +9,10 @@ end
 
 function assertion.of_type(type_string)
   return assertion(
-      function(value)
+      function(_, value)
         return type(value) == type_string
       end,
-      function(value)
+      function(_, value)
         return type_string..' expected, '..type(value)..' received'
       end)
 end

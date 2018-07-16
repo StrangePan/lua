@@ -12,10 +12,12 @@ local assertion_subject = class.build()
 function assertion_subject:_init(subject)
   self.subject = subject
   self.assertion_count = 0
-  self.finaled = false
 end
 
--- INITIALIZER ASSERTIONS
+--[[ Checks if the current test subject is of type number and returns this assertion_subject. ]]
+function assertion_subject:is_a_number()
+  return self:passes_assertion(assertions.is_a_number)
+end
 
 --[[ Checks if the current test subject is of type string and returns this assertion_subject. ]]
 function assertion_subject:is_a_string()
@@ -30,7 +32,6 @@ end
 --[[ Generic assertion method to test against the current test subject and returns this
 assertion_subject. ]]
 function assertion_subject:passes_assertion(assertion)
-  self:_assert_ready_for_initial_assertion()
   return self:_apply_assertion(assertion)
 end
 

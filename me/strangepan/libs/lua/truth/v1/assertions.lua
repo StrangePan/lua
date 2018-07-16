@@ -8,6 +8,10 @@ simple functions, but these are still provided for convenience and efficiency.
 
 local assertions = {}
 
+assertions.is_a_number = assertion.of_type('number')
+
 assertions.is_a_string = assertion.of_type('string')
 
 assertions.is_a_table = assertion.of_type('table')
+
+return assertions
