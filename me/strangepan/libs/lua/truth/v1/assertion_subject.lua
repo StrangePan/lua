@@ -11,22 +11,21 @@ local assertion_subject = class.build()
 
 function assertion_subject:_init(subject)
   self.subject = subject
-  self.assertion_count = 0
 end
 
 --[[ Checks if the current test subject is of type number and returns this assertion_subject. ]]
 function assertion_subject:is_a_number()
-  return self:passes_assertion(assertions.is_a_number)
+  return self:_apply_assertion(assertions.is_a_number)
 end
 
 --[[ Checks if the current test subject is of type string and returns this assertion_subject. ]]
 function assertion_subject:is_a_string()
-  return self:passes_assertion(assertions.is_a_string)
+  return self:_apply_assertion(assertions.is_a_string)
 end
 
 --[[ Checks if the current test subject is of type table and returns this assertion_subject. ]]
 function assertion_subject:is_a_table()
-  return self:passes_assertion(assertions.is_a_table)
+  return self:_apply_assertion(assertions.is_a_table)
 end
 
 --[[ Generic assertion method to test against the current test subject and returns this
@@ -38,15 +37,10 @@ end
 -- INTERNAL METHODS
 
 function assertion_subject:_apply_assertion(assertion)
-  assert(
-      assertion:check(self.subject),
-      'Assertion failure: '..assertion:build_failure_message(self.subject))
-  self:_record_assertion()
+  if not assertion:check(self.subject) then
+    error('Assertion failure: '..assertion:build_failure_message(self.subject), 3)
+  end
   return self
-end
-
-function assertion_subject:_record_assertion()
-  self.assertion_count = self.assertion_count + 1
 end
 
 return assertion_subject
