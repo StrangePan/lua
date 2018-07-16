@@ -27,6 +27,12 @@ function TestClass:test_isAString_whenString_didNotThrowError()
   assert_that(test_string):is_a_string()
 end
 
+function TestClass:test_isAString_whenNil_didThrowError()
+  luaunit.assertError(function()
+    assert_that(nil):is_a_string()
+  end)
+end
+
 function TestClass:test_isAString_whenTable_didThrowError()
   luaunit.assertError(function()
     assert_that(test_table):is_a_string()
@@ -36,6 +42,12 @@ end
 -- Table assertions
 function TestClass:test_isATable_whenTable_didNotThrowError()
   assert_that(test_table):is_a_table()
+end
+
+function TestClass:test_isATable_whenNil_didThrowError()
+  luaunit.assertError(function()
+    assert_that(nil):is_a_table()
+  end)
 end
 
 function TestClass:test_isATable_whenString_didThrowError()
