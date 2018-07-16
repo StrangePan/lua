@@ -45,6 +45,10 @@ function TestClass:test_isATable_whenString_didThrowError()
 end
 
 -- Test multiple chained invocations
+function TestClass:test_isANumber_thrice_didNotThrowError()
+  assert_that(132):is_a_number():is_a_number():is_a_number()
+end
+
 function TestClass:test_isAString_thrice_didNotThrowError()
   assert_that(test_string):is_a_string():is_a_string():is_a_string()
 end
