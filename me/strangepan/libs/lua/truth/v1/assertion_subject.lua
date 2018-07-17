@@ -19,6 +19,11 @@ function assertion_subject:is_a_number()
   return self:passes_assertion(assertions.is_a_number)
 end
 
+--[[ Checks if the current test subject is of type boolean and returns this assertion_subject. ]]
+function assertion_subject:is_a_boolean()
+  return self:passes_assertion(assertions.is_a_boolean)
+end
+
 --[[ Checks if the current test subject is of type string and returns this assertion_subject. ]]
 function assertion_subject:is_a_string()
   return self:passes_assertion(assertions.is_a_string)

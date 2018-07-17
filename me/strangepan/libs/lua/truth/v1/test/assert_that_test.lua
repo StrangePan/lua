@@ -22,6 +22,23 @@ function TestClass:test_isANumber_whenTable_didThrowError()
   end)
 end
 
+-- Boolean assertions
+function TestClass:test_isABoolean_whenBoolean_didNotThrowError()
+  assert_that(true):is_a_boolean()
+end
+
+function TestClass:test_isABoolean_whenNil_didThrowError()
+  luaunit.assertError(function()
+    assert_that(nil):is_a_boolean()
+  end)
+end
+
+function TestClass:test_isABoolean_whenTable_didThrowError()
+  luaunit.assertError(function()
+    assert_that({}):is_a_boolean()
+  end)
+end
+
 -- String assertions
 function TestClass:test_isAString_whenString_didNotThrowError()
   assert_that(test_string):is_a_string()
