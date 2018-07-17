@@ -24,7 +24,7 @@ assertions.is_nil =
           return value == nil
         end,
         function(_, value)
-          return "nil expected, "..value.." received"
+          return "nil expected, "..tostring(value).." received"
         end)
 
 return assertions
