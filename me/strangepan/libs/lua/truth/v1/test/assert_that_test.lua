@@ -80,15 +80,19 @@ function TestClass:test_isAFunction_whenFunction_didNotThrowError()
 end
 
 function TestClass:test_isAFunction_whenNil_didThrowError()
-  luaunit.assertError(function()
-    assert_that(nil):is_a_functino()
-  end)
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: function expected, nil received",
+    function()
+      assert_that(nil):is_a_function()
+    end)
 end
 
 function TestClass:test_isAFunction_whenTable_didThrowError()
-  luaunit.assertError(function()
-    assert_that({}):is_a_function()
-  end)
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: function expected, table received",
+    function()
+      assert_that({}):is_a_function()
+    end)
 end
 
 -- Value assertions
@@ -98,9 +102,11 @@ function TestClass:test_isNil_whenNil_didNotThrowError()
 end
 
 function TestClass:test_isNil_whenTable_didThrowError()
-  luaunit.assertError(function()
-    assert_that({}):is_nil()
-  end)
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: nil expected, table.- received",
+    function()
+      assert_that({}):is_nil()
+    end)
 end
 
 -- Test multiple chained invocations
