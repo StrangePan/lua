@@ -16,4 +16,6 @@ assertions.is_a_string = assertion.of_type('string')
 
 assertions.is_a_table = assertion.of_type('table')
 
+assertions.is_a_function = assertion.of_type('function')
+
 return assertions

@@ -34,6 +34,11 @@ function assertion_subject:is_a_table()
   return self:passes_assertion(assertions.is_a_table)
 end
 
+--[[ Checks if the current test subject is of type function and returns this assertion subject. ]]
+function assertion_subject:is_a_function()
+  return self:passes_assertion(assertions.is_a_function)
+end
+
 --[[ Generic assertion method to test against the current test subject and returns this
 assertion_subject. ]]
 function assertion_subject:passes_assertion(assertion)

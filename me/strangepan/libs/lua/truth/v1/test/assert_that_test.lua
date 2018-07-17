@@ -73,6 +73,23 @@ function TestClass:test_isATable_whenString_didThrowError()
   end)
 end
 
+-- Table assertions
+function TestClass:test_isAFunction_whenFunction_didNotThrowError()
+  assert_that(function() end):is_a_function()
+end
+
+function TestClass:test_isAFunction_whenNil_didThrowError()
+  luaunit.assertError(function()
+    assert_that(nil):is_a_functino()
+  end)
+end
+
+function TestClass:test_isAFunction_whenTable_didThrowError()
+  luaunit.assertError(function()
+    assert_that({}):is_a_function()
+  end)
+end
+
 -- Test multiple chained invocations
 function TestClass:test_isANumber_thrice_didNotThrowError()
   assert_that(132):is_a_number():is_a_number():is_a_number()
