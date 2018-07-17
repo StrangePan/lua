@@ -39,6 +39,14 @@ function assertion_subject:is_a_function()
   return self:passes_assertion(assertions.is_a_function)
 end
 
+
+-- Value assertions
+
+--[[ Checks if the current test subject is a nil reference and returns this assertion object. ]]
+function assertion_subject:is_nil()
+  return self:passes_assertion(assertions.is_nil)
+end
+
 --[[ Generic assertion method to test against the current test subject and returns this
 assertion_subject. ]]
 function assertion_subject:passes_assertion(assertion)

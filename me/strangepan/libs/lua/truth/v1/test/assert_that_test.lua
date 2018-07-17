@@ -74,6 +74,7 @@ function TestClass:test_isATable_whenString_didThrowError()
 end
 
 -- Table assertions
+
 function TestClass:test_isAFunction_whenFunction_didNotThrowError()
   assert_that(function() end):is_a_function()
 end
@@ -87,6 +88,18 @@ end
 function TestClass:test_isAFunction_whenTable_didThrowError()
   luaunit.assertError(function()
     assert_that({}):is_a_function()
+  end)
+end
+
+-- Value assertions
+
+function TestClass:test_isNil_whenNil_didNotThrowError()
+  assert_that(nil):is_nil()
+end
+
+function TestClass:test_isNil_whenTable_didThrowError()
+  luaunit.assertError(function()
+    assert_that({}):is_nil()
   end)
 end
 

@@ -18,4 +18,13 @@ assertions.is_a_table = assertion.of_type('table')
 
 assertions.is_a_function = assertion.of_type('function')
 
+assertions.is_nil =
+    assertion(
+        function(_, value)
+          return value == nil
+        end,
+        function(_, value)
+          return "nil expected, "..value.." received"
+        end)
+
 return assertions
