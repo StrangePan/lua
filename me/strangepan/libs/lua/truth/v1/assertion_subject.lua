@@ -46,6 +46,26 @@ function assertion_subject:is_nil()
   return self:_apply_assertion(assertions.is_nil)
 end
 
+--[[ Checks if the current test subject evaluates to true and returns this assertion object.
+
+This check leverages the truthiness of native lua types. In other words, false, and nil evaluate to
+false while every other value evalutes to true, including 0. Use the `is_a_boolean()` assertion in
+combination with this one to assert the boolean `true` constant.
+ ]]
+function assertion_subject:is_true()
+  return self:_apply_assertion(assertions.is_true)
+end
+
+--[[ Checks if the current test subject evaluates to false and returns this assertion object.
+
+This check leverages the truthiness of native lua types. In other words, false, and nil evaluate to
+false while every other value evalutes to true, including 0. Use the `is_a_boolean()` assertion in
+combination with this one to assert the boolean `false` constant.
+ ]]
+function assertion_subject:is_false()
+  return self:_apply_assertion(assertions.is_false)
+end
+
 --[[ Generic assertion method to test against the current test subject and returns this
 assertion_subject. ]]
 function assertion_subject:passes_assertion(assertion)

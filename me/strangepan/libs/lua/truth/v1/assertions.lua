@@ -27,4 +27,24 @@ assertions.is_nil =
           return "nil expected, "..tostring(value).." received"
         end)
 
+assertions.is_true =
+    assertion(
+        function(_, value)
+          -- the 'not' operator converts value to boolean and inverts it. Invert again.
+          return not not value
+        end,
+        function(_, value)
+          return "expected value to be true, but was "..tostring(value)
+        end)
+
+assertions.is_false =
+    assertion(
+        function(_, value)
+          -- The 'not' operator converts value to a boolean and inverts it
+          return not value
+        end,
+        function(_, value)
+          return "expected value to be false, but was "..tostring(value)
+        end)
+
 return assertions
