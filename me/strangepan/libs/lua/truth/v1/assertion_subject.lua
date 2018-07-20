@@ -66,6 +66,28 @@ function assertion_subject:is_false()
   return self:_apply_assertion(assertions.is_false)
 end
 
+--[[ Checks if the current test subject is equivalent to the given value and returns this assertion
+object.
+
+This check uses the `==` operator to evaluate equivalency unless it's a table. Note that using this
+technique, `false` and `nil` are not equal. Tables are compared using a field-by-field recursive
+comparison, including metatables. To compare table identities, use the is() assertion.
+]]
+function assertion_subject:equals(other)
+  return self:_apply_assertion(assertions.equals(other))
+end
+
+--[[ Checks if the current test subject is the same object as the given value and returns this
+assertion object.
+
+This check uses the `==` operator to evaluate equivalency. Note that strings have no concept of
+"sameness", and thus their instances cannot actually be compared. Tables are compared for identity.
+To compare table equivalencies recursively, use the equals() assertion.
+]]
+function assertion_subject:is(other)
+  return self:_apply_assertion(assertions.is(other))
+end
+
 --[[ Generic assertion method to test against the current test subject and returns this
 assertion_subject. ]]
 function assertion_subject:passes_assertion(assertion)
