@@ -443,6 +443,80 @@ function TestClass:test_equals_whenTablesUnequal_didThrowError()
     end)
 end
 
+-- less than
+
+function TestClass:test_isLessThan_whenLessThan_didNotThrowError()
+  assert_that(10):is_less_than(20)
+end
+
+function TestClass:test_isLessThan_whenEqual_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: 10 is not less than 10",
+    function()
+      assert_that(10):is_less_than(10)
+    end)
+end
+
+function TestClass:test_isLessThan_whenGreaterThan_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: 10 is not less than 5",
+    function()
+      assert_that(10):is_less_than(5)
+    end)
+end
+
+function TestClass:test_isLessThanOrEqualTo_whenLessThan_didNotThrowError()
+  assert_that(10):is_less_than_or_equal_to(20)
+end
+
+function TestClass:test_isLessThanOrEqualTo_whenEqual_didNotThrowError()
+  assert_that(10):is_less_than_or_equal_to(10)
+end
+
+function TestClass:test_isLessThanOrEqualTo_whenGreaterThan_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: 10 is not less than or equal to 5",
+    function()
+      assert_that(10):is_less_than_or_equal_to(5)
+    end)
+end
+
+function TestClass:test_isGreaterThanOrEqualTo_whenGreaterThan_didNotThrowError()
+  assert_that(20):is_greater_than_or_equal_to(10)
+end
+
+function TestClass:test_isGreaterThanOrEqualTo_whenEqual_didNotThrowError()
+  assert_that(5):is_greater_than_or_equal_to(5)
+end
+
+function TestClass:test_isGreaterThanOrEqualTo_whenLessThan_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: 5 is not greater than or equal to 10",
+    function()
+      assert_that(5):is_greater_than_or_equal_to(10)
+    end)
+end
+
+function TestClass:test_isGreaterThan_whenGreaterThan_didNotThrowError()
+  assert_that(20):is_greater_than(10)
+end
+
+function TestClass:test_isGreaterThan_whenEqual_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: 5 is not greater than 5",
+    function()
+      assert_that(5):is_greater_than(5)
+    end)
+end
+
+function TestClass:test_isGreaterThan_whenLessThan_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: 5 is not greater than 10",
+    function()
+      assert_that(5):is_greater_than(10)
+    end)
+end
+
 -- Test multiple chained invocations
 function TestClass:test_isANumber_thrice_didNotThrowError()
   assert_that(132):is_a_number():is_a_number():is_a_number()

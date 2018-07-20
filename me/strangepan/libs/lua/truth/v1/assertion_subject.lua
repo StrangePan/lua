@@ -88,6 +88,47 @@ function assertion_subject:is(other)
   return self:_apply_assertion(assertions.is(other))
 end
 
+--[[ Checks if the current test subjet is of a numeric value less than the given value and returns
+this assertion object.
+
+This check uses the `<` operator to compare values. If the supplied values are not comperable using
+this method, then the assertion will fail.
+]]
+function assertion_subject:is_less_than(other)
+  return self:_apply_assertion(assertions.is_less_than(other))
+end
+
+--[[ Checks if the current test subjet is of a numeric value less than or equal to the given value
+and returns this assertion object.
+
+This check uses the `<=` operator to compare values. If the supplied values are not comperable using
+this method, then the assertion will fail.
+]]
+function assertion_subject:is_less_than_or_equal_to(other)
+  return self:_apply_assertion(assertions.is_less_than_or_equal_to(other))
+end
+
+--[[ Checks if the current test subjet is of a numeric value greater than the given value and
+returns this assertion object.
+
+This check uses the `>` operator to compare values. If the supplied values are not comperable using
+this method, then the assertion will fail.
+]]
+function assertion_subject:is_greater_than(other)
+  return self:_apply_assertion(assertions.is_greater_than(other))
+end
+
+--[[ Checks if the current test subjet is of a numeric value greater than or equal to the given
+value and returns this assertion object.
+
+This check uses the `>=` operator to compare values. If the supplied values are not comperable using
+this method, then the assertion will fail.
+]]
+function assertion_subject:is_greater_than_or_equal_to(other)
+  return self:_apply_assertion(assertions.is_greater_than_or_equal_to(other))
+end
+
+
 --[[ Generic assertion method to test against the current test subject and returns this
 assertion_subject. ]]
 function assertion_subject:passes_assertion(assertion)

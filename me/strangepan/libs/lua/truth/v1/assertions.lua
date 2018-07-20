@@ -109,4 +109,44 @@ function assertions.is(other)
       end)
 end
 
+function assertions.is_less_than(other)
+  return assertion(
+    function(_, value)
+      return value < other
+    end,
+    function(_, value)
+      return tostring(value).." is not less than "..tostring(other)
+    end)
+end
+
+function assertions.is_less_than_or_equal_to(other)
+  return assertion(
+    function(_, value)
+      return value <= other
+    end,
+    function(_, value)
+      return tostring(value).." is not less than or equal to "..tostring(other)
+    end)
+end
+
+function assertions.is_greater_than(other)
+  return assertion(
+    function(_, value)
+      return value > other
+    end,
+    function(_, value)
+      return tostring(value).." is not greater than "..tostring(other)
+    end)
+end
+
+function assertions.is_greater_than_or_equal_to(other)
+  return assertion(
+    function(_, value)
+      return value >= other
+    end,
+    function(_, value)
+      return tostring(value).." is not greater than or equal to "..tostring(other)
+    end)
+end
+
 return assertions
