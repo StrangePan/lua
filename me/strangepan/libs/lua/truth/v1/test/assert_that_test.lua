@@ -135,6 +135,18 @@ function TestClass:test_isNil_whenTable_didThrowError()
     end)
 end
 
+function TestClass:test_isNotNil_whenTable_didThrowError()
+  assert_that({}):is_not_nil()
+end
+
+function TestClass:test_isNotNil_whenNil_didNotThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: value is nil, expected not nil",
+    function()
+      assert_that(nil):is_not_nil()
+    end)
+end
+
 
 -- Boolean assertions
 

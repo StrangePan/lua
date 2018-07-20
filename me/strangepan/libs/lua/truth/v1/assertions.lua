@@ -27,6 +27,15 @@ assertions.is_nil =
           return "nil expected, "..tostring(value).." received"
         end)
 
+assertions.is_not_nil =
+    assertion(
+        function(_, value)
+          return value ~= nil
+        end,
+        function(_, _)
+          return "value is nil, expected not nil"
+        end)
+
 assertions.is_true =
     assertion(
         function(_, value)

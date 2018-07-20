@@ -46,6 +46,11 @@ function assertion_subject:is_nil()
   return self:_apply_assertion(assertions.is_nil)
 end
 
+--[[ Checks if the current test subject is not a nil reference and returns this assertion object. ]]
+function assertion_subject:is_not_nil()
+  return self:_apply_assertion(assertions.is_not_nil)
+end
+
 --[[ Checks if the current test subject evaluates to true and returns this assertion object.
 
 This check leverages the truthiness of native lua types. In other words, false, and nil evaluate to
