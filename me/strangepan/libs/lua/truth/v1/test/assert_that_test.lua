@@ -430,6 +430,49 @@ function TestClass:test_isCopyOf_whenExpectedHasFewerFields_didThrowError()
     end)
 end
 
+-- is instance of
+
+function TestClass:test_isInstanceOf_whenString_didThrowError()
+  luaunit.assertErrorMsgMatches(
+      ".-Assertion failure: received value is not an instance of expected value: "
+        .."no equivalent metatables.*",
+      function()
+        assert_that("hi"):is_instance_of({})
+      end)
+end
+
+function TestClass:test_isInstanceOf_whenMetatableMatches_didNotThrowError()
+  local instance = {}
+  local class = {}
+  setmetatable(instance, class)
+
+  assert_that(instance):is_instance_of(class)
+end
+
+function TestClass:test_isInstanceOf_whenMetatableOfMetatableMatches_didNotThrowError()
+  local instance = {}
+  local class = {}
+  local superclass = {}
+  setmetatable(instance, class)
+  setmetatable(class, superclass)
+
+  assert_that(instance):is_instance_of(superclass)
+end
+
+function TestClass:test_isInstanceOf_whenMetatableDoesNotMatch_didThrowError()
+  local instance = {}
+  local class = {}
+  local otherclass = {}
+  setmetatable(instance, class)
+
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: received value is not an instance of expected value: "
+        .."no equivalent metatables.*",
+    function()
+      assert_that(instance):is_instance_of(otherclass)
+    end)
+end
+
 -- less than
 
 function TestClass:test_isLessThan_whenLessThan_didNotThrowError()

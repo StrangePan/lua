@@ -92,6 +92,12 @@ function assertion_subject:is_copy_of(other)
   return self:_apply_assertion(assertions.is_copy_of(other))
 end
 
+--[[ Checks if the current test subject's metatable (or metatable of metatable) is the expected
+value and returns this assertion object. ]]
+function assertion_subject:is_instance_of(other)
+  return self:_apply_assertion(assertions.is_instance_of(other))
+end
+
 --[[ Checks if the current test subjet is of a numeric value less than the given value and returns
 this assertion object.
 

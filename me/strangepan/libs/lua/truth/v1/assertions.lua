@@ -150,6 +150,22 @@ function assertions.is_equal_to(other)
       end)
 end
 
+function assertions.is_instance_of(other)
+  return assertion(
+    function(_, value)
+      local t = getmetatable(value)
+      while t do
+        if t == other then return true end
+        t = getmetatable(t)
+      end
+      return false
+    end,
+    function(_, value)
+      return "received value is not an instance of expected value: no equivalent metatables\n"
+          .."  received: "..tostring(value)
+    end)
+end
+
 function assertions.is_less_than(other)
   return assertion(
     function(_, value)
