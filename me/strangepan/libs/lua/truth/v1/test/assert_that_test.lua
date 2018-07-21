@@ -228,230 +228,205 @@ end
 
 -- is
 
-function TestClass:test_is_whenBothTrue_didNotThrowError()
-  assert_that(true):is(true)
+function TestClass:test_isEqualTo_whenBothTrue_didNotThrowError()
+  assert_that(true):is_equal_to(true)
 end
 
-function TestClass:test_is_whenBothFalse_didNotThrowError()
-  assert_that(false):is(false)
+function TestClass:test_isEqualTo_whenBothFalse_didNotThrowError()
+  assert_that(false):is_equal_to(false)
 end
 
-function TestClass:test_is_whenBothNil_didNotThrowError()
-  assert_that(nil):is(nil)
+function TestClass:test_isEqualTo_whenBothNil_didNotThrowError()
+  assert_that(nil):is_equal_to(nil)
 end
 
-function TestClass:test_is_whenBothEqualNumbers_didNotThrowError()
-  assert_that(132):is(132)
+function TestClass:test_isEqualTo_whenBothEqualNumbers_didNotThrowError()
+  assert_that(132):is_equal_to(132)
 end
 
-function TestClass:test_is_whenBothEqualStrings_didNotThrowError()
-  assert_that("hi"):is("hi")
+function TestClass:test_isEqualTo_whenBothEqualStrings_didNotThrowError()
+  assert_that("hi"):is_equal_to("hi")
 end
 
-function TestClass:test_is_whenBothSameFunction_didNotThrowError()
+function TestClass:test_isEqualTo_whenBothSameFunction_didNotThrowError()
   local f = function() end
-  assert_that(f):is(f)
+  assert_that(f):is_equal_to(f)
 end
 
-function TestClass:test_is_whenBothSameTable_didNotThrowError()
+function TestClass:test_isEqualTo_whenBothSameTable_didNotThrowError()
   local t = {x = 132 }
-  assert_that(t):is(t)
+  assert_that(t):is_equal_to(t)
 end
 
-function TestClass:test_is_whenUnequalBooleans_didThrowError()
+function TestClass:test_isEqualTo_whenUnequalBooleans_didThrowError()
   luaunit.assertErrorMsgMatches(
     ".-Assertion failure: values are not the same:.*",
     function()
-      assert_that(false):is(true)
+      assert_that(false):is_equal_to(true)
     end)
 end
 
-function TestClass:test_is_whenNilAndFalse_didThrowError()
+function TestClass:test_isEqualTo_whenNilAndFalse_didThrowError()
   luaunit.assertErrorMsgMatches(
     ".-Assertion failure: values are not the same:.*",
     function()
-      assert_that(nil):is(false)
+      assert_that(nil):is_equal_to(false)
     end)
 end
 
-function TestClass:test_is_whenUnequalNumbers_didThrowError()
+function TestClass:test_isEqualTo_whenUnequalNumbers_didThrowError()
   luaunit.assertErrorMsgMatches(
     ".-Assertion failure: values are not the same:.*",
     function()
-      assert_that(132):is(10101010)
+      assert_that(132):is_equal_to(10101010)
     end)
 end
 
-function TestClass:test_is_whenUnequalStrings_didThrowError()
+function TestClass:test_isEqualTo_whenUnequalStrings_didThrowError()
   luaunit.assertErrorMsgMatches(
     ".-Assertion failure: values are not the same:.*",
     function()
-      assert_that("hi"):is("bye")
+      assert_that("hi"):is_equal_to("bye")
     end)
 end
 
-function TestClass:test_is_whenEqualFunctions_didThrowError()
+function TestClass:test_isEqualTo_whenEqualFunctions_didThrowError()
   local f1 = function() end
   local f2 = function() end
 
   luaunit.assertErrorMsgMatches(
     ".-Assertion failure: values are not the same:.*",
     function()
-      assert_that(f1):is(f2)
+      assert_that(f1):is_equal_to(f2)
     end)
 end
 
-function TestClass:test_is_whenEqualTables_didThrowError()
+function TestClass:test_isEqualTo_whenEqualTables_didThrowError()
   local t1 = {x = 132}
   local t2 = {x = 132 }
 
   luaunit.assertErrorMsgMatches(
     ".-Assertion failure: values are not the same:.*",
     function()
-      assert_that(t1):is(t2)
+      assert_that(t1):is_equal_to(t2)
     end)
 end
 
 -- equals
 
-function TestClass:test_equals_whenBothTrue_didNotThrowError()
-  assert_that(true):equals(true)
-end
-
-function TestClass:test_equals_whenBothFalse_didNotThrowError()
-  assert_that(false):equals(false)
-end
-
-function TestClass:test_equals_whenBothNil_didNotThrowError()
-  assert_that(nil):equals(nil)
-end
-
-function TestClass:test_equals_whenEqualNumbers_didNotThrowError()
-  assert_that(132):equals(132)
-end
-
-function TestClass:test_equals_whenEqualStrings_didNotThrowError()
-  assert_that("hi"):equals("hi")
-end
-
-function TestClass:test_equals_whenSameFunction_didNotThrowError()
-  local f = function() end
-  assert_that(f):equals(f)
-end
-
-function TestClass:test_equals_whenSameTable_didNotThrowError()
+function TestClass:test_isCopyOf_whenSameTable_didNotThrowError()
   local t = {}
-  assert_that(t):equals(t)
+  assert_that(t):is_copy_of(t)
 end
 
-function TestClass:test_equals_whenEmptyTables_didNotThrowError()
-  assert_that({}):equals({})
+function TestClass:test_isCopyOf_whenEmptyTables_didNotThrowError()
+  assert_that({}):is_copy_of({})
 end
 
-function TestClass:test_equals_whenEmptyTables_withSameMetatable_didNotThrowError()
+function TestClass:test_isCopyOf_whenEmptyTables_withSameMetatable_didNotThrowError()
   local mtable = {}
   local t1 = {}
   local t2 = {}
   setmetatable(t1, mtable)
   setmetatable(t2, mtable)
 
-  assert_that(t1):equals(t2)
+  assert_that(t1):is_copy_of(t2)
 end
 
-function TestClass:test_equals_whenTablesContainNumbers_didNotThrowError()
-  assert_that({1, 2, 3}):equals({[1] = 1, [2] = 2, [3] = 3})
+function TestClass:test_isCopyOf_whenTablesContainNumbers_didNotThrowError()
+  assert_that({1, 2, 3}):is_copy_of({[1] = 1, [2] = 2, [3] = 3})
 end
 
-function TestClass:test_equals_whenTablesContainStrings_didNotThrowError()
-  assert_that({"one", "two", "three"}):equals({[1] = "one", [2] = "two", [3] = "three"})
+function TestClass:test_isCopyOf_whenTablesContainStrings_didNotThrowError()
+  assert_that({"one", "two", "three"}):is_copy_of({[1] = "one", [2] = "two", [3] = "three"})
 end
 
-function TestClass:test_equals_whenTablesContainFuctions_didNotThrowError()
+function TestClass:test_isCopyOf_whenTablesContainFuctions_didNotThrowError()
   local f1 = function() end
   local f2 = function() print("hi") end
 
-  assert_that({a = f1, [132] = f2}):equals({["a"] = f1, [132] = f2})
+  assert_that({a = f1, [132] = f2}):is_copy_of({["a"] = f1, [132] = f2})
 end
 
-function TestClass:test_equals_whenTableContainsTables_didNotThrowError()
+function TestClass:test_isCopyOf_whenTableContainsTables_didNotThrowError()
   local t1 = {{x = 132}, ["hi"] = {"hello"} }
   local t2 = {hi = {[1] = "hello"}, [1] = {["x"] = 132}}
 
-  assert_that(t1):equals(t2)
+  assert_that(t1):is_copy_of(t2)
 end
 
-function TestClass:test_equals_whenTableContainsTablesContainsSelf_didNotThrowError()
+function TestClass:test_isCopyOf_whenTableContainsTablesContainsSelf_didNotThrowError()
   -- Test that recursive equality check does not fail when tables contain references to themselves
   local t1 = {x = {132}}
   t1.y = t1
   local t2 = {y = t1, x = t1.x}
 
-  assert_that(t1):equals(t2)
+  assert_that(t1):is_copy_of(t2)
 end
 
 -- equals failures
 
-function TestClass:test_equals_whenUnequalBooleans_didThrowError()
+function TestClass:test_isCopyOf_whenEqualStrings_didThrowError()
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not equal:.*",
+    ".-Assertion failure: both received value and expected value are not tables:.*",
     function()
-      assert_that(true):equals(false)
+      assert_that("hi"):is_copy_of("hi")
     end)
 end
 
-function TestClass:test_equals_whenNilAndFalse_didThrowError()
+function TestClass:test_isCopyOf_whenReceivedValueIsString_didThrowError()
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not equal:.*",
+    ".-Assertion failure: received value is not a table:.*",
     function()
-      assert_that(nil):equals(false)
+      assert_that("hi"):is_copy_of({})
     end)
 end
 
-function TestClass:test_equals_whenUnequalNumbers_didThrowError()
+function TestClass:test_isCopyOf_whenEqualStrings_didThrowError()
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not equal:.*",
+    ".-Assertion failure: expected value is not a table:.*",
     function()
-      assert_that(132):equals(101010)
+      assert_that({}):is_copy_of("hi")
     end)
 end
 
-function TestClass:test_equals_whenUnequalStrings_didThrowError()
-  luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not equal:.*",
-    function()
-      assert_that("hi"):equals("goodbye")
-    end)
-end
-
-function TestClass:test_equals_whenDifferentFunctions_didThrowError()
-  luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not equal:.*",
-    function()
-      assert_that(function() end):equals(function() end)
-    end)
-end
-
-function TestClass:test_equals_whenMetatablesUnequal_didThrowError()
+function TestClass:test_isCopyOf_whenMetatablesUnequal_didThrowError()
   local t1 = {}
   local t2 = {}
   setmetatable(t1, {})
   setmetatable(t2, {x = 1})
 
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not equal:.*",
+    ".-Assertion failure: received value is not a copy of expected value:.*",
     function()
-      assert_that(t1):equals(t2)
+      assert_that(t1):is_copy_of(t2)
     end)
 end
 
-function TestClass:test_equals_whenTablesUnequal_didThrowError()
-  local t1 = {x = 132, y = {} }
-  local t2 = {x = 1010101, y = {} }
+function TestClass:test_isCopyOf_whenTablesUnequal_didThrowError()
+  local t1 = {x = 132, y = {}}
+  local t2 = {x = 1010101, y = {}}
 
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not equal:.*",
+    ".-Assertion failure: received value is not a copy of expected value:.*",
     function()
-      assert_that(t1):equals(t2)
+      assert_that(t1):is_copy_of(t2)
+    end)
+end
+
+function TestClass:test_isCopyOf_whenExpectedHasMoreFields_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: received value is not a copy of expected value:.*",
+    function()
+      assert_that({1, 2, 3}):is_copy_of({1, 2, 3, 4})
+    end)
+end
+
+function TestClass:test_isCopyOf_whenExpectedHasFewerFields_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: received value is not a copy of expected value:.*",
+    function()
+      assert_that({1, 2, 3}):is_copy_of({1, 2})
     end)
 end
 

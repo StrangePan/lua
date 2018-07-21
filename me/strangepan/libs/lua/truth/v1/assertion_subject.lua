@@ -71,26 +71,25 @@ function assertion_subject:is_false()
   return self:_apply_assertion(assertions.is_false)
 end
 
---[[ Checks if the current test subject is equivalent to the given value and returns this assertion
-object.
-
-This check uses the `==` operator to evaluate equivalency unless it's a table. Note that using this
-technique, `false` and `nil` are not equal. Tables are compared using a field-by-field recursive
-comparison, including metatables. To compare table identities, use the is() assertion.
-]]
-function assertion_subject:equals(other)
-  return self:_apply_assertion(assertions.equals(other))
-end
-
---[[ Checks if the current test subject is the same object as the given value and returns this
+--[[ Checks if the current test subject is equal to the given value and returns this
 assertion object.
 
-This check uses the `==` operator to evaluate equivalency. Note that strings have no concept of
-"sameness", and thus their instances cannot actually be compared. Tables are compared for identity.
-To compare table equivalencies recursively, use the equals() assertion.
+This check uses the `==` operator to evaluate equivalency. This means that the values of numbers,
+booleans, and strings will be compared for equivalency. Tables will only be equal if they are the
+same instance or if their metatables have an `__eq` function defined that evalutes to true.
 ]]
-function assertion_subject:is(other)
-  return self:_apply_assertion(assertions.is(other))
+function assertion_subject:is_equal_to(other)
+  return self:_apply_assertion(assertions.is_equal_to(other))
+end
+
+--[[ Checks if the current test subject is a table and all fields and metatable fields are deep
+copies of the given expected table. returns this assertion object.
+
+This check uses the `==` operator to evaluate equivalency for all non-table fields and recursively
+compares all tables.
+]]
+function assertion_subject:is_copy_of(other)
+  return self:_apply_assertion(assertions.is_copy_of(other))
 end
 
 --[[ Checks if the current test subjet is of a numeric value less than the given value and returns
