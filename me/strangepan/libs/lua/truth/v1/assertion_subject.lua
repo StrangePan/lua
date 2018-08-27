@@ -82,6 +82,18 @@ function assertion_subject:is_equal_to(other)
   return self:_apply_assertion(assertions.is_equal_to(other))
 end
 
+--[[ Checks if the current test subject is not equal to the given value and returns this assertion
+object.
+
+This check uses the `==` operator to evaluate equivalency, then inverts the result. This means that
+valueso f numbers, booleans, and strings will be compared for equivalency. Tables will only be equal
+if they are the same instance or if their metatables have an `__eq` function defined that evalutes
+to true.
+]]
+function assertion_subject:is_unequal_to(other)
+  return self:_apply_assertion(assertions.is_unequal_to(other))
+end
+
 --[[ Checks if the current test subject is a table and all fields and metatable fields are deep
 copies of the given expected table. returns this assertion object.
 

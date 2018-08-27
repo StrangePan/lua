@@ -226,7 +226,7 @@ function TestClass:test_isFalse_whenString_didThrowError()
     end)
 end
 
--- is
+-- equals
 
 function TestClass:test_isEqualTo_whenBothTrue_didNotThrowError()
   assert_that(true):is_equal_to(true)
@@ -258,9 +258,11 @@ function TestClass:test_isEqualTo_whenBothSameTable_didNotThrowError()
   assert_that(t):is_equal_to(t)
 end
 
+-- equals errors
+
 function TestClass:test_isEqualTo_whenUnequalBooleans_didThrowError()
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not the same:.*",
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
     function()
       assert_that(false):is_equal_to(true)
     end)
@@ -268,7 +270,7 @@ end
 
 function TestClass:test_isEqualTo_whenNilAndFalse_didThrowError()
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not the same:.*",
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
     function()
       assert_that(nil):is_equal_to(false)
     end)
@@ -276,7 +278,7 @@ end
 
 function TestClass:test_isEqualTo_whenUnequalNumbers_didThrowError()
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not the same:.*",
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
     function()
       assert_that(132):is_equal_to(10101010)
     end)
@@ -284,7 +286,7 @@ end
 
 function TestClass:test_isEqualTo_whenUnequalStrings_didThrowError()
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not the same:.*",
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
     function()
       assert_that("hi"):is_equal_to("bye")
     end)
@@ -295,7 +297,7 @@ function TestClass:test_isEqualTo_whenEqualFunctions_didThrowError()
   local f2 = function() end
 
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not the same:.*",
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
     function()
       assert_that(f1):is_equal_to(f2)
     end)
@@ -306,13 +308,129 @@ function TestClass:test_isEqualTo_whenEqualTables_didThrowError()
   local t2 = {x = 132 }
 
   luaunit.assertErrorMsgMatches(
-    ".-Assertion failure: values are not the same:.*",
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
     function()
       assert_that(t1):is_equal_to(t2)
     end)
 end
 
--- equals
+-- unequals
+
+function TestClass:test_isUnequalTo_whenBothTrue_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be unequal, but were equal:.*",
+    function()
+      assert_that(true):is_unequal_to(true)
+    end)
+end
+
+function TestClass:test_isUnequalTo_whenBothFalse_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be unequal, but were equal:.*",
+    function()
+      assert_that(false):is_unequal_to(false)
+    end)
+end
+
+function TestClass:test_isUnequalTo_whenBothNil_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be unequal, but were equal:.*",
+    function()
+      assert_that(nil):is_unequal_to(nil)
+    end)
+end
+
+function TestClass:test_isUnequalTo_whenBothEqualNumbers_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be unequal, but were equal:.*",
+    function()
+      assert_that(132):is_unequal_to(132)
+    end)
+end
+
+function TestClass:test_isUnequalTo_whenBothEqualStrings_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be unequal, but were equal:.*",
+    function()
+      assert_that("hi"):is_unequal_to("hi")
+    end)
+end
+
+function TestClass:test_isUnequalTo_whenBothSameFunction_didThrowError()
+  local f = function() end
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be unequal, but were equal:.*",
+    function()
+      assert_that(f):is_unequal_to(f)
+    end)
+end
+
+function TestClass:test_isUnequalTo_whenBothSameTable_didThrowError()
+  local t = {x = 132}
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be unequal, but were equal:.*",
+    function()
+      assert_that(t):is_unequal_to(t)
+    end)
+end
+
+-- equals errors
+
+function TestClass:test_isEqualTo_whenUnequalBooleans_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
+    function()
+      assert_that(false):is_equal_to(true)
+    end)
+end
+
+function TestClass:test_isEqualTo_whenNilAndFalse_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
+    function()
+      assert_that(nil):is_equal_to(false)
+    end)
+end
+
+function TestClass:test_isEqualTo_whenUnequalNumbers_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
+    function()
+      assert_that(132):is_equal_to(10101010)
+    end)
+end
+
+function TestClass:test_isEqualTo_whenUnequalStrings_didThrowError()
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
+    function()
+      assert_that("hi"):is_equal_to("bye")
+    end)
+end
+
+function TestClass:test_isEqualTo_whenEqualFunctions_didThrowError()
+  local f1 = function() end
+  local f2 = function() end
+
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
+    function()
+      assert_that(f1):is_equal_to(f2)
+    end)
+end
+
+function TestClass:test_isEqualTo_whenEqualTables_didThrowError()
+  local t1 = {x = 132}
+  local t2 = {x = 132 }
+
+  luaunit.assertErrorMsgMatches(
+    ".-Assertion failure: values were expected to be equal, but were unequal:.*",
+    function()
+      assert_that(t1):is_equal_to(t2)
+    end)
+end
+
+-- copy
 
 function TestClass:test_isCopyOf_whenSameTable_didNotThrowError()
   local t = {}
@@ -364,7 +482,7 @@ function TestClass:test_isCopyOf_whenTableContainsTablesContainsSelf_didNotThrow
   assert_that(t1):is_copy_of(t2)
 end
 
--- equals failures
+-- copy failures
 
 function TestClass:test_isCopyOf_whenEqualStrings_didThrowError()
   luaunit.assertErrorMsgMatches(

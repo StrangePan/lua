@@ -144,7 +144,19 @@ function assertions.is_equal_to(other)
         return value == other
       end,
       function(_, value)
-        return "values are not the same:\n"
+        return "values were expected to be equal, but were unequal:\n"
+            .."  expected: "..tostring(other).."\n"
+            .."  received: "..tostring(value)
+      end)
+end
+
+function assertions.is_unequal_to(other)
+  return assertion(
+      function(_, value)
+        return value ~= other
+      end,
+      function(_, value)
+        return "values were expected to be unequal, but were equal:\n"
             .."  expected: "..tostring(other).."\n"
             .."  received: "..tostring(value)
       end)
