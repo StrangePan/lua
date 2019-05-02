@@ -1,5 +1,5 @@
 local luaunit = require 'luaunit'
-local enum = require 'me.strangepan.lua.v1.enum'
+local enum = require 'me.strangepan.libs.lua.v1.enum'
 
 TestObject = {}
 
