@@ -1,6 +1,6 @@
-require "strangepan.secretary.Secretary"
-require "strangepan.util.class"
-require "strangepan.util.type"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 Game = buildClass()
 local Class = Game

@@ -1,10 +1,10 @@
-require "strangepan.util.type"
-require "networking.CustomNetworkedEntityManager"
-require "networking.Connection"
-require "ServerConnectionManager"
-require "networking.ConnectionStatus"
+require "me.strangepan.games.mazerino.common.networking.Connection"
+require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
+require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.server.ServerConnectionManager"
 
-local Serializer = require "Serializer"
+local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 
 local PRINT_DEBUG = false
 

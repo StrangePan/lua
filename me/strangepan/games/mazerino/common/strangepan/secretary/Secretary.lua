@@ -1,13 +1,13 @@
-require "strangepan.secretary.QuadTree"
-require "strangepan.secretary.EventType"
-require "strangepan.secretary.DrawLayer"
-require "strangepan.secretary.Entity"
-require "strangepan.secretary.PhysObject"
-require "strangepan.util.class"
-require "strangepan.util.functions"
-require "strangepan.util.type"
-require "strangepan.util.SortedSet"
-require "strangepan.util.FunctionQueue"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.QuadTree"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.DrawLayer"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.functions"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.strangepan.util.SortedSet"
+require "me.strangepan.games.mazerino.common.strangepan.util.FunctionQueue"
 
 Secretary = buildClass()
 local class = Secretary

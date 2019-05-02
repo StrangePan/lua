@@ -1,11 +1,11 @@
-require "strangepan.util.class"
-require "strangepan.util.type"
-require "EventCoordinator"
-require "networking.MessageType"
-require "networking.messages"
-require "strangepan.util.Queue"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.EventCoordinator"
+require "me.strangepan.games.mazerino.common.networking.MessageType"
+require "me.strangepan.games.mazerino.common.networking.messages"
+require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
 
-local Serializer = require "Serializer"
+local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 
 local PRINT_MESSAGES = false
 

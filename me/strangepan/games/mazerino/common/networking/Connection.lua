@@ -1,6 +1,6 @@
-require "strangepan.util.class"
-require "strangepan.util.type"
-require "networking.ConnectionStatus"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 
 --
 -- Class for maintaining information on connections. Rather than using a

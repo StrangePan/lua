@@ -1,4 +1,4 @@
-require "strangepan.util.enum"
+require "me.strangepan.games.mazerino.common.strangepan.util.enum"
 
 -- Enum
 -- Defines depth for drawing layers

@@ -1,7 +1,7 @@
-require "strangepan.util.class"
-require "CommandType"
-require "InputMethod"
-require "EventCoordinator"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.CommandType"
+require "me.strangepan.games.mazerino.common.InputMethod"
+require "me.strangepan.games.mazerino.common.EventCoordinator"
 
 CommandMap = buildClass()
 

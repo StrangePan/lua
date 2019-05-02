@@ -1,6 +1,6 @@
-require "strangepan.secretary.Entity"
-require "strangepan.util.type"
-require "Set"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.Set"
 
 Map = buildClass(Entity)
 

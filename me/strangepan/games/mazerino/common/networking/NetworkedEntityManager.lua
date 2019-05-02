@@ -1,12 +1,12 @@
-require "strangepan.util.type"
-require "networking.ConnectionManager"
-require "strangepan.secretary.Entity"
-require "networking.NetworkedEntityType"
-require "networking.EntityUpdateType"
-require "networking.NetworkedEntity"
-require "EventCoordinator"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+require "me.strangepan.games.mazerino.common.networking.EntityUpdateType"
+require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
+require "me.strangepan.games.mazerino.common.EventCoordinator"
 
-local Serializer = require "Serializer"
+local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 
 local PRINT_DEBUG = true
 

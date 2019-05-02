@@ -1,4 +1,4 @@
-require "strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
 
 Queue = buildClass()
 

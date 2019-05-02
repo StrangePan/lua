@@ -1,5 +1,5 @@
-require "strangepan.util.class"
-require "strangepan.secretary.Entity"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 
 --
 -- PhysObject

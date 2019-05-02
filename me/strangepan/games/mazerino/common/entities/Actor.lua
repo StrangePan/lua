@@ -1,8 +1,8 @@
-require "strangepan.secretary.PhysObject"
-require "entities.Footprint"
-require "EventCoordinator"
-require "Color"
-local translation = require "mazerino.util.translation"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+require "me.strangepan.games.mazerino.common.entities.Footprint"
+require "me.strangepan.games.mazerino.common.EventCoordinator"
+require "me.strangepan.games.mazerino.common.Color"
+local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 
 Actor = buildClass(PhysObject)
 

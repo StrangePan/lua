@@ -1,5 +1,5 @@
-require "strangepan.util.class"
-require "strangepan.util.type"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 QuadTree = buildClass()
 

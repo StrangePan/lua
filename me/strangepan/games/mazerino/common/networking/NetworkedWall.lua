@@ -1,5 +1,5 @@
-require "networking.NetworkedEntity"
-require "entities.Wall"
+require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
+require "me.strangepan.games.mazerino.common.entities.Wall"
 
 -- Message fields.
 local F_X = "x"

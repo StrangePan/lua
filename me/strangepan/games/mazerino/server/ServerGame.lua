@@ -1,7 +1,7 @@
-require "NetworkGame"
-require "ServerConnectionManager"
-require "ServerNetworkedEntityManager"
-require "networking.NetworkedEntityType"
+require "me.strangepan.games.mazerino.common.NetworkGame"
+require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+require "me.strangepan.games.mazerino.server.ServerConnectionManager"
+require "me.strangepan.games.mazerino.server.ServerNetworkedEntityManager"
 
 ServerGame = buildClass(NetworkGame)
 local Class = ServerGame

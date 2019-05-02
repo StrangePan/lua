@@ -1,4 +1,4 @@
-require "networking.ConnectionManager"
+require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
 
 --
 -- Connection handler for servers; maintains connections to multiple clients.

@@ -1,4 +1,4 @@
-require "networking.ConnectionManager"
+require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
 
 --
 -- Message handler and coordinator for clients.

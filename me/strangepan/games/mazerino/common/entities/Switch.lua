@@ -1,6 +1,6 @@
-require "strangepan.secretary.PhysObject"
-require "Color"
-local translation = require "mazerino.util.translation"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+require "me.strangepan.games.mazerino.common.Color"
+local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 
 Switch = buildClass(PhysObject)
 

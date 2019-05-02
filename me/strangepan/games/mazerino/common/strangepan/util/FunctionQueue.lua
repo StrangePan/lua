@@ -1,6 +1,6 @@
-require "strangepan.util.class"
-require "strangepan.util.Queue"
-require "strangepan.util.type"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 --[[
 Specialized queue for enqueuing function calls and executing them.

@@ -1,6 +1,6 @@
-require "strangepan.util.type"
-require "networking.CustomNetworkedEntityManager"
-require "ClientConnectionManager"
+require "me.strangepan.games.mazerino.client.ClientConnectionManager"
+require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 local F_NETWORK_ENTITY_ID = "i"
 
