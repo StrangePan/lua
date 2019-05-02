@@ -1,9 +1,9 @@
-require "font"
-require "funds"
+require "me.strangepan.games.specialdelivery.font"
+require "me.strangepan.games.specialdelivery.funds"
 
-gameGraph = require "graph"
-require "van"
-require "delivery"
+gameGraph = require "me.strangepan.games.specialdelivery.graph"
+require "me.strangepan.games.specialdelivery.van"
+require "me.strangepan.games.specialdelivery.delivery"
 require "van2"
 
 vans = {}

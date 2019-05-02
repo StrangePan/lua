@@ -1,4 +1,4 @@
-require "direction"
+require "me.strangepan.games.specialdelivery.direction"
 
 Path = {}
 Path.__index = Path

@@ -1,6 +1,6 @@
 require "graph_walker"
-require "path"
-require "direction"
+require "me.strangepan.games.specialdelivery.path"
+require "me.strangepan.games.specialdelivery.direction"
 
 Van2 = {}
 Van2.__index = Van2

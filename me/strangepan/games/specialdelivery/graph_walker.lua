@@ -1,5 +1,5 @@
-require "path"
-require "direction"
+require "me.strangepan.games.specialdelivery.path"
+require "me.strangepan.games.specialdelivery.direction"
 
 GraphWalker = {}
 GraphWalker.__index = GraphWalker

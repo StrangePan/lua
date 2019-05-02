@@ -1,4 +1,4 @@
-require "priorityqueue"
+require "me.strangepan.games.specialdelivery.priorityqueue"
 
 local graph = {
   nextNode = 1,

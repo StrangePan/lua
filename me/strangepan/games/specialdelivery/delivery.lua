@@ -1,4 +1,4 @@
-require 'path'
+require "me.strangepan.games.specialdelivery.path"
 
 Delivery = {}
 Delivery.__index = Delivery
