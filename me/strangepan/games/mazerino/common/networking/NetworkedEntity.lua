@@ -1,5 +1,5 @@
-require "strangepan.util.class"
-require "networking.NetworkedEntityType"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
 
 local PRINT_DEBUG = false
 

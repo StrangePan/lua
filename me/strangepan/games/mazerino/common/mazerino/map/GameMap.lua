@@ -1,8 +1,8 @@
-require 'strangepan.util.class'
-require 'strangepan.util.type'
-require 'entities.Player'
-require 'entities.Switch'
-require 'entities.Wall'
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.entities.Player"
+require "me.strangepan.games.mazerino.common.entities.Switch"
+require "me.strangepan.games.mazerino.common.entities.Wall"
 local GameMap = buildClass()
 
 -- Instantiates an entity of the given type at the given game map coordinates.

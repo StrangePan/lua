@@ -1,8 +1,8 @@
-require "Game"
-require "strangepan.secretary.Secretary"
-require "strangepan.util.type"
-require "networking.ConnectionManager"
-require "networking.NetworkedEntityManager"
+require "me.strangepan.games.mazerino.common.Game"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
+require "me.strangepan.games.mazerino.common.networking.NetworkedEntityManager"
 
 NetworkGame = buildClass(Game)
 local Class = NetworkGame

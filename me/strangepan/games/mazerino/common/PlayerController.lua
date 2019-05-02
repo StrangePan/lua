@@ -1,7 +1,7 @@
-require "strangepan.util.class"
-require "strangepan.util.type"
-require "entities.Player"
-require "entities.Direction"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.entities.Player"
+require "me.strangepan.games.mazerino.common.entities.Direction"
 
 PlayerController = buildClass()
 local Class = PlayerController

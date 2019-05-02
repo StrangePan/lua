@@ -1,9 +1,7 @@
-package.path = package.path..";../common/?.lua"
-
-require "strangepan.secretary.LoveSecretary"
-require "entities.Player"
-require "entities.Wall"
-require "OfflineGame"
+require "me.strangepan.games.mazerino.common.entities.Player"
+require "me.strangepan.games.mazerino.common.entities.Wall"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.LoveSecretary"
+require "me.strangepan.games.mazerino.offline.OfflineGame"
 
 function love.load()
   local secretary = LoveSecretary():captureLoveEvents()

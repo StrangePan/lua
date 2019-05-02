@@ -1,12 +1,12 @@
-require "NetworkGame"
-require "Camera"
-require "entities.Actor"
-require "entities.Player"
-require "strangepan.secretary.Secretary"
-require "strangepan.util.type"
-require "ClientConnectionManager"
-require "CommandMap"
-require "LocalPlayerController"
+require "me.strangepan.games.mazerino.client.ClientConnectionManager"
+require "me.strangepan.games.mazerino.common.NetworkGame"
+require "me.strangepan.games.mazerino.common.Camera"
+require "me.strangepan.games.mazerino.common.CommandMap"
+require "me.strangepan.games.mazerino.common.LocalPlayerController"
+require "me.strangepan.games.mazerino.common.entities.Actor"
+require "me.strangepan.games.mazerino.common.entities.Player"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 ClientGame = buildClass(NetworkGame)
 local Class = ClientGame

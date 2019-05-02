@@ -1,6 +1,6 @@
-require "strangepan.util.type"
-require "strangepan.util.class"
-require "strangepan.secretary.Entity"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+require "me.strangepan.games.mazerino.common.strangepan.util.class"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 
 EventCoordinator = buildClass(Entity)
 

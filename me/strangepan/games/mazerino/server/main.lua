@@ -1,10 +1,8 @@
-package.path = package.path..";../common/?.lua"
-
-require "strangepan.secretary.LoveSecretary"
-require "ServerGame"
-require "networking.NetworkedEntityType"
-require "ServerConnectionManager"
-require "ServerNetworkedEntityManager"
+require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.LoveSecretary"
+require "me.strangepan.games.mazerino.server.ServerConnectionManager"
+require "me.strangepan.games.mazerino.server.ServerGame"
+require "me.strangepan.games.mazerino.server.ServerNetworkedEntityManager"
 
 function love.load()
   local secretary = LoveSecretary()

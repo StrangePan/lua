@@ -1,5 +1,5 @@
-require "strangepan.util.Object"
-require "strangepan.util.type"
+require "me.strangepan.games.mazerino.common.strangepan.util.Object"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 --
 -- Builds a new class using the supplied table as a superclass..

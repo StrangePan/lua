@@ -1,4 +1,4 @@
-require "strangepan.util.type"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 Object = {}
 Object.__index = Object

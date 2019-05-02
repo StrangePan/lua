@@ -1,4 +1,4 @@
-require "strangepan.secretary.Secretary"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
 
 --
 -- Secretary object that is specifically compatible with Love2D and

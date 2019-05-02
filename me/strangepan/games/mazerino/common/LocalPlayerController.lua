@@ -1,6 +1,6 @@
-require "PlayerController"
-require "CommandMap"
-require "strangepan.util.type"
+require "me.strangepan.games.mazerino.common.PlayerController"
+require "me.strangepan.games.mazerino.common.CommandMap"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 LocalPlayerController = buildClass(PlayerController)
 

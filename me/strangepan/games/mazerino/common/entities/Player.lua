@@ -1,4 +1,4 @@
-require "entities.Actor"
+require "me.strangepan.games.mazerino.common.entities.Actor"
 
 Player = buildClass(Actor)
 

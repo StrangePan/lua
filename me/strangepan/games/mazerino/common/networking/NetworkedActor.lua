@@ -1,6 +1,6 @@
-require "networking.NetworkedEntity"
-require "entities.Actor"
-require "Color"
+require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
+require "me.strangepan.games.mazerino.common.entities.Actor"
+require "me.strangepan.games.mazerino.common.Color"
 
 -- Message fields.
 local F_X = "x"

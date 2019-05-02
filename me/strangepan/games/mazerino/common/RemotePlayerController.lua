@@ -1,6 +1,6 @@
-require "PlayerController"
-require "strangepan.util.Queue"
-require "strangepan.util.type"
+require "me.strangepan.games.mazerino.common.PlayerController"
+require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 RemotePlayerController = buildClass(PlayerController)
 local Class = RemotePlayerController

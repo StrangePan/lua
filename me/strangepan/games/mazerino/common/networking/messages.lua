@@ -1,5 +1,5 @@
-require "networking.MessageType"
-require "networking.EntityUpdateType"
+require "me.strangepan.games.mazerino.common.networking.MessageType"
+require "me.strangepan.games.mazerino.common.networking.EntityUpdateType"
 
 messages = {}
 

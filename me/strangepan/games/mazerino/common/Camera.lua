@@ -1,7 +1,7 @@
-require "strangepan.secretary.Entity"
-require "strangepan.secretary.PhysObject"
-require "strangepan.util.type"
-local translation = require "mazerino.util.translation"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 
 --
 -- Camera class for handling motion and keeping a subject within view.

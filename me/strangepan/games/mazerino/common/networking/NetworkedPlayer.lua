@@ -1,6 +1,6 @@
-require "networking.NetworkedActor"
-require "entities.Player"
-require "strangepan.util.type"
+require "me.strangepan.games.mazerino.common.networking.NetworkedActor"
+require "me.strangepan.games.mazerino.common.entities.Player"
+require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 local PRINT_DEBUG = false
 
