@@ -151,10 +151,16 @@ function assertion_subject:is_greater_than_or_equal_to(other)
 end
 
 
---[[ Generic assertion method to test against the current test subject and returns this
-assertion_subject. ]]
+--[[ Tests a generic assertion method against the current test subject and returns this
+assertion_subject.
+]]
 function assertion_subject:passes_assertion(assertion)
   return self:_apply_assertion(assertion)
+end
+
+--[[ Returns the current test subject verbatim. ]]
+function assertion_subject:and_return()
+  return self.subject
 end
 
 -- INTERNAL METHODS
