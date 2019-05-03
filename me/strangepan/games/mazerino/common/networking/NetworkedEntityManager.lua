@@ -1,11 +1,10 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
-require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
-require "me.strangepan.games.mazerino.common.networking.EntityUpdateType"
-require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
-require "me.strangepan.games.mazerino.common.EventCoordinator"
-
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local ConnectionManager = require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
+local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+local EntityUpdateType = require "me.strangepan.games.mazerino.common.networking.EntityUpdateType"
+local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
+local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 
 local PRINT_DEBUG = true
@@ -22,12 +21,11 @@ local F_SYNC_NUM = "n"
 -- Maintains an internal list of entities that are connected to network
 -- versions. Works to track and coordinate changes between networked entities.
 --
-NetworkedEntityManager = buildClass(Entity)
-local Class = NetworkedEntityManager
+local NetworkedEntityManager = class.build(Entity)
 
-function Class:_init(connectionManager)
-  Class.superclass._init(self)
-  assertClass(connectionManager, ConnectionManager, "connectionManager")
+function NetworkedEntityManager:_init(connectionManager)
+  class.superclass(NetworkedEntityManager)._init(self)
+  assertNetworkedEntityManager(connectionManager, ConnectionManager, "connectionManager")
   self.connectionManager = connectionManager
 
   -- Sparse array containing metadata on entities.
@@ -94,7 +92,7 @@ end
 -- Arguments can be either an existing connection metadata object or a
 -- connection ID.
 --
-function Class:getConnection(connection)
+function NetworkedEntityManager:getConnection(connection)
   if type(connection) == "number" then
     return self.connections[connection]
   end
@@ -108,7 +106,7 @@ end
 --
 -- Adds a connection ID to receive entity updates.
 --
-function Class:addConnection(connectionId)
+function NetworkedEntityManager:addConnection(connectionId)
   assertNumber(connectionId)
   local connection = self:getConnection(connectionId)
   if connection then return end
@@ -139,7 +137,7 @@ end
 --
 -- Removes a connection from receiving entity updates.
 --
-function Class:removeConnection(connectionId)
+function NetworkedEntityManager:removeConnection(connectionId)
   assertNumber(connectionId)
   local connection = self:getConnection(connectionId)
   if not connection then return end
@@ -157,7 +155,7 @@ end
 --
 -- Iterator function that loops through all existing connection Ids.
 --
-function Class:allConnectionIds()
+function NetworkedEntityManager:allConnectionIds()
   local i = 0
   return function()
     i = i + 1
@@ -168,7 +166,7 @@ end
 --
 -- Iterator function that loops through all existing connection metadatas.
 --
-function Class:allConnections()
+function NetworkedEntityManager:allConnections()
   local i =0
   return function()
     i = i + 1
@@ -188,7 +186,7 @@ end
 -- - The ID of the desired entity.
 -- - Returns nil in all other cases.
 --
-function Class:getEntity(entity)
+function NetworkedEntityManager:getEntity(entity)
 
   -- If parameter is already a NetworkedEntity
   if checkType(entity, NetworkedEntity) then
@@ -211,7 +209,7 @@ end
 -- returns the id. If an entity already exists with the same ID, destroys that
 -- entity. Adds the claimed ID to the end of the entityIds array.
 --
-function Class:claimId(id)
+function NetworkedEntityManager:claimId(id)
   id = id or self.nextId
   if self.nextId <= id then
     self.nextId = id + 1
@@ -228,7 +226,7 @@ end
 -- Internal method for adding an existing method to this class and optionally
 -- broadcasts its creation to connected instances. Does not validate arguments.
 --
-function Class:_addEntity(entity, broadcast)
+function NetworkedEntityManager:_addEntity(entity, broadcast)
   local id = entity:getNetworkId()
   self.entities[id] = {
     entity = entity,
@@ -258,7 +256,7 @@ end
 -- Returns the newly created `NetworkedEntity`. Will delete any previous entity
 -- using the provided ID.
 --
-function Class:createEntityWithParams(id, entityType, params)
+function NetworkedEntityManager:createEntityWithParams(id, entityType, params)
   assertNumber(id, "id")
   assert(NetworkedEntityType.fromId(entityType),
       "entityType: "..entityType.." is not a valid NetworkedEntityType")
@@ -278,7 +276,7 @@ end
 -- of arguments. See the specific implementation of the NetworkedEntity class
 -- for the expected arguments.
 --
-function Class:spawnEntity(entityType, ...)
+function NetworkedEntityManager:spawnEntity(entityType, ...)
   assert(NetworkedEntityType.fromId(entityType),
       "entityType: "..entityType.." is not a valid NetworkedEntityType")
 
@@ -300,7 +298,7 @@ end
 -- destruction. Calls :destroy() on provided entity. Returns the destroyed
 -- entity or `nil` if the entity was already destroyed.
 --
-function Class:_removeEntity(entity, broadcast)
+function NetworkedEntityManager:_removeEntity(entity, broadcast)
   entity = self:getEntity(entity)
   if not entity then return nil end
 
@@ -327,14 +325,14 @@ end
 -- Deletes the entity from this entity manager and calls :destroy() on the
 -- supplied entity. Does nothing if this manager does not recognize the entity.
 --
-function Class:destroyEntity(entity)
+function NetworkedEntityManager:destroyEntity(entity)
   return self:_removeEntity(entity, true)
 end
 
 --
 -- Loops through all entities, cleaning up any sparseness in the array.
 --
-function Class:allEntities()
+function NetworkedEntityManager:allEntities()
   local nextId = self:allEntityIds()
   return function()
     local id = nextId()
@@ -345,7 +343,7 @@ end
 --
 -- Loops through all entity IDs, cleaning up any sparseness in the array.
 --
-function Class:allEntityIds()
+function NetworkedEntityManager:allEntityIds()
   local i = 0
   local j = 0
   local n = self.entityIds.n
@@ -370,7 +368,7 @@ end
 --                               HELPER METHODS                               --
 --------------------------------------------------------------------------------
 
-function Class:_incrementSyncNum(connection, entity)
+function NetworkedEntityManager:_incrementSyncNum(connection, entity)
   connection = self:getConnection(connection)
   entity = self:getEntity(entity)
   local id = entity:getNetworkId()
@@ -384,7 +382,7 @@ function Class:_incrementSyncNum(connection, entity)
   return connection.entities[id].syncNum
 end
 
-function Class:_getSyncNum(connection, entity)
+function NetworkedEntityManager:_getSyncNum(connection, entity)
   connection = self:getConnection(connection)
   entity = self:getEntity(entity)
   local id = entity:getNetworkId()
@@ -394,7 +392,7 @@ function Class:_getSyncNum(connection, entity)
   return connection.entities[id].syncNum
 end
 
-function Class:_setSyncNum(connection, entity, value)
+function NetworkedEntityManager:_setSyncNum(connection, entity, value)
   connection = self:getConnection(connection)
   entity = self:getEntity(entity)
   local id = entity:getNetworkId()
@@ -404,7 +402,7 @@ function Class:_setSyncNum(connection, entity, value)
   connection.entities[id].syncNum = value
 end
 
-function Class:_isUpdated(connection, entity, value)
+function NetworkedEntityManager:_isUpdated(connection, entity, value)
   connection = self:getConnection(connection)
   entity = self:getEntity(entity)
   local id = entity:getNetworkId()
@@ -414,7 +412,7 @@ function Class:_isUpdated(connection, entity, value)
   return connection.entities[id].updated == true
 end
 
-function Class:_setUpdated(connection, entity, value)
+function NetworkedEntityManager:_setUpdated(connection, entity, value)
   connection = self:getConnection(connection)
   entity = self:getEntity(entity)
   local id = entity:getNetworkId()
@@ -424,7 +422,7 @@ function Class:_setUpdated(connection, entity, value)
   connection.entities[id].updated = true
 end
 
-function Class:_isInSync(connection, entity)
+function NetworkedEntityManager:_isInSync(connection, entity)
   connection = self:getConnection(connection)
   entity = self:getEntity(entity)
   local id = entity:getNetworkId()
@@ -434,7 +432,7 @@ function Class:_isInSync(connection, entity)
   return connection.entities[id].inSync == true
 end
 
-function Class:_setInSync(connection, entity, value)
+function NetworkedEntityManager:_setInSync(connection, entity, value)
   connection = self:getConnection(connection)
   entity = self:getEntity(entity)
   local id = entity:getNetworkId()
@@ -455,7 +453,7 @@ end
 -- Can include any number of optional connection IDs to exclude when
 -- broadcasting.
 --
-function Class:publishIncrementalUpdate(entity, update, ...)
+function NetworkedEntityManager:publishIncrementalUpdate(entity, update, ...)
   self:_broadcastEntityUpdate(
     entity, EntityUpdateType.INCREMENTING, update, ...)
 end
@@ -464,7 +462,7 @@ end
 -- Internal. Send the supplied update data to all known connections except for
 -- the ones supplied as optional arguments. Performs validation.
 --
-function Class:_broadcastEntityUpdate(entity, updateType, update, ...)
+function NetworkedEntityManager:_broadcastEntityUpdate(entity, updateType, update, ...)
 
   -- Mark supplied optional excluded IDs in table for quick lookup
   local excluded = {}
@@ -489,7 +487,7 @@ end
 -- Internal. Send thesupplied update data to all listed connections. Performs
 -- validation.
 --
-function Class:_sendEntityUpdate(entity, updateType, update, ...)
+function NetworkedEntityManager:_sendEntityUpdate(entity, updateType, update, ...)
   entity = self:getEntity(entity)
   assert(entity, "entity not of supported type or not recognized by manager")
   assert(
@@ -568,7 +566,7 @@ end
 -- Handles any incoming entity update messages. Is responsible for extracting
 -- the inner data from the network message before processing.
 --
-function Class:onReceiveEntityUpdate(message, connectionId)
+function NetworkedEntityManager:onReceiveEntityUpdate(message, connectionId)
   local t = message[F_ENTITY_UPDATE_TYPE]
   
   if t == EntityUpdateType.CREATING then
@@ -590,7 +588,7 @@ end
 -- Handles an EntityUpdateType.CREATING message. Performs any necessary
 -- validation and initiates the entity creation process.
 --
-function Class:onReceiveEntityCreate(message, connectionId)
+function NetworkedEntityManager:onReceiveEntityCreate(message, connectionId)
 
   -- Extract relevant information from message.
   local id = message[F_NETWORK_ENTITY_ID]
@@ -606,7 +604,7 @@ end
 -- Handles an EntityUpdateType.DESTROYING message. Performs any necessary
 -- validation and cleanup and destroys the underlying entity.
 --
-function Class:onReceiveEntityDestroy(message, connectionId)
+function NetworkedEntityManager:onReceiveEntityDestroy(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
   local entity = self:getEntity(id)
 
@@ -625,7 +623,7 @@ end
 -- validation and causes the associated entity to resynchronize state with the
 -- contents of the received message.
 --
-function Class:onReceiveEntitySync(message, connectionId)
+function NetworkedEntityManager:onReceiveEntitySync(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
   local syncNum = message[F_SYNC_NUM]
   local params = message[F_SYNC_DATA]
@@ -659,7 +657,7 @@ end
 --
 -- Returns true if the entity was notified of the update.
 --
-function Class:onReceiveEntityInc(message, connectionId)
+function NetworkedEntityManager:onReceiveEntityInc(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
   local syncNum = message[F_SYNC_NUM]
   local params = message[F_INC_DATA]
@@ -691,7 +689,7 @@ end
 -- Handles an EntityUpdateType.OUT_OF_SYNC message. Sends the current state of
 -- the entity.
 --
-function Class:onReceiveEntityOutOfSync(message, connectionId)
+function NetworkedEntityManager:onReceiveEntityOutOfSync(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
   local syncNum = message[F_SYNC_NUM]
 
@@ -720,7 +718,7 @@ end
 -- being created. Only receives notifications for the supplied entityType or
 -- all entities if entityType is nil.
 --
-function Class:registerEntityCreateListener(listener, callback, entityType)
+function NetworkedEntityManager:registerEntityCreateListener(listener, callback, entityType)
   self:_registerEntityEventListener(
       listener, callback, entityType, self.entityCreateCoordinators)
 end
@@ -730,7 +728,7 @@ end
 -- being destroyed. Only receives notifications for the supplied entityType or
 -- all entities if entityType is nil.
 --
-function Class:registerEntityDeleteListener(listener, callback, entityType)
+function NetworkedEntityManager:registerEntityDeleteListener(listener, callback, entityType)
   self:_registerEntityEventListener(
       listener, callback, entityType, self.entityDeleteCoordinators)
 end
@@ -739,7 +737,7 @@ end
 -- Registers an entity listener for the given entity update type or all entity
 -- update types.
 --
-function Class:_registerEntityEventListener(
+function NetworkedEntityManager:_registerEntityEventListener(
     listener, callback, entityType, coordinators)
   if entityType then
     assert(NetworkedEntityType.fromId(entityType),
@@ -758,21 +756,21 @@ end
 --
 -- Notifies listeners of entity creation.
 --
-function Class:notifyEntityCreateListeners(entity)
+function NetworkedEntityManager:notifyEntityCreateListeners(entity)
   self:_notifyEntityEventListeners(entity, self.entityCreateCoordinators)
 end
 
 --
 -- Notifies listeners of entity deletion.
 --
-function Class:notifyEntityDeleteListeners(entity)
+function NetworkedEntityManager:notifyEntityDeleteListeners(entity)
   self:_notifyEntityEventListeners(entity, self.entityDeleteCoordinators)
 end
 
 --
 -- Notifies listeners of any type of entity event.
 --
-function Class:_notifyEntityEventListeners(entity, coordinators)
+function NetworkedEntityManager:_notifyEntityEventListeners(entity, coordinators)
   entity = self:getEntity(entity)
   if not entity then return end
   local entityType = entity:getEntityType()
@@ -789,7 +787,7 @@ end
 --
 -- Removes a registered listener.
 --
-function Class:unregisterEntityCreateListener(listener, callback)
+function NetworkedEntityManager:unregisterEntityCreateListener(listener, callback)
   self:_unregisterEntityEventListener(
       listener, callback, self.entityCreateCoordinator)
 end
@@ -797,7 +795,7 @@ end
 --
 -- Removes a registered listener.
 --
-function Class:unregisterEntityDeleteListener(listener, callback)
+function NetworkedEntityManager:unregisterEntityDeleteListener(listener, callback)
   self:_unregisterEntityEventListener(
       listener, callback, self.entityDeleteCoordinator)
 end
@@ -805,7 +803,7 @@ end
 --
 -- Unregisters a listener of the given type.
 --
-function Class:_unregisterEntityEventListener(listener, callback, coordinators)
+function NetworkedEntityManager:_unregisterEntityEventListener(listener, callback, coordinators)
   entity = self:getEntity(entity)
   if not entity then return end
   local entityType = entity:getEntityType()
@@ -818,3 +816,5 @@ function Class:_unregisterEntityEventListener(listener, callback, coordinators)
     coordinator:unreigsterListeners(listener, callback)
   end
 end
+
+return NetworkedEntityManager

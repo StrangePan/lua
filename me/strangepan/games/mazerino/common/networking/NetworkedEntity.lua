@@ -1,5 +1,5 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+local class = require "me.strangepan.libs.lua.v1.class"
+local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
 
 local PRINT_DEBUG = false
 
@@ -8,8 +8,7 @@ local PRINT_DEBUG = false
 -- entities on remote program instances. Generally instantiated by a manager
 -- of some sort who handles connections and permissions.
 --
-NetworkedEntity = buildClass()
-local Class = NetworkedEntity
+local NetworkedEntity = class.build()
 
 --
 -- Private static table of registered entity types that can be instantiated
@@ -24,14 +23,14 @@ local registeredEntities = {}
 -- If an entity has already been registered with the given NetworkedEntityType, then this
 -- method will return `false`.
 --
-function Class.registerEntityType(entityType, entityClass)
+function NetworkedEntity.registerEntityType(entityType, entityNetworkedEntity)
   assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
-  assertClass(entityClass, NetworkedEntity, "entityClass")
-  assert(entityClass ~= Class, "Cannot register NetworkedEntity with itself!")
+  assertNetworkedEntity(entityNetworkedEntity, NetworkedEntity, "entityNetworkedEntity")
+  assert(entityNetworkedEntity ~= NetworkedEntity, "Cannot register NetworkedEntity with itself!")
   if registeredEntities[entityType] then
     return false
   end
-  registeredEntities[entityType] = entityClass
+  registeredEntities[entityType] = entityNetworkedEntity
   return true
 end
 
@@ -56,7 +55,7 @@ end
 --   form of a single table. See `createNewInstance` method to create new
 --   entity with individual construction params.
 --
-function Class.createNewInstanceWithParams(manager, id, entityType, params)
+function NetworkedEntity.createNewInstanceWithParams(manager, id, entityType, params)
   assertNumber(id, "id")
   
   -- Ensure supplied entityType is indeed an NetworkedEntityType.
@@ -69,7 +68,7 @@ function Class.createNewInstanceWithParams(manager, id, entityType, params)
   
   -- Try to catch infinite recursion if user fails to override this method.
   assert(registeredEntities[entityType].createNewInstanceWithParams ~=
-      Class.createNewInstanceWithParams,
+      NetworkedEntity.createNewInstanceWithParams,
       "Make sure createNewInstanceWithParams() is overridden")
 
   -- Instantiate and return new instance using given arguments.
@@ -104,7 +103,7 @@ end
 --   create a new entity with instantiation params received from a remote
 --   instance.
 --
-function Class.createNewInstance(manager, id, entityType, ...)
+function NetworkedEntity.createNewInstance(manager, id, entityType, ...)
   assertNumber(id, "id")
   
   -- Ensure supplied entityType is indeed an NetworkedEntityType.
@@ -117,7 +116,7 @@ function Class.createNewInstance(manager, id, entityType, ...)
   
   -- Try to catch infinite recursion if user fails to override this method.
   assert(registeredEntities[entityType].createNewInstance ~=
-      Class.createNewInstance,
+      NetworkedEntity.createNewInstance,
       "Make sure createNewInstance() is overridden")
 
   -- Instantiate and return new instance using given arguments.
@@ -130,12 +129,12 @@ end
 --
 -- Instantiates a new NetworkedEntity.
 --
-function Class:_init(manager, networkId, entityType, params, entity)
-  Class.superclass._init(self)
-  assertClass(manager, NetworkedEntityManager, "manager")
+function NetworkedEntity:_init(manager, networkId, entityType, params, entity)
+  class.superclass(NetworkedEntity)._init(self)
+  assertNetworkedEntity(manager, NetworkedEntityManager, "manager")
   assertNumber(networkId, "networkId")
   assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
-  assertClass(entity, Entity, "entity")
+  assertNetworkedEntity(entity, Entity, "entity")
 
   self.manager = manager
   self.id = networkId
@@ -149,28 +148,28 @@ end
 --
 -- Gets the NetworkedEntityManager that created this NetworkedEntity.
 --
-function Class:getManager()
+function NetworkedEntity:getManager()
   return self.manager
 end
 
 --
 -- Gets the network ID of this NetworkedEntity.
 --
-function Class:getNetworkId()
+function NetworkedEntity:getNetworkId()
   return self.id
 end
 
 --
 -- Gets the entity type of this NetworkedEntity.
 --
-function Class:getEntityType()
+function NetworkedEntity:getEntityType()
   return self.entityType
 end
 
 --
 -- Gets the local entity.
 --
-function Class:getLocalEntity()
+function NetworkedEntity:getLocalEntity()
   return self.entity
 end
 
@@ -178,7 +177,7 @@ end
 -- Gets the owner ID of this networked entity. Default implementation returns
 -- nil.
 --
-function Class:getOwnerId()
+function NetworkedEntity:getOwnerId()
   return nil
 end
 
@@ -186,12 +185,12 @@ end
 -- Commands this entity to register any necessary listeners and begin
 -- sending out incremental entity updates when necessary.
 --
-function Class:startBroadcastingUpdates()
+function NetworkedEntity:startBroadcastingUpdates()
   if PRINT_DEBUG then print("NetworkedEntity:startBroadcastingUpdates()") end
   self.broadcasting = true
 end
 
-function Class:isBroadcastingUpdates()
+function NetworkedEntity:isBroadcastingUpdates()
   return self.broadcasting
 end
 
@@ -199,7 +198,7 @@ end
 -- Commands this entity to unregister any necessary listeners and stop sending
 -- out incremental entity updates.
 --
-function Class:stopBroadcastingUpdates()
+function NetworkedEntity:stopBroadcastingUpdates()
   self.broadcasting = true
 end
 
@@ -214,7 +213,7 @@ end
 --
 -- Returns a params object containing the local entity's params.
 --
-function Class:getInstantiationParams(params)
+function NetworkedEntity:getInstantiationParams(params)
   return params or {}
 end
 
@@ -224,7 +223,7 @@ end
 -- Sets the state of the NetworkedEntity based the contents of a received state
 -- synchronization message.
 --
-function Class:setSynchronizedState(state)
+function NetworkedEntity:setSynchronizedState(state)
 end
 
 --
@@ -236,7 +235,7 @@ end
 --
 -- Returns a state object containing the local entity's state.
 --
-function Class:getSynchronizedState(state)
+function NetworkedEntity:getSynchronizedState(state)
   return state or {}
 end
 
@@ -248,7 +247,7 @@ end
 -- 10 pixels over of the object has jumped; something incremental has changed
 -- about the entity and the entity should handle it appropriately.
 --
-function Class:performIncrementalUpdate(update)
+function NetworkedEntity:performIncrementalUpdate(update)
   return true
 end
 
@@ -258,7 +257,7 @@ end
 --
 -- *This method will not do anything if `isLocked()` is true.*
 --
-function Class:sendIncrementalUpdate(update)
+function NetworkedEntity:sendIncrementalUpdate(update)
   if self:isLocked() then return end
   if PRINT_DEBUG then print("NetworkedEntity:sendIncrementalUpdate()") end
   return self:getManager():publishIncrementalUpdate(self, update)
@@ -268,7 +267,7 @@ end
 -- Deletes this entity; entity should be immediately destroyed and its
 -- resources freed; no exceptions, and no animations.
 --
-function Class:delete()
+function NetworkedEntity:delete()
   local entity = self:getLocalEntity()
   local manager = self:getManager()
   if not manager and not entity then
@@ -287,7 +286,7 @@ end
 -- Increments the internal lock counter. Check if locks are currently in place
 -- with `isLocked()`.
 --
-function Class:lock()
+function NetworkedEntity:lock()
   self.lockCounter = self.lockCounter + 1
 end
 
@@ -295,7 +294,7 @@ end
 -- Decrements the internal lock counter. To check if locks are currently in
 -- place with `isLocked()`.
 --
-function Class:unlock()
+function NetworkedEntity:unlock()
   self.lockCounter = self.lockCounter - 1
 end
 
@@ -303,6 +302,8 @@ end
 -- Checks if the entity is currently locked because of an event resolution
 -- operation. Returns `true` if a lock is in place, `false` if not.
 --
-function Class:isLocked()
+function NetworkedEntity:isLocked()
   return self.lockCounter > 0
 end
+
+return NetworkedEntity

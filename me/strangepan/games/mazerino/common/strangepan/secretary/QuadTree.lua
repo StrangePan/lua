@@ -1,7 +1,7 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local class = require "me.strangepan.libs.lua.v1.class"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
-QuadTree = buildClass()
+local QuadTree = class.build()
 
 -- 
 -- QuadTree constructor
@@ -333,3 +333,5 @@ function QuadTree:draw( )
     subnode:draw()
   end
 end
+
+return QuadTree

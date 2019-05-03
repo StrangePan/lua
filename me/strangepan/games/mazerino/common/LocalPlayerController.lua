@@ -1,11 +1,11 @@
-require "me.strangepan.games.mazerino.common.PlayerController"
-require "me.strangepan.games.mazerino.common.CommandMap"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local PlayerController = require "me.strangepan.games.mazerino.common.PlayerController"
+local CommandMap = require "me.strangepan.games.mazerino.common.CommandMap"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
-LocalPlayerController = buildClass(PlayerController)
+local LocalPlayerController = class.build(PlayerController)
 
 function LocalPlayerController:_init(player, commandMap)
-  LocalPlayerController.superclass._init(self, player)
+  class.superclass(LocalPlayerController)._init(self, player)
   self:setCommandMap(commandMap)
 end
 
@@ -31,3 +31,5 @@ function LocalPlayerController:setCommandMap(commandMap)
     self.commandMap:registerCommandListener(CommandType.EMOTE_SPIN, self, self.emoteSpin)
   end
 end
+
+return LocalPlayerController

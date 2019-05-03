@@ -1,11 +1,12 @@
-require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
-require "me.strangepan.games.mazerino.common.Color"
+local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local Color = require "me.strangepan.games.mazerino.common.Color"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
+local class = require "me.strangepan.libs.lua.v1.class"
 
-Switch = buildClass(PhysObject)
+local Switch = class.build(PhysObject)
 
 function Switch:_init(x, y)
-  Switch.superclass._init(self)
+  class.superclass(Switch)._init(self)
   self:setPosition(x, y)
   self:setSize(1, 1)
   self.lineColor = Color(255, 255, 255)
@@ -27,7 +28,7 @@ function Switch:deactivate()
 end
 
 function Switch:registerWithSecretary(secretary)
-  Switch.superclass.registerWithSecretary(self, secretary)
+  class.superclass(Switch).registerWithSecretary(self, secretary)
   secretary:registerEventListener(self, self.step, EventType.STEP)
   secretary:registerEventListener(self, self.postStep, EventType.POST_STEP)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
@@ -80,3 +81,5 @@ function Switch:draw()
   
   love.graphics.pop()
 end
+
+return Switch

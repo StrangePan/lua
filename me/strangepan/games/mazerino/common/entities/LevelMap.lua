@@ -1,11 +1,12 @@
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.Set"
+local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local Set = require "me.strangepan.games.mazerino.common.Set"
+local class = require "me.strangepan.libs.lua.v1.class"
 
-Map = buildClass(Entity)
+local LevelMap = class.build(Entity)
 
 function LevelMap:_init()
-  LevelMap.superclass._init(self)
+  class.superclass(LevelMap)._init(self)
   
   self.entities = Set()
 end
@@ -19,11 +20,11 @@ function LevelMap:destroy()
   for entity in self.entities:each() do
     entity:destroy()
   end
-  LevelMap.superclass.destroy(self)
+  class.superclass(LevelMap).destroy(self)
 end
 
 function LevelMap:registerWithSecretary(secretary)
-  LevelMap.superclass.registerWithSecretary(self, secretary)
+  class.superclass(LevelMap).registerWithSecretary(self, secretary)
   for entity in self.entities:each() do
     entity:registerWithSecretary(secretary)
   end
@@ -33,5 +34,7 @@ function LevelMap:deregisterWithSecretary()
   for entity in self.entities:each() do
     entity:deregisterWithSecretary()
   end
-  LevelMap.superclass.deregisterWithSecretary(self)
+  class.superclass(LevelMap).deregisterWithSecretary(self)
 end
+
+return LevelMap

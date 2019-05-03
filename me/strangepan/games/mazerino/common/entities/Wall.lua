@@ -1,12 +1,12 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.entities.Direction"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local class = require "me.strangepan.libs.lua.v1.class"
+local Direction = require "me.strangepan.games.mazerino.common.entities.Direction"
+local PhysObject require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 
-Wall = buildClass(PhysObject)
+local Wall = class.build(PhysObject)
 
 function Wall:_init(x, y)
-  Wall.superclass._init(self)
+  class.superclass(Wall)._init(self)
   
   self:setPosition(x or 0, y or 0)
   self:setSize(1, 1)
@@ -34,7 +34,7 @@ function Wall:bump(direction)
 end
 
 function Wall:registerWithSecretary(secretary)
-  Wall.superclass.registerWithSecretary(self, secretary)
+  class.superclass(Wall).registerWithSecretary(self, secretary)
   secretary:registerEventListener(self, self.onStep, EventType.STEP)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
   return self
@@ -71,3 +71,5 @@ function Wall:draw()
   local scale = self.drawScale
   love.graphics.rectangle("fill", x + (w/2 - w/2 * scale), y + (h/2 - h/2 * scale), w * scale, h * scale)
 end
+
+return Wall

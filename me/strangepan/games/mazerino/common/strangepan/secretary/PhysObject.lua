@@ -1,5 +1,5 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local class = require "me.strangepan.libs.lua.v1.class"
+local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 
 --
 -- PhysObject
@@ -9,7 +9,7 @@ require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 -- sizing, velocity, and acceleration. All variables can be get and set as
 -- needed.
 --
-PhysObject = buildClass(Entity)
+local PhysObject = class.build(Entity)
 
 ---------------------------------------
 -- BEGIN PhysObject CLASS DEFINITION --
@@ -310,3 +310,5 @@ function PhysObject:draw()
   -- This method exists soley to be overridden. Will not be registered with a
   -- secretary unless overridden or explicitly called.
 end
+
+return PhysObject

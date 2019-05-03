@@ -1,6 +1,7 @@
-require "me.strangepan.games.mazerino.client.ClientConnectionManager"
-require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local ClientConnectionManager = require "me.strangepan.games.mazerino.client.ClientConnectionManager"
+local CustomNetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local class = require "me.strangepan.libs.lua.v1.class"
 
 local F_NETWORK_ENTITY_ID = "i"
 
@@ -8,15 +9,14 @@ local F_NETWORK_ENTITY_ID = "i"
 -- Client-specific entity manager. Ignores updates from anyone other than the
 -- server.
 --
-ClientNetworkedEntityManager = buildClass(CustomNetworkedEntityManager)
-local Class = ClientNetworkedEntityManager
+local ClientNetworkedEntityManager = class.build(CustomNetworkedEntityManager)
 
-function Class:_init(connectionManager)
-  Class.superclass._init(self, connectionManager)
-  assertClass(connectionManager, ClientConnectionManager, "connectionManager")
+function ClientNetworkedEntityManager:_init(connectionManager)
+  class.superclass(ClientNetworkedEntityManager)._init(self, connectionManager)
+  assertClientNetworkedEntityManager(connectionManager, ClientConnectionManager, "connectionManager")
 end
 
-function Class:onReceiveEntityUpdate(message, connectionId)
+function ClientNetworkedEntityManager:onReceiveEntityUpdate(message, connectionId)
   local server = self.connectionManager:getServerConnection()
 
   -- Ignore any incoming messages from anyone other than the server
@@ -24,16 +24,18 @@ function Class:onReceiveEntityUpdate(message, connectionId)
     return
   end
 
-  return Class.superclass.onReceiveEntityUpdate(self, message, connectionId)
+  return class.superclass(ClientNetworkedEntityManager).onReceiveEntityUpdate(self, message, connectionId)
 end
 
-function Class:onReceiveEntityInc(message, connectionId)
+function ClientNetworkedEntityManager:onReceiveEntityInc(message, connectionId)
   local entity = self:getEntity(message[F_NETWORK_ENTITY_ID])
 
-  if Class.superclass.onReceiveEntityInc(self, message, connectionId)
+  if class.superclass(ClientNetworkedEntityManager).onReceiveEntityInc(self, message, connectionId)
       and entity
       and not self:_isInSync(connectionId, entity) then
     self:_sendEntityUpdate(
         entity, EntityUpdateType.OUT_OF_SYNC, nil, connectionId)
   end
 end
+
+return ClientNetworkedEntityManager

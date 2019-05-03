@@ -1,6 +1,6 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
+local class = require "me.strangepan.libs.lua.v1.class"
 
-Set = buildClass()
+local Set = class.build()
 
 function Set:_init()
   self.contents = {}
@@ -43,3 +43,5 @@ function Set:each()
     return k
   end
 end
+
+return Set

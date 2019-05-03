@@ -1,22 +1,21 @@
-require "me.strangepan.games.mazerino.common.strangepan.secretary.QuadTree"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.DrawLayer"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.functions"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.strangepan.util.SortedSet"
-require "me.strangepan.games.mazerino.common.strangepan.util.FunctionQueue"
+local QuadTree = require "me.strangepan.games.mazerino.common.strangepan.secretary.QuadTree"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local DrawLayer = require "me.strangepan.games.mazerino.common.strangepan.secretary.DrawLayer"
+local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local class = require "me.strangepan.libs.lua.v1.class"
+local functions = require "me.strangepan.games.mazerino.common.strangepan.util.functions"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local SortedSet = require "me.strangepan.games.mazerino.common.strangepan.util.SortedSet"
+local FunctionQueue = require "me.strangepan.games.mazerino.common.strangepan.util.FunctionQueue"
 
-Secretary = buildClass()
-local class = Secretary
+local Secretary = class.build()
 
-class.DEFAULT_PRIORITY = 1
-
+Secretary.DEFAULT_PRIORITY = 1
 
 
-function class:_init()
+
+function Secretary:_init()
   
   -- Collision detection data structure
   self.tree = QuadTree(1, -1000, 1000, 1000, -1000)
@@ -44,7 +43,7 @@ Registers a new PhysObject with the Secretary.
 
 object: The new object to track collisions with.
 ]]
-function class:registerPhysObject(object)
+function Secretary:registerPhysObject(object)
   
   -- Validate arguments
   assertClass(object, PhysObject, "object")
@@ -66,7 +65,7 @@ checks and data structures.
 
 object: The object to unregister.
 ]]
-function class:unregisterPhysObject(object)
+function Secretary:unregisterPhysObject(object)
   
   -- Validate arguments
   assertClass(object, PhysObject, "object")
@@ -87,7 +86,7 @@ and indexes for fast access.
 
 object: The object to update information for.
 ]]
-function class:updateObject(object)
+function Secretary:updateObject(object)
   local path = self.tree:getFullIndex(object:getBoundingBox())
   
   if path ~= self.objectNodes[object] then
@@ -115,7 +114,7 @@ supplied bounds.
 - Table containing indexed array of objects whose bounding boxes intersect
   with the supplied coordinates.
 ]]
-function class:getCollisions(top, right, bottom, left, front, back, ...)
+function Secretary:getCollisions(top, right, bottom, left, front, back, ...)
   local arg = {...}
   assert(top and right and bottom and left, "parameter(s) cannot be nil")
   
@@ -148,7 +147,7 @@ function class:getCollisions(top, right, bottom, left, front, back, ...)
   return list
 end
 
-function class:remove(object)
+function Secretary:remove(object)
   if object:instanceOf(PhysObject) then
     self:unregisterPhysObject(object)
   end
@@ -157,7 +156,7 @@ end
 
 
 
-function class:registerChildSecretary(child)
+function Secretary:registerChildSecretary(child)
   
   -- Validate parameters
   assertClass(child, Secretary, "child")
@@ -208,7 +207,7 @@ a previously registered object whose destruction is to be monitered.
   required for the given event type.
 - eventType: type of event the listener is listening for.
 ]]
-function class:registerEventListener(object, listener, eventType, ...)
+function Secretary:registerEventListener(object, listener, eventType, ...)
   local arg = {...}
   
   -- Verify arguments
@@ -219,7 +218,7 @@ function class:registerEventListener(object, listener, eventType, ...)
   assert(eventType ~= nil, "eventType must be a valid EventType")
   
   -- Verify optional arguments
-  local priority = class.DEFAULT_PRIORITY
+  local priority = Secretary.DEFAULT_PRIORITY
   local watchObject = object
   
   if eventType == EventType.DESTROY and arg[1] ~= nil then
@@ -305,11 +304,11 @@ Moves an object's draw callback(s) to a new draw layer.
 - listener (optional): specific draw function to move to drawLayer in case 
   object has multiple draw callbacks registered
 ]]
-function class:setDrawLayer(object, drawLayer, listener)
+function Secretary:setDrawLayer(object, drawLayer, listener)
   self:setEventPriority(object, listener, EventType.DRAW, drawLayer)
 end
 
-function class:setEventPriority(object, listener, eventType, priority, watchObject)
+function Secretary:setEventPriority(object, listener, eventType, priority, watchObject)
   
   -- Validate arguments
   assertTable(object, "object")
@@ -373,7 +372,7 @@ Deletes all callbacks associated with the given object.
 
 - object: The object to delete all registered callbacks for.
 ]]
-function class:unregisterAllListeners(object)
+function Secretary:unregisterAllListeners(object)
   
   -- Validate arguments
   assertTable(object, "object")
@@ -427,7 +426,7 @@ Sets the current pause status of the secretary
 
 - paused: `true` if the secretary should be paused, `false` if it should become unpaused.
 ]]
-function class:setPaused(paused)
+function Secretary:setPaused(paused)
   self.paused = paused
 end
 
@@ -438,7 +437,7 @@ Gets whether the secretary is currently paused.
 
 - returns: `true` if the secretary is paused, `false` if not.
 ]]
-function class:isPaused()
+function Secretary:isPaused()
   return self.paused
 end
 
@@ -450,118 +449,118 @@ end
 
 
 -- Called every draw step
-function class:onDraw()
+function Secretary:onDraw()
   self:executeCallbacks(self.callbacks[EventType.DRAW])
 end
 
 -- Called every game step
-function class:onPreStep()
+function Secretary:onPreStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PRE_STEP])
 end
 
 -- Called every game step
-function class:onStep()
+function Secretary:onStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.STEP])
 end
 
 -- Called every game step
-function class:onPostStep()
+function Secretary:onPostStep()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.POST_STEP])
 end
 
 -- Called before every physics event
-function class:onPrePhysics()
+function Secretary:onPrePhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PRE_PHYSICS])
 end
 
 -- CAlled every step to execute physics
-function class:onPhysics()
+function Secretary:onPhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.PHYSICS])
 end
 
 -- Called after physics event
-function class:onPostPhysics()
+function Secretary:onPostPhysics()
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.POST_PHYSICS])
 end
 
 -- Called when framework is shutting down
-function class:onShutdown()
+function Secretary:onShutdown()
   self:executeCallbacks(self.callbacks[EventType.SHUTDOWN])
 end
 
 -- Called when a keyboard button is pressed
-function class:onKeyboardDown(key, scancode, isrepeat)
+function Secretary:onKeyboardDown(key, scancode, isrepeat)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.KEYBOARD_DOWN], key, scancode, isrepeat)
 end
 
 -- Called when a keyboard button is released
-function class:onKeyboardUp(key, scancode)
+function Secretary:onKeyboardUp(key, scancode)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.KEYBOARD_UP], key, scancode )
 end
 
 -- Called when a mouse button is pressed
-function class:onMouseDown(x, y, button, istouch)
+function Secretary:onMouseDown(x, y, button, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_DOWN], x, y, button, istouch)
 end
 
 -- Called when a mouse button is released
-function class:onMouseUp(x, y, button, istouch)
+function Secretary:onMouseUp(x, y, button, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_UP], x, y, button, istouch)
 end
 
 -- Called when the mouse is moved
-function class:onMouseMove(x, y, dx, dy, istouch)
+function Secretary:onMouseMove(x, y, dx, dy, istouch)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_MOVE], x, y, dx, dy, istouch)
 end
 
 -- Called when the mouse wheel moves
-function class:onMouseWheelMove(x, y)
+function Secretary:onMouseWheelMove(x, y)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.MOUSE_WHEEL], x, y)
 end
 
 -- Called when a joystick button is pressed
-function class:onJoystickDown(joystick, button)
+function Secretary:onJoystickDown(joystick, button)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_DOWN], joystick, button)
 end
 
 -- Called when a joystick button is released
-function class:onJoystickUp(joystick, button)
+function Secretary:onJoystickUp(joystick, button)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_UP], joystick, button)
 end
 
 -- Called when a joystick is connected
-function class:onJoystickAdd(joystick)
+function Secretary:onJoystickAdd(joystick)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_ADD], joystick)
 end
 
 -- Called when a joystick is released
-function class:onJoystickRemove(joystick)
+function Secretary:onJoystickRemove(joystick)
   if self.paused then return end
   self:executeCallbacks(self.callbacks[EventType.JOYSTICK_REMOVE], joystick)
 end
 
 -- Called when the game window is resized
-function class:onWindowResize(w, h)
+function Secretary:onWindowResize(w, h)
   self:executeCallbacks(self.callbacks[EventType.WINDOW_RESIZE], w, h)
 end
 
 -- Called before draw events are executed
-function class:onPreDraw()
+function Secretary:onPreDraw()
   self:executeCallbacks(self.callbacks[EventType.PRE_DRAW])
 end
 
@@ -572,7 +571,7 @@ Generic function that executes callbacks for a given event type.
 Handles errors and takes any variable number of arguments and passes
 them along to the callbacks.
 ]]
-function class:executeCallbacks(callbacks, ...)
+function Secretary:executeCallbacks(callbacks, ...)
   local arg = {...}
   
   if not callbacks then return end
@@ -635,3 +634,5 @@ function class:executeCallbacks(callbacks, ...)
   -- Empty any event queue we got
   self.queue:executeAll()
 end
+
+return Secretary

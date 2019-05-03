@@ -1,6 +1,6 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.enum"
+require "me.strangepan.libs.lua.v1.enum"
 
-MessageType = buildEnum(
+return enum.build(
   "BUNDLE",
   "CONNECT_INIT",
   "CONNECT_ACK",

@@ -1,13 +1,14 @@
-require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
-require "me.strangepan.games.mazerino.common.entities.Footprint"
-require "me.strangepan.games.mazerino.common.EventCoordinator"
-require "me.strangepan.games.mazerino.common.Color"
+local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local Footprint = require "me.strangepan.games.mazerino.common.entities.Footprint"
+local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
+local Color = require "me.strangepan.games.mazerino.common.Color"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
+local class = require "me.strangepan.libs.lua.v1.class"
 
-Actor = buildClass(PhysObject)
+local Actor = class.build(PhysObject)
 
 function Actor:_init()
-  Actor.superclass._init(self)
+  class.superclass(Actor)._init(self)
   
   self.angle = 0
   self.drawAngle = self.angle
@@ -71,7 +72,7 @@ function Actor:unregisterSpinListener(listener, callback)
 end
 
 function Actor:registerWithSecretary(secretary)
-  Actor.superclass.registerWithSecretary(self, secretary)
+  class.superclass(Actor).registerWithSecretary(self, secretary)
   
   self.moveEventCoordinator:registerWithSecretary(secretary)
   
@@ -145,7 +146,7 @@ end
 
 function Actor:setPosition(x, y, z)
   local ox, oy, oz = self:getPosition()
-  Actor.superclass.setPosition(self, x, y, z)
+  class.superclass(Actor).setPosition(self, x, y, z)
   
   x, y, z = self:getPosition()
   if ox ~= x or oy ~= y or oz ~= z then
@@ -237,3 +238,5 @@ function Actor:draw()
   love.graphics.rectangle("fill", -ox, -oy, w, h)
   love.graphics.pop()
 end
+
+return Actor

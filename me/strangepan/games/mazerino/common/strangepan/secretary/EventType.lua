@@ -1,8 +1,8 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.enum"
+local enum = require "me.strangepan.libs.lua.v1.enum"
 
 -- Enum
 -- Event types; used for event registration
-EventType = buildEnum(
+return enum.build(
   "DRAW",
   "PRE_STEP",
   "STEP",

@@ -1,39 +1,40 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local class = require "me.strangepan.libs.lua.v1.class"
+local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 --[[
 Specialized queue for enqueuing function calls and executing them.
 ]]
-FunctionQueue = buildClass()
-local class = FunctionQueue
+local FunctionQueue = class.build()
 
-function class:_init()
+function FunctionQueue:_init()
   self.queue = Queue()
 end
 
-function class:push(func, ...)
+function FunctionQueue:push(func, ...)
   assertFunction(func, 'func')
   self.queue:push({f = func, a = {...}})
 end
 
-function class:executeAll()
+function FunctionQueue:executeAll()
   while not self.queue:empty() do
     self:executeSingle()
   end
 end
 
-function class:executeSingle()
+function FunctionQueue:executeSingle()
   local a = self.queue:pop()
   if a then
     a.f(unpack(a.a))
   end
 end
 
-function class:empty()
+function FunctionQueue:empty()
   return self.queue:empty()
 end
 
-function class:clear()
+function FunctionQueue:clear()
   return self.queue:clear()
 end
+
+return FunctionQueue

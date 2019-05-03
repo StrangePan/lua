@@ -1,9 +1,9 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.CommandType"
-require "me.strangepan.games.mazerino.common.InputMethod"
-require "me.strangepan.games.mazerino.common.EventCoordinator"
+local class = require "me.strangepan.libs.lua.v1.class"
+local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
+local InputMethod = require "me.strangepan.games.mazerino.common.InputMethod"
+local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
 
-CommandMap = buildClass()
+local CommandMap = class.build()
 
 function CommandMap:_init()
   self.mappings = {
@@ -89,3 +89,5 @@ end
 function CommandMap:unmapInput(method, input)
   self.mappings.methods[method][input] = nil
 end
+
+return CommandMap

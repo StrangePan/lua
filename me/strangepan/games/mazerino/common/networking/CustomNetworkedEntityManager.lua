@@ -1,12 +1,12 @@
-require "me.strangepan.games.mazerino.common.networking.NetworkedEntityManager"
+local NetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityManager"
+local class = require "me.strangepan.libs.lua.v1.class"
 
-CustomNetworkedEntityManager = buildClass(NetworkedEntityManager)
-local Class = CustomNetworkedEntityManager
+local CustomNetworkedEntityManager = class.build(NetworkedEntityManager)
 
-function Class:_init(connectionManager)
-  Class.superclass._init(self, connectionManager)
+function CustomNetworkedEntityManager:_init(connectionManager)
+  class.superclass(CustomNetworkedEntityManager)._init(self, connectionManager)
 end
 
-require "me.strangepan.games.mazerino.common.networking.NetworkedPlayer"
-require "me.strangepan.games.mazerino.common.networking.NetworkedActor"
-require "me.strangepan.games.mazerino.common.networking.NetworkedWall"
+local NetworkedPlayer = require "me.strangepan.games.mazerino.common.networking.NetworkedPlayer"
+local NetworkedActor = require "me.strangepan.games.mazerino.common.networking.NetworkedActor"
+local NetworkedWall = require "me.strangepan.games.mazerino.common.networking.NetworkedWall"

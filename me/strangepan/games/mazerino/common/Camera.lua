@@ -1,16 +1,16 @@
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
+local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local translation = local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
+local class = require "me.strangepan.libs.lua.v1.class"
 
 --
 -- Camera class for handling motion and keeping a subject within view.
 --
-Camera = buildClass(Entity)
-local Class = Camera
+local Camera = class.build(Entity)
 
-function Class:_init()
-  Class.superclass._init(self)
+function Camera:_init()
+  class.superclass(Camera)._init(self)
   
   self.x = 0
   self.y = 0
@@ -26,7 +26,7 @@ end
 -- Sets the camera's target coordinates. It will move towards these coordinates
 -- over multiple draw cycles at an ease value set with `setEasing()`.
 --
-function Class:moveTowards(x, y)
+function Camera:moveTowards(x, y)
   self.x = assertNumber(x, "x")
   self.y = assertNumber(y, "y")
 end
@@ -34,7 +34,7 @@ end
 --
 -- Immediately moves the camera to the specified coordinates.
 --
-function Class:jumpTo(x, y)
+function Camera:jumpTo(x, y)
   self:moveTowards(x, y)
   self.drawX = self.x
   self.drawY = self.y
@@ -43,8 +43,8 @@ end
 --
 -- Immediately moves camera to be centered on the specified subject.
 --
-function Class:jumpToSubject(subject)
-  assertClass(subject, PhysObject, "subject")
+function Camera:jumpToSubject(subject)
+  assertCamera(subject, PhysObject, "subject")
   local px, py = translation.toScreen(subject:getPosition())
   local pw, ph = translation.toScreen(subject:getSize())
   self:jumpTo(px + pw / 2, py + ph / 2)
@@ -54,12 +54,12 @@ end
 -- Sets the Camera subject for this camera to track or `nil` to remove the
 -- current subject. Must be of type PhysObject.
 --
-function Class:setSubject(subject)
+function Camera:setSubject(subject)
   if not subject then
     self.subject = nil
     return
   end
-  self.subject = assertClass(subject, PhysObject, "subject")
+  self.subject = assertCamera(subject, PhysObject, "subject")
 end
 
 --
@@ -68,14 +68,14 @@ end
 -- faster. The supplied ease ratio must be a number greater than 0 and less than
 -- or equal to 1.
 --
-function Class:setEasing(easeRatio)
+function Camera:setEasing(easeRatio)
   assertNumber(easeRatio)
   assert(0 < easeRatio and easeRatio <= 1, "number must be (0..1]")
   self.easeRatio = easeRatio
 end
 
-function Class:registerWithSecretary(secretary)
-  Camera.superclass.registerWithSecretary(self, secretary)
+function Camera:registerWithSecretary(secretary)
+  class.superclass(Camera).registerWithSecretary(self, secretary)
   secretary:registerEventListener(self, self.onPreDraw, EventType.PRE_DRAW)
   secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
   secretary:registerEventListener(self, self.onStep, EventType.STEP)
@@ -85,7 +85,7 @@ end
 --
 -- Translates the drawing area to give the illusion of a camera moving.
 --
-function Class:onPreDraw()
+function Camera:onPreDraw()
   love.graphics.origin()
   local width, height = love.graphics.getDimensions()
   love.graphics.translate((width/2)-self.drawX, (height/2)-self.drawY)
@@ -94,7 +94,7 @@ end
 --
 -- Moves the camera one step towards the subject.
 --
-function Class:onPostPhysics()
+function Camera:onPostPhysics()
   self:stepTowardsSubject()
 end
 
@@ -113,7 +113,7 @@ end
 --
 -- Moves the camera one step towards the subject.
 --
-function Class:stepTowardsSubject()
+function Camera:stepTowardsSubject()
   self.drawX = easeValue(self.drawX, self.x, self.easeRatio, self.snapThreshold)
   self.drawY = easeValue(self.drawY, self.y, self.easeRatio, self.snapThreshold)
 end
@@ -121,7 +121,7 @@ end
 --
 -- Moves the camera's target coordinates to centered on the subject.
 --
-function Class:onStep()
+function Camera:onStep()
   if not self.subject then
     return
   end
@@ -133,7 +133,9 @@ function Class:onStep()
   self.y = oy + oh/2
 end
 
-function Class:destroy()
-  Class.superclasss.destroy(self)
+function Camera:destroy()
+  class.superclass(Camera)s.destroy(self)
   self.subject = nil
 end
+
+return Camera

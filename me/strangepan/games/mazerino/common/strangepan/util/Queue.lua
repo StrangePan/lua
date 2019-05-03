@@ -1,6 +1,6 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
+local class = require "me.strangepan.libs.lua.v1.class"
 
-Queue = buildClass()
+local Queue = class.build()
 
 function Queue:_init()
   self:clear()
@@ -87,3 +87,5 @@ function Queue:items()
     return i,value
   end
 end
+
+return Queue

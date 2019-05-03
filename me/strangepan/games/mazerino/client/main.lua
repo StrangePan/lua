@@ -1,11 +1,9 @@
-require "me.strangepan.games.mazerino.client.ClientConnectionManager"
-require "me.strangepan.games.mazerino.client.ClientGame"
-require "me.strangepan.games.mazerino.client.ClientNetworkedEntityManager"
-require "me.strangepan.games.mazerino.common.entities.Player"
-require "me.strangepan.games.mazerino.common.entities.Wall"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.LoveSecretary"
-
-local connection
+local ClientConnectionManager = require "me.strangepan.games.mazerino.client.ClientConnectionManager"
+local ClientGame = require "me.strangepan.games.mazerino.client.ClientGame"
+local ClientNetworkedEntityManager = require "me.strangepan.games.mazerino.client.ClientNetworkedEntityManager"
+local Player = require "me.strangepan.games.mazerino.common.entities.Player"
+local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
+local LoveSecretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.LoveSecretary"
 
 function love.load()
   local secretary = LoveSecretary()

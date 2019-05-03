@@ -1,10 +1,9 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.EventCoordinator"
-require "me.strangepan.games.mazerino.common.networking.MessageType"
-require "me.strangepan.games.mazerino.common.networking.messages"
-require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
-
+local class = require "me.strangepan.libs.lua.v1.class"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
+local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
+local messages = require "me.strangepan.games.mazerino.common.networking.messages"
+local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 
 local PRINT_MESSAGES = false
@@ -14,13 +13,12 @@ local PRINT_MESSAGES = false
 -- includes mechanisms for registering for message receipt callbacks
 -- and handling message acknowledgements.
 --
-MessagePasser = buildClass()
-local Class = MessagePasser
+local MessagePasser = class.build()
 
 local ANY_MESSAGE_TYPE = "any"
 local ACKMSG_RESEND_DELAY = 3 -- seconds
 
-function Class:_init(udp)
+function MessagePasser:_init(udp)
   self.udp = udp
   self.inbox = Queue() -- raw inbox for received messages, ordered as received
   self.outbox = {} -- raw outbox for outgoing messages grouped by destination
@@ -43,7 +41,7 @@ end
 --
 -- Sends message object to the specified IP address and port number.
 --
-function Class:sendMessage(message, address, port)
+function MessagePasser:sendMessage(message, address, port)
   assertTable(message, "message")
   assertString(address, "address")
   assertNumber(port, "port")
@@ -70,7 +68,7 @@ end
 -- blocking any other outgoing messages on the provided channel until the
 -- client sends acknowledgement.
 --
-function Class:sendMessageWithAck(message, channel, address, port)
+function MessagePasser:sendMessageWithAck(message, channel, address, port)
   assertTable(message, "message")
   assertString(channel, "channel")
   assertString(address, "address")
@@ -85,7 +83,7 @@ end
 -- blocking any other outgoing messages on the provided channel until the
 -- client sends acknowledgement.
 --
-function Class:sendMessageWithAckReset(message, channel, address, port)
+function MessagePasser:sendMessageWithAckReset(message, channel, address, port)
   assertTable(message, "message")
   assertString(channel, "channel")
   assertString(address, "address")
@@ -99,7 +97,7 @@ end
 -- to the appropriate queue. First parameter can be either
 -- MessageType.ACK_REQUEST or MessageType.ACK_REQUEST_RESET
 --
-function Class:_sendMessageWithAck(messageType, message, channel, address, port)
+function MessagePasser:_sendMessageWithAck(messageType, message, channel, address, port)
   assert(messageType == MessageType.ACK_REQUEST
       or messageType == MessageType.ACK_REQUEST_RESET,
       "Unsupported message type "..messageType)
@@ -161,7 +159,7 @@ end
 -- Sends multiple messages in a bundle that have been queued up by various
 -- calls to the `sendMessage` functions.
 --
-function Class:releaseMessageBundle()
+function MessagePasser:releaseMessageBundle()
   local t = love.timer.getTime()
 
   -- Send acknowledgements for incoming ack requests
@@ -233,7 +231,7 @@ end
 -- Processes all incoming messages and notifies registered listeners as
 -- appropriate.
 --
-function Class:receiveAllMessages()
+function MessagePasser:receiveAllMessages()
 
   -- Receive messages from UDP
   repeat
@@ -270,7 +268,7 @@ end
 -- messages, recursive messages, received acknowledgements, acknowledgement
 -- requests, and acknowledgement resets.
 --
-function Class:processMessage(message, addr, port)
+function MessagePasser:processMessage(message, addr, port)
   
   -- short-circuit if we've already processed this message
   if self.processed[message] then return end
@@ -369,7 +367,7 @@ end
 -- to be discarded; use this only when it's time to erase all records of
 -- communication with the given address and port.
 --
-function Class:freeResources(address, port)
+function MessagePasser:freeResources(address, port)
   local destKey = string.format("%s:%s", address, port)
   for ackKey in pairs(self.outgoingAckDestinations[destKey].all) do
     self.outgoingAckQueues[ackKey] = nil
@@ -386,7 +384,7 @@ end
 -- Notifies registered listeners of the provided message's type of receipt
 -- of message, providing sender address and port.
 --
-function Class:notifyListeners(message, addr, port)
+function MessagePasser:notifyListeners(message, addr, port)
   if type(message) ~= "table" then return end
   local t = message.t
   
@@ -414,7 +412,7 @@ end
 -- 2. sender IP address
 -- 3. sender port
 --
-function Class:registerListener(messageType, listener, callback)
+function MessagePasser:registerListener(messageType, listener, callback)
   -- Validate parameters.
   if messageType == nil then
     messageType = ANY_MESSAGE_TYPE
@@ -432,3 +430,5 @@ function Class:registerListener(messageType, listener, callback)
   -- Register for callbacks.
   self.coordinators[messageType]:registerListener(listener, callback)
 end
+
+return MessagePasser

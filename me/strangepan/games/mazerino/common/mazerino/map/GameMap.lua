@@ -1,9 +1,10 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.entities.Player"
-require "me.strangepan.games.mazerino.common.entities.Switch"
-require "me.strangepan.games.mazerino.common.entities.Wall"
-local GameMap = buildClass()
+local class = require "me.strangepan.libs.lua.v1.class"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local Player = require "me.strangepan.games.mazerino.common.entities.Player"
+local Switch = require "me.strangepan.games.mazerino.common.entities.Switch"
+local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
+
+local GameMap = class.build()
 
 -- Instantiates an entity of the given type at the given game map coordinates.
 local function createEntity(code, x, y)

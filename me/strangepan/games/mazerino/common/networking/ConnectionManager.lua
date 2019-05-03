@@ -1,8 +1,8 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.networking.MessagePasser"
-require "me.strangepan.games.mazerino.common.networking.Connection"
-require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
+local class = require "me.strangepan.libs.lua.v1.class"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local MessagePasser = require "me.strangepan.games.mazerino.common.networking.MessagePasser"
+local Connection = require "me.strangepan.games.mazerino.common.networking.Connection"
+local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 
 local PRINT_DEBUG = true
 
@@ -11,14 +11,13 @@ local PRINT_DEBUG = true
 -- initiating connections, sendings periodic pings, and provides mechanisms
 -- for sending message objects to other connected instances.
 --
-ConnectionManager = buildClass()
-local Class = ConnectionManager
+local ConnectionManager = class.build()
 
 --
 -- Constructor for a connection manager. Requries a port to which to bind.
 --
-function Class:_init(port)
-  Class.superclass._init(self)
+function ConnectionManager:_init(port)
+  class.superclass(ConnectionManager)._init(self)
   self.port = port
 
   -- Initialize udp connection object.
@@ -51,7 +50,7 @@ end
 --
 -- Should be called multiple times a second for more responsive results.
 --
-function Class:receiveAllMessages()
+function ConnectionManager:receiveAllMessages()
   self.passer:receiveAllMessages()
 
   local time = love.timer.getTime()
@@ -94,7 +93,7 @@ end
 -- Terminates all current connections and broadcasts connection termination
 -- messages to all conected instances.
 --
-function Class:terminateAllConnections()
+function ConnectionManager:terminateAllConnections()
   local connections = {}
   for connection in self:allConnections() do
     table.insert(connections, connection)
@@ -108,7 +107,7 @@ end
 -- Initiates a new connection; sends connection request to the specified
 -- address and port.
 --
-function Class:initiateConnection(address, port)
+function ConnectionManager:initiateConnection(address, port)
   local connection = self:createConnection(address, port)
   if not connection then return end
   connection.didInit = true
@@ -119,7 +118,7 @@ end
 -- Creates new internal connection object to specified address and port.
 -- Automatically assigns an ID.
 --
-function Class:createConnection(address, port)
+function ConnectionManager:createConnection(address, port)
   assertString(address, "address")
   assertNumber(port, "port")
   if self:getConnection(address, port) then return end
@@ -142,7 +141,7 @@ end
 -- Destroys connection with supplied connectionId. Optionally sends the
 -- notifies connection about the disconnect with a message.
 --
-function Class:terminateConnection(connection, sendDisconnect)
+function ConnectionManager:terminateConnection(connection, sendDisconnect)
   local connection = self:getConnection(connection)
   if not connection then return end
   if sendDisconnect then
@@ -157,7 +156,7 @@ end
 -- Disconnects a connection from the connection's ID. Deletes tracked info and resets
 -- internal state for that connection. Performs any necessary cleanup.
 --
-function Class:deleteConnection(connection)
+function ConnectionManager:deleteConnection(connection)
   local connection = self:getConnection(connection)
   if connection == nil then return end
   local id = connection.id
@@ -179,7 +178,7 @@ end
 -- 1. connectionId
 -- 2. IP address, port
 --
-function Class:getConnection(...)
+function ConnectionManager:getConnection(...)
   local args = {...}
   local id = nil
   
@@ -208,7 +207,7 @@ end
 -- Sets the status of the supplied status to the supplied status. Notifies
 -- registered listeners if new status is different from old status.
 --
-function Class:setConnectionStatus(connection, status)
+function ConnectionManager:setConnectionStatus(connection, status)
   assert(
       ConnectionStatus.fromId(status),
       status.." is not a valid ConnectionStatus")
@@ -229,7 +228,7 @@ end
 -- message: The message that was received.
 -- connectionId: The ID of the connection that sent the message.
 --
-function Class:registerMessageListener(messageType, listener, callback)
+function ConnectionManager:registerMessageListener(messageType, listener, callback)
   assert(MessageType.fromId(messageType), messageType.." is not a valid MessageType")
   if not self.coordinators[messageType] then
     self.coordinators[messageType] = EventCoordinator()
@@ -241,7 +240,7 @@ end
 -- Notifies registered listeners of the given message's type of a received
 -- message from connection with ID connectionId.
 --
-function Class:notifyMessageListeners(message, connectionId)
+function ConnectionManager:notifyMessageListeners(message, connectionId)
   if self.coordinators[message.t] then
     self.coordinators[message.t]:notifyListeners(message, connectionId)
   end
@@ -253,7 +252,7 @@ end
 -- connectionId: The ID of the connection whose status changed.
 -- oldStatus: The previous status of the connection.
 --
-function Class:registerConnectionStatusListener(listener, callback)
+function ConnectionManager:registerConnectionStatusListener(listener, callback)
   self.connectionStatusCoordinator:registerListener(listener, callback)
 end
 
@@ -261,21 +260,21 @@ end
 -- Notifies registered listeners of old connections that a connection's status
 -- has changed.
 --
-function Class:notifyConnectionStatusListeners(connectionId, oldStatus)
+function ConnectionManager:notifyConnectionStatusListeners(connectionId, oldStatus)
   self.connectionStatusCoordinator:notifyListeners(self, connectionId, oldStatus)
 end
 
 --
 -- Creates an connection identifying string based on the source IP and port
 --
-function Class:createConnectionString(address, port)
+function ConnectionManager:createConnectionString(address, port)
   return string.format("%s:%s", address, port)
 end
 
 --
 -- Sends a message object to all connections.
 --
-function Class:broadcastMessage(message)
+function ConnectionManager:broadcastMessage(message)
   return self:sendMessage(message, unpack(self.connectionIds))
 end
 
@@ -284,7 +283,7 @@ end
 -- the recipients acknowledge receipt of the message, blocking further messages
 -- on the same channel until the connections confirm that they have received
 -- this one.
-function Class:broadcastMessageWithAck(message, channel)
+function ConnectionManager:broadcastMessageWithAck(message, channel)
   self:sendMessageWithAck(message, channel, unpack(self.connectionIds))
 end
 
@@ -296,7 +295,7 @@ end
 -- acknowledgement requests and indicate that the receiver reset its internal
 -- acknowledgement tracker to synchronize with this message.
 --
-function Class:broadcastMessageWithAckReset(message, channel)
+function ConnectionManager:broadcastMessageWithAckReset(message, channel)
   self:sendMessageWithAck(message, channel, unpack(self.connectionIds))
 end
 
@@ -304,7 +303,7 @@ end
 -- Sends a message object to any number of connections. Optional parameters
 -- may be a list of connection IDs to send the message to.
 --
-function Class:sendMessage(message, ...)
+function ConnectionManager:sendMessage(message, ...)
   return self:sendMessageOfType("plain", message, nil, ...)
 end
 
@@ -314,7 +313,7 @@ end
 -- on the same channel until the connections confirm that they have received
 -- this one.
 --
-function Class:sendMessageWithAck(message, channel, ...)
+function ConnectionManager:sendMessageWithAck(message, channel, ...)
   return self:sendMessageOfType("ack", message, channel, ...)
 end
 
@@ -326,7 +325,7 @@ end
 -- requests and indicate that the receiver reset its internal acknowledgement
 -- tracker to synchronize with this message.
 --
-function Class:sendMessageWithAckReset(message, channel, ...)
+function ConnectionManager:sendMessageWithAckReset(message, channel, ...)
   return self:sendMessageOfType("reset", message, channel, ...)
 end
 
@@ -337,7 +336,7 @@ end
 -- "ack"
 -- "reset"
 --
-function Class:sendMessageOfType(mtype, message, channel, ...)
+function ConnectionManager:sendMessageOfType(mtype, message, channel, ...)
   local connections = {...}
   local time = love.timer.getTime()
   
@@ -365,7 +364,7 @@ end
 --
 -- Sends a connection init message to the supplied connection.
 --
-function Class:sendConnectionInit(connection)
+function ConnectionManager:sendConnectionInit(connection)
   connection = self:getConnection(connection)
   if not connection then return end
   local id = connection.id
@@ -378,7 +377,7 @@ end
 --
 -- Sends a connection ack message to the supplied connection.
 --
-function Class:sendConnectionAck(connection)
+function ConnectionManager:sendConnectionAck(connection)
   connection = self:getConnection(connection)
   if not connection then return end
   local id = connection.id
@@ -405,7 +404,7 @@ local callbackMap = {
 -- Updates the last received message time for the sender if the sender is
 -- a known connection.
 --
-function Class:onReceiveMessage(message, address, port)
+function ConnectionManager:onReceiveMessage(message, address, port)
   local connection = self:getConnection(address, port)
   if connection then
     connection.lastReceivedTime = love.timer.getTime()
@@ -428,7 +427,7 @@ end
 -- Callback function for messages of type PING. Updates ping time from sender
 -- to ensure connection is still alive.
 --
-function Class:onReceivePing(message, address, port)
+function ConnectionManager:onReceivePing(message, address, port)
   local connection = self:getConnection(address, port)
 end
 
@@ -437,7 +436,7 @@ end
 -- connection with another instance and sets up connection data. Responds with
 -- acknowledgement.
 --
-function Class:onReceiveConnectionInit(message, address, port)
+function ConnectionManager:onReceiveConnectionInit(message, address, port)
   local connection = self:createConnection(address, port)
   local didCreate = connection ~= nil
   connection = connection or self:getConnection(address, port)
@@ -458,7 +457,7 @@ end
 -- Callback function for messages of type CONNECT_ACK. Confirms connection
 -- to the remote instance.
 --
-function Class:onReceiveConnectionAck(message, address, port)
+function ConnectionManager:onReceiveConnectionAck(message, address, port)
   local connection = self:getConnection(address, port)
   if not connection then return end
   local id = connection.id
@@ -478,7 +477,7 @@ end
 -- Callback function for messages of type CONNECT_ACK_ACK. Confirms connection
 -- to remote instance.
 --
-function Class:onReceiveConnectionAckAck(message, address, port)
+function ConnectionManager:onReceiveConnectionAckAck(message, address, port)
   local connection = self:getConnection(address, port)
   if not connection then return end
 
@@ -496,7 +495,7 @@ end
 --
 -- Terminates connection to sender. Does not send acknowledgement.
 --
-function Class:onReceiveDisconnect(message, address, port)
+function ConnectionManager:onReceiveDisconnect(message, address, port)
   local connection = self:getConnection(address, port)
   self:terminateConnection(connection, true)
 end
@@ -504,7 +503,7 @@ end
 --
 -- Iterator function for looping through all connection objects.
 --
-function Class:allConnections()
+function ConnectionManager:allConnections()
   local i = 0
   return function()
     i = i + 1
@@ -517,10 +516,12 @@ end
 --
 -- Iterator function for looping through the IDs of all connections.
 --
-function Class:allConnectionIds()
+function ConnectionManager:allConnectionIds()
   local i = 0
   return function()
     i = i + 1
     return self.connectionIds[i]
   end
 end
+
+return ConnectionManager

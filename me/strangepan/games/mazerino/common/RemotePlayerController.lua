@@ -1,18 +1,17 @@
-require "me.strangepan.games.mazerino.common.PlayerController"
-require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local PlayerController = require "me.strangepan.games.mazerino.common.PlayerController"
+local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
-RemotePlayerController = buildClass(PlayerController)
-local Class = RemotePlayerController
+local RemotePlayerController = class.build(PlayerController)
 
-function Class:_init(player, connection)
+function RemotePlayerController:_init(player, connection)
   self.movementDelay = 0.25
   self.movementQueue = Queue()
   self.lastMovement = nil
   self:setConnection(connection)
 end
 
-function Class:setConnection(connection)
+function RemotePlayerController:setConnection(connection)
   if connection ~= nil then
     assertClass(connection, ConnectionManager, "connection")
   end
@@ -30,17 +29,17 @@ function Class:setConnection(connection)
   end
 end
 
-function Class:setPlayerId(id)
+function RemotePlayerController:setPlayerId(id)
   self.playerId = id
 end
 
-function Class:onReceivePlayerMoveMessage(message)
+function RemotePlayerController:onReceivePlayerMoveMessage(message)
   if message.id == player.id then
     self.movementQueue:push(message.direction)
   end
 end
 
-function Class:onStep()
+function RemotePlayerController:onStep()
   if self:getPlayer() ~= nil and
       self.movementQueue:empty() ~= false and
       (self.lastMovement ~= nil or
@@ -49,3 +48,5 @@ function Class:onStep()
     self.lastMovement = love.timer.getTime()
   end
 end
+
+return RemotePlayerController

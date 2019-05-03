@@ -1,6 +1,6 @@
-require "me.strangepan.games.mazerino.common.networking.NetworkedActor"
-require "me.strangepan.games.mazerino.common.entities.Player"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local NetworkedActor = require "me.strangepan.games.mazerino.common.networking.NetworkedActor"
+local Player = require "me.strangepan.games.mazerino.common.entities.Player"
+local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
 
 local PRINT_DEBUG = false
 
@@ -13,26 +13,25 @@ local F_GREEN = "g"
 local F_BLUE = "b"
 
 --
--- Class for tying a Player to corresponding players on other instances.
+-- NetworkedPlayer for tying a Player to corresponding players on other instances.
 --
-NetworkedPlayer = buildClass(NetworkedActor)
-local Class = NetworkedPlayer
+local NetworkedPlayer = class.build(NetworkedActor)
 
 --
 -- Instantiates a Player and performs necessary setup.
 --
-function Class.createNewInstanceWithParams(manager, id, entityType, params)
+function NetworkedPlayer.createNewInstanceWithParams(manager, id, entityType, params)
   if PRINT_DEBUG then print("NetworkedPlayer.createNewInstanceWithParams") end
   local ownerId = assertNumber(params[F_OWNER])
-  return Class(manager, id, entityType, params, Player(), ownerId)
+  return NetworkedPlayer(manager, id, entityType, params, Player(), ownerId)
 end
 
 --
 -- Instantiates a Player and performs necessary setup.
 --
-function Class.createNewInstance(manager, id, entityType, ...)
+function NetworkedPlayer.createNewInstance(manager, id, entityType, ...)
   local owner, x, y, r, g, b = ...
-  return Class.createNewInstanceWithParams(manager, id, entityType, {
+  return NetworkedPlayer.createNewInstanceWithParams(manager, id, entityType, {
       [F_OWNER] = owner,
       [F_X] = x,
       [F_Y] = y,
@@ -45,23 +44,23 @@ end
 --
 -- Registers this class to be instantiated by the network.
 --
-Class.registerEntityType(NetworkedEntityType.PLAYER, Class)
+NetworkedPlayer.registerEntityType(NetworkedEntityType.PLAYER, NetworkedPlayer)
 
 
 
-function Class:_init(manager, networkedId, entityType, params, player, ownerId)
-  Class.superclass._init(self, manager, networkedId, entityType, params, player)
-  assertClass(player, Player)
+function NetworkedPlayer:_init(manager, networkedId, entityType, params, player, ownerId)
+  class.superclass(NetworkedPlayer)._init(self, manager, networkedId, entityType, params, player)
+  assertNetworkedPlayer(player, Player)
   assertNumber(ownerId)
   self.ownerId = ownerId
 end
 
-function Class:getOwnerId()
+function NetworkedPlayer:getOwnerId()
   return self.ownerId
 end
 
-function Class:getInstantiationParams(params)
-  params = Class.superclass.getInstantiationParams(self, params)
+function NetworkedPlayer:getInstantiationParams(params)
+  params = class.superclass(NetworkedPlayer).getInstantiationParams(self, params)
   return self:writePlayerState(params, "new")
 end
 
@@ -71,10 +70,12 @@ end
 -- - 'new': for new Players
 -- - 'sync': for sync updates
 --
-function Class:writePlayerState(state, mode)
+function NetworkedPlayer:writePlayerState(state, mode)
   if mode == "new" then
     state[F_OWNER] = self:getOwnerId()
   end
   
   return state
 end
+
+return NetworkedPlayer

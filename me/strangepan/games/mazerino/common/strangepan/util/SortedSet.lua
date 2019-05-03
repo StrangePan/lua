@@ -1,12 +1,11 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
+local class = require "me.strangepan.libs.lua.v1.class"
 
-SortedSet = buildClass()
-local class = SortedSet
+local SortedSet = class.build()
 
 --[[
 A type of set that only accepts integers and keeps them in sorted order.
 ]]
-function class:_init()
+function SortedSet:_init()
   self.contents = {}
 end
 
@@ -15,7 +14,7 @@ Inserts an integer into the set. If number already exists in set, does nothing.
 Returns `true` if the number was not previously in the set and was inserted and
 `false` if it was already in the set.
 ]]
-function class:insert(number)
+function SortedSet:insert(number)
   assertNumber(number)
   
   local n = #self.contents
@@ -60,7 +59,7 @@ does nothing.
 Returns `true` if the number was in the set and was removed and `false` if it was not
 in the set.
 ]]
-function class:remove(number)
+function SortedSet:remove(number)
   assertNumber(number)
   
   local n = #self.contents
@@ -91,14 +90,14 @@ end
 --[[
 Gets the number of items in the set.
 ]]
-function class:size()
+function SortedSet:size()
   return #self.contents
 end
 
 --[[
 Checks whether the set contains the given number.
 ]]
-function class:contains(number)
+function SortedSet:contains(number)
   assertNumber(number)
   
   local n = #self.contents
@@ -126,7 +125,7 @@ end
 Returns an iterator function for all values in the set. Traverses the set in
 order.
 ]]
-function class:values()
+function SortedSet:values()
   local i = 0
   local values = self.contents
   return function()
@@ -134,3 +133,5 @@ function class:values()
     return values[i]
   end
 end
+
+return SortedSet

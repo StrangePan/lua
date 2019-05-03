@@ -1,31 +1,30 @@
-require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
-require "me.strangepan.games.mazerino.common.entities.Wall"
+local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
+local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
 
 -- Message fields.
 local F_X = "x"
 local F_Y = "y"
 
 --
--- Class for tying an wall entity to corresponding walls on other instances.
+-- NetworkedWall for tying an wall entity to corresponding walls on other instances.
 --
-NetworkedWall = buildClass(NetworkedEntity)
-local Class = NetworkedWall
+local NetworkedWall = class.build(NetworkedEntity)
 
 --
 -- Instantiates an Wall and performs necessary setup.
 --
-function Class.createNewInstanceWithParams(manager, id, entityType, params)
+function NetworkedWall.createNewInstanceWithParams(manager, id, entityType, params)
   local x, y = params[F_X], params[F_Y]
   local wall = Wall(x, y)
-  return Class(manager, id, entityType, params, wall)
+  return NetworkedWall(manager, id, entityType, params, wall)
 end
 
 --
 -- Instantiates an Actor and performs necessary setup.
 --
-function Class.createNewInstance(manager, id, entityType, ...)
+function NetworkedWall.createNewInstance(manager, id, entityType, ...)
   local x, y = ...
-  return Class.createNewInstanceWithParams(manager, id, entityType, {
+  return NetworkedWall.createNewInstanceWithParams(manager, id, entityType, {
       [F_X] = x,
       [F_Y] = y,
   })
@@ -34,21 +33,21 @@ end
 --
 -- Registers this class to be instantiated by the network.
 --
-Class.registerEntityType(NetworkedEntityType.WALL, Class)
+NetworkedWall.registerEntityType(NetworkedEntityType.WALL, NetworkedWall)
 
 
 
-function Class:_init(manager, networkedId, entityType, params, wall)
-  Class.superclass._init(self, manager, networkedId, entityType, params, wall)
+function NetworkedWall:_init(manager, networkedId, entityType, params, wall)
+  class.superclass(NetworkedWall)._init(self, manager, networkedId, entityType, params, wall)
 end
 
-function Class:getInstantiationParams(params)
-  params = Class.superclass.getInstantiationParams(self, params)
+function NetworkedWall:getInstantiationParams(params)
+  params = class.superclass(NetworkedWall).getInstantiationParams(self, params)
   return self:writeWallState(params)
 end
 
-function Class:setSynchronizedState(state)
-  Class.superclass.setSynchronizedState(self, state)
+function NetworkedWall:setSynchronizedState(state)
+  class.superclass(NetworkedWall).setSynchronizedState(self, state)
   local wall = self:getLocalEntity()
   local x, y = state[F_X], state[F_Y]
   if x and y then
@@ -56,18 +55,20 @@ function Class:setSynchronizedState(state)
   end
 end
 
-function Class:getSynchronizedState(state)
-  state = Class.superclass.getSynchronizedState(self, state)
+function NetworkedWall:getSynchronizedState(state)
+  state = class.superclass(NetworkedWall).getSynchronizedState(self, state)
   return self:writeWallState(state)
 end
 
 --
 -- Outputs the state of the wall to the provided table.
 --
-function Class:writeWallState(state)
+function NetworkedWall:writeWallState(state)
   local wall = self:getLocalEntity()
   local x, y = wall:getPosition()
   state[F_X] = x
   state[F_Y] = y
   return state
 end
+
+return NetworkedWall
