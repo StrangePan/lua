@@ -665,6 +665,16 @@ function TestClass:test_isGreaterThan_whenLessThan_didThrowError()
     end)
 end
 
+-- and_return
+
+function TestClass:test_andReturn_didReturn()
+  local testObject = "hello"
+
+  luaunit.assertEquals(
+      testObject,
+      assert_that(testObject):and_return())
+end
+
 -- Test multiple chained invocations
 function TestClass:test_isANumber_thrice_didNotThrowError()
   assert_that(132):is_a_number():is_a_number():is_a_number()
