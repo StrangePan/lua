@@ -3,7 +3,9 @@ local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local MessagePasser = require "me.strangepan.games.mazerino.common.networking.MessagePasser"
 local Connection = require "me.strangepan.games.mazerino.common.networking.Connection"
 local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
+local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
+local messages = require "me.strangepan.games.mazerino.common.networking.messages"
 
 local PRINT_DEBUG = true
 
@@ -18,7 +20,6 @@ local ConnectionManager = class.build()
 -- Constructor for a connection manager. Requries a port to which to bind.
 --
 function ConnectionManager:_init(port)
-  class.superclass(ConnectionManager)._init(self)
   self.port = port
 
   -- Initialize udp connection object.
@@ -184,7 +185,7 @@ function ConnectionManager:getConnection(...)
   local id = nil
   
   
-  if checkType(args[1], Connection) then
+  if class.instance_of(args[1], Connection) then
     return args[1]
   end
   
@@ -209,7 +210,7 @@ end
 -- registered listeners if new status is different from old status.
 --
 function ConnectionManager:setConnectionStatus(connection, status)
-  assert_that(connection):is_a_number():is_a_key_in(ConnectionStatus)
+  assert_that(status):is_a_number():is_a_key_in(ConnectionStatus)
   connection = self:getConnection(connection)
   if not connection then return end
   local oldStatus = connection.status or ConnectionStatus.DISCONNECTED

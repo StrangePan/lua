@@ -1,4 +1,4 @@
-require "me.strangepan.libs.lua.v1.enum"
+local enum = require "me.strangepan.libs.lua.v1.enum"
 
 return enum.build(
   -- When an entity is created, its initial state communicated.

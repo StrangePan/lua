@@ -4,16 +4,18 @@ local Camera = require "me.strangepan.games.mazerino.common.Camera"
 local CommandMap = require "me.strangepan.games.mazerino.common.CommandMap"
 local LocalPlayerController = require "me.strangepan.games.mazerino.common.LocalPlayerController"
 local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
-local Player = require "me.strangepan.games.mazerino.common.entities.Player"
-local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
 local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local class = require "me.strangepan.libs.lua.v1.class"
+local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 
 local ClientGame = class.build(NetworkGame)
 
 function ClientGame:_init(secretary, connectionManager, entityManager)
   class.superclass(ClientGame)._init(self, secretary, connectionManager, entityManager)
-  assertClientGame(connectionManager, ClientConnectionManager, "connectionManager")
+  assert_that(connectionManager):is_instance_of(ClientConnectionManager)
 
   self.lastSpinTime = love.timer.getTime()
   self.idleActor = Actor()

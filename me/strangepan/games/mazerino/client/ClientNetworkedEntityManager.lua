@@ -2,6 +2,7 @@ local ClientConnectionManager = require "me.strangepan.games.mazerino.client.Cli
 local CustomNetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
 local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local class = require "me.strangepan.libs.lua.v1.class"
+local EntityUpdateType = require "me.strangepan.games.mazerino.common.networking.EntityUpdateType"
 
 local F_NETWORK_ENTITY_ID = "i"
 
@@ -12,8 +13,8 @@ local F_NETWORK_ENTITY_ID = "i"
 local ClientNetworkedEntityManager = class.build(CustomNetworkedEntityManager)
 
 function ClientNetworkedEntityManager:_init(connectionManager)
-  class.superclass(ClientNetworkedEntityManager)._init(self, connectionManager)
-  assertClientNetworkedEntityManager(connectionManager, ClientConnectionManager, "connectionManager")
+  CustomNetworkedEntityManager._init(self, connectionManager)
+  assert_that(connectionManager):is_instance_of(ClientConnectionManager)
 end
 
 function ClientNetworkedEntityManager:onReceiveEntityUpdate(message, connectionId)

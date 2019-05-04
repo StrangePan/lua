@@ -26,7 +26,7 @@ local registeredEntities = {}
 --
 function NetworkedEntity.registerEntityType(entityType, entityNetworkedEntity)
   assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
-  assertNetworkedEntity(entityNetworkedEntity, NetworkedEntity, "entityNetworkedEntity")
+  assert_that(entityNetworkedEntity):is_instance_of(NetworkedEntity)
   assert(entityNetworkedEntity ~= NetworkedEntity, "Cannot register NetworkedEntity with itself!")
   if registeredEntities[entityType] then
     return false

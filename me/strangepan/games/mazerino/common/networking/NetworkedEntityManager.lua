@@ -6,7 +6,8 @@ local EntityUpdateType = require "me.strangepan.games.mazerino.common.networking
 local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
 local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local class = require "me.strangepan.libs.lua.v1.class"
+local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
 
 local PRINT_DEBUG = true
 
@@ -25,8 +26,8 @@ local F_SYNC_NUM = "n"
 local NetworkedEntityManager = class.build(Entity)
 
 function NetworkedEntityManager:_init(connectionManager)
-  class.superclass(NetworkedEntityManager)._init(self)
-  assertNetworkedEntityManager(connectionManager, ConnectionManager, "connectionManager")
+  Entity._init(self)
+  assert_that(connectionManager):is_instance_of(ConnectionManager)
   self.connectionManager = connectionManager
 
   -- Sparse array containing metadata on entities.
