@@ -2,6 +2,8 @@ local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.
 local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
 local class = require "me.strangepan.libs.lua.v1.class"
 
+local PRINT_DEBUG = false
+
 -- Message fields.
 local F_X = "x"
 local F_Y = "y"
@@ -16,6 +18,7 @@ local NetworkedWall = class.build(NetworkedEntity)
 --
 function NetworkedWall.createNewInstanceWithParams(manager, id, entityType, params)
   local x, y = params[F_X], params[F_Y]
+  if PRINT_DEBUG then print ("NetworkedWall.createNewInstanceWithParams", x , y) end
   local wall = Wall(x, y)
   return NetworkedWall(manager, id, entityType, params, wall)
 end

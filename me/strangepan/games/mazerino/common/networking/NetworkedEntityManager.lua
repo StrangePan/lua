@@ -10,7 +10,7 @@ local class = require "me.strangepan.libs.lua.v1.class"
 local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
 local messages = require "me.strangepan.games.mazerino.common.networking.messages"
 
-local PRINT_DEBUG = true
+local PRINT_DEBUG = false
 
 local F_NETWORK_ENTITY_ID = "i"
 local F_ENTITY_UPDATE_TYPE = "u"
@@ -262,6 +262,7 @@ end
 function NetworkedEntityManager:createEntityWithParams(id, entityType, params)
   assert_that(id):is_a_number():and_return()
   assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
+  if PRINT_DEBUG then print("NetworkedEntityManager.createEntityWithParams", id, entityType) end
 
   -- Claim an ID. Will destroy the previous entity at that ID.
   id = self:claimId(id)
@@ -280,6 +281,7 @@ end
 --
 function NetworkedEntityManager:spawnEntity(entityType, ...)
   assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
+  if PRINT_DEBUG then print("NetworkedEntityManager.createEntityWithParams", entityType) end
 
   -- Generate an ID.
   local id = self:claimId()
@@ -505,8 +507,12 @@ function NetworkedEntityManager:_sendEntityUpdate(entity, updateType, update, ..
     entityType = entity:getEntityType()
   end
 
-  if PRINT_DEBUG and updateType == EntityUpdateType.SYNCHRONIZING then
-    print("sending sync of entity "..id.." to:", ...)
+  if PRINT_DEBUG then
+    if updateType == EntityUpdateType.SYNCHRONIZING then
+      print("sending sync of entity "..id.." to:", ...)
+    elseif updateType == EntityUpdateType.CREATING then
+      print("sending sync of entity "..id..", type "..entityType.." to:", ...)
+    end
   end
 
   -- Loop through all known IDs, constructing and sending messages to each
@@ -521,7 +527,7 @@ function NetworkedEntityManager:_sendEntityUpdate(entity, updateType, update, ..
       -- Build message
       if updateType == EntityUpdateType.CREATING then
         self:_setInSync(connection, entity, true)
-        message = messages.entityUpdate.create(id, updateType, update)
+        message = messages.entityUpdate.create(id, entityType, update)
         requiresAck = true
       elseif updateType == EntityUpdateType.DESTROYING then
         self:_setUpdated(connection, entity, false)
@@ -532,7 +538,7 @@ function NetworkedEntityManager:_sendEntityUpdate(entity, updateType, update, ..
         self:_setUpdated(connection, entity, false)
         self:_setInSync(connection, entity, true)
         syncNum = self:_incrementSyncNum(connection, entity)
-        message = messages.entityUpdate.sync(id, updateType, update, syncNum)
+        message = messages.entityUpdate.sync(id, entityType, update, syncNum)
         requiresAck = true
       elseif updateType == EntityUpdateType.INCREMENTING then
         self:_setUpdated(connection, entity, true)
@@ -592,6 +598,8 @@ function NetworkedEntityManager:onReceiveEntityCreate(message, connectionId)
   local id = message[F_NETWORK_ENTITY_ID]
   local entityType = message[F_ENTITY_TYPE]
   local params = message[F_CREATE_PARAMS]
+
+  if PRINT_DEBUG then print("NetworkedEntityManager:onReceiveEntityUpdate", id, entityType) end
 
   -- Create the new entity. Do not worry about colliding IDs, since ths method
   -- will destroy any local entities with matching IDs.
