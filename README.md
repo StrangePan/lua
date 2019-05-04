@@ -34,7 +34,7 @@ local my_class = require 'path.to.my_class'
 
 -- BAD
 local my_class = require 'path/to/my_class'
-local my_class = require 'path\to\my_class'
+local my_class = require 'path\\to\\my_class'
 ```
 
 ### Omit file extension
