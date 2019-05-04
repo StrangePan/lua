@@ -8,6 +8,7 @@ local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoord
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 local class = require "me.strangepan.libs.lua.v1.class"
 local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
+local messages = require "me.strangepan.games.mazerino.common.networking.messages"
 
 local PRINT_DEBUG = true
 
@@ -288,8 +289,7 @@ function NetworkedEntityManager:spawnEntity(entityType, ...)
   end
 
   -- Instantiate a new entity and hook everything up.
-  local entity = NetworkedEntity.createNewInstance(
-      self, id, entityType, ...)
+  local entity = NetworkedEntity.createNewInstance(self, id, entityType, ...)
   return self:_addEntity(entity, true)
 end
 
@@ -490,7 +490,7 @@ end
 function NetworkedEntityManager:_sendEntityUpdate(entity, updateType, update, ...)
   entity = self:getEntity(entity)
   assert(entity, "entity not of supported type or not recognized by manager")
-  assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
+  assert_that(entity:getEntityType()):is_a_number():is_a_key_in(NetworkedEntityType)
   if updateType == EntityUpdateType.CREATING
       or updateType == EntityUpdateType.SYNCHRONIZING
       or updateType == EntityUpdateType.INCREMENTING then
@@ -521,7 +521,7 @@ function NetworkedEntityManager:_sendEntityUpdate(entity, updateType, update, ..
       -- Build message
       if updateType == EntityUpdateType.CREATING then
         self:_setInSync(connection, entity, true)
-        message = messages.entityUpdate.create(id, entityType, update)
+        message = messages.entityUpdate.create(id, updateType, update)
         requiresAck = true
       elseif updateType == EntityUpdateType.DESTROYING then
         self:_setUpdated(connection, entity, false)
@@ -532,7 +532,7 @@ function NetworkedEntityManager:_sendEntityUpdate(entity, updateType, update, ..
         self:_setUpdated(connection, entity, false)
         self:_setInSync(connection, entity, true)
         syncNum = self:_incrementSyncNum(connection, entity)
-        message = messages.entityUpdate.sync(id, entityType, update, syncNum)
+        message = messages.entityUpdate.sync(id, updateType, update, syncNum)
         requiresAck = true
       elseif updateType == EntityUpdateType.INCREMENTING then
         self:_setUpdated(connection, entity, true)

@@ -24,7 +24,7 @@ local NetworkedPlayer = class.build(NetworkedActor)
 --
 function NetworkedPlayer.createNewInstanceWithParams(manager, id, entityType, params)
   if PRINT_DEBUG then print("NetworkedPlayer.createNewInstanceWithParams") end
-  local ownerId = assert_that(params):is_a_number():and_return()
+  local ownerId = assert_that(params[F_OWNER]):is_a_number():and_return()
   return NetworkedPlayer(manager, id, entityType, params, Player(), ownerId)
 end
 
@@ -51,8 +51,9 @@ NetworkedPlayer.registerEntityType(NetworkedEntityType.PLAYER, NetworkedPlayer)
 
 
 function NetworkedPlayer:_init(manager, networkedId, entityType, params, player, ownerId)
+  print(manager, networkedId, entityType, params, player, ownerId)
   class.superclass(NetworkedPlayer)._init(self, manager, networkedId, entityType, params, player)
-  assertNetworkedPlayer(player, Player)
+  assert_that(player):is_instance_of(Player)
   assert_that(ownerId):is_a_number():and_return()
   self.ownerId = ownerId
 end

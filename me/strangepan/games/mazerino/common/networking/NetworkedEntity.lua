@@ -1,6 +1,7 @@
 local class = require "me.strangepan.libs.lua.v1.class"
 local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
 local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 
 local PRINT_DEBUG = false
 
@@ -116,8 +117,8 @@ function NetworkedEntity.createNewInstance(manager, id, entityType, ...)
   end
   
   -- Try to catch infinite recursion if user fails to override this method.
-  assert(registeredEntities[entityType].createNewInstance ~=
-      NetworkedEntity.createNewInstance,
+  assert(
+      registeredEntities[entityType].createNewInstance ~= NetworkedEntity.createNewInstance,
       "Make sure createNewInstance() is overridden")
 
   -- Instantiate and return new instance using given arguments.
@@ -131,11 +132,10 @@ end
 -- Instantiates a new NetworkedEntity.
 --
 function NetworkedEntity:_init(manager, networkId, entityType, params, entity)
-  class.superclass(NetworkedEntity)._init(self)
-  assertNetworkedEntity(manager, NetworkedEntityManager, "manager")
+  -- assert_that(manager):is_instance_of(NetworkedEntityManager) -- circular dependency
   assert_that(networkId):is_a_number():and_return()
   assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
-  assertNetworkedEntity(entity, Entity, "entity")
+  assert_that(entity):is_instance_of(Entity)
 
   self.manager = manager
   self.id = networkId

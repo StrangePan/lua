@@ -3,6 +3,7 @@ local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
 local Color = require "me.strangepan.games.mazerino.common.Color"
 local class = require "me.strangepan.libs.lua.v1.class"
 local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 -- Message fields.
 local F_X = "x"
@@ -44,16 +45,9 @@ function NetworkedActor.createNewInstance(manager, id, entityType, ...)
   })
 end
 
---
--- Registers this class to be instantiated by the network.
---
-NetworkedActor.registerEntityType(NetworkedEntityType.ACTOR, NetworkedActor)
-
-
-
 function NetworkedActor:_init(manager, networkedId, entityType, params, actor)
   class.superclass(NetworkedActor)._init(self, manager, networkedId, entityType, params, actor)
-  assertNetworkedActor(actor, Actor, "actor")
+  assert_that(actor):is_instance_of(Actor)
   self:setActorState(params)
 end
 

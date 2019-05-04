@@ -1,7 +1,6 @@
 local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
 local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
 local class = require "me.strangepan.libs.lua.v1.class"
-local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
 
 -- Message fields.
 local F_X = "x"
@@ -31,13 +30,6 @@ function NetworkedWall.createNewInstance(manager, id, entityType, ...)
       [F_Y] = y,
   })
 end
-
---
--- Registers this class to be instantiated by the network.
---
-NetworkedWall.registerEntityType(NetworkedEntityType.WALL, NetworkedWall)
-
-
 
 function NetworkedWall:_init(manager, networkedId, entityType, params, wall)
   class.superclass(NetworkedWall)._init(self, manager, networkedId, entityType, params, wall)
