@@ -1,6 +1,6 @@
 local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 local CustomNetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local ServerConnectionManager = require "me.strangepan.games.mazerino.server.ServerConnectionManager"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 
@@ -15,7 +15,7 @@ local ServerNetworkedEntityManager = class.build(CustomNetworkedEntityManager)
 
 function ServerNetworkedEntityManager:_init(connectionManager)
   class.superclass(ServerNetworkedEntityManager)._init(self, connectionManager)
-  assertClass(connectionManager, ServerConnectionManager, "connectionManager")
+  assert_that(connectionManager):is_instance_of(ServerConnectionManager):and_return()
   connectionManager:registerConnectionStatusListener(
       self, self.onConnectionStatusChanged)
 end

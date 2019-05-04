@@ -1,4 +1,5 @@
 local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local SortedSet = class.build()
 
@@ -15,7 +16,7 @@ Returns `true` if the number was not previously in the set and was inserted and
 `false` if it was already in the set.
 ]]
 function SortedSet:insert(number)
-  assertNumber(number)
+  assert_that(number):is_a_number():and_return()
   
   local n = #self.contents
   if n == 0 or self.contents[1] > number then
@@ -60,7 +61,7 @@ Returns `true` if the number was in the set and was removed and `false` if it wa
 in the set.
 ]]
 function SortedSet:remove(number)
-  assertNumber(number)
+  assert_that(number):is_a_number():and_return()
   
   local n = #self.contents
   if n == 0 or self.contents[1] > number or self.contents[n] < number then
@@ -98,7 +99,7 @@ end
 Checks whether the set contains the given number.
 ]]
 function SortedSet:contains(number)
-  assertNumber(number)
+  assert_that(number):is_a_number():and_return()
   
   local n = #self.contents
   if n == 0 then

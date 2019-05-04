@@ -1,5 +1,5 @@
 local class = require "me.strangepan.libs.lua.v1.class"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 --
 -- Color for storing color values.
@@ -33,16 +33,16 @@ end
 --
 function Color:setRGBA(r, g, b, a)
   if r ~= nil then
-    self.r = assertNumber(r, "r")
+    self.r = assert_that(r):is_a_number():and_return()
   end
   if g ~= nil then
-    self.g = assertNumber(g, "g")
+    self.g = assert_that(g):is_a_number():and_return()
   end
   if b ~= nil then
-    self.b = assertNumber(b, "b")
+    self.b = assert_that(b):is_a_number():and_return()
   end
   if a ~= nil then
-    self.a = assertNumber(a, "a")
+    self.a = assert_that(a):is_a_number():and_return()
   end
 end
 

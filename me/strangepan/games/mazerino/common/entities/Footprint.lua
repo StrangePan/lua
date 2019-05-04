@@ -1,7 +1,8 @@
 local class = require "me.strangepan.libs.lua.v1.class"
 local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
-local class = require "me.strangepan.libs.lua.v1.class"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local DrawLayer = require "me.strangepan.games.mazerino.common.strangepan.secretary.DrawLayer"
 
 local Footprint = class.build(Entity)
 

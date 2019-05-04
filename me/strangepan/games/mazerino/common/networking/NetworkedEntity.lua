@@ -1,5 +1,6 @@
 local class = require "me.strangepan.libs.lua.v1.class"
 local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local PRINT_DEBUG = false
 
@@ -24,7 +25,7 @@ local registeredEntities = {}
 -- method will return `false`.
 --
 function NetworkedEntity.registerEntityType(entityType, entityNetworkedEntity)
-  assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
+  assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
   assertNetworkedEntity(entityNetworkedEntity, NetworkedEntity, "entityNetworkedEntity")
   assert(entityNetworkedEntity ~= NetworkedEntity, "Cannot register NetworkedEntity with itself!")
   if registeredEntities[entityType] then
@@ -56,10 +57,10 @@ end
 --   entity with individual construction params.
 --
 function NetworkedEntity.createNewInstanceWithParams(manager, id, entityType, params)
-  assertNumber(id, "id")
+  assert_that(id):is_a_number():and_return()
   
   -- Ensure supplied entityType is indeed an NetworkedEntityType.
-  assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
+  assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
   
   -- Ensure entity type is registered. Otherwise, return nil.
   if not registeredEntities[entityType] then
@@ -104,10 +105,10 @@ end
 --   instance.
 --
 function NetworkedEntity.createNewInstance(manager, id, entityType, ...)
-  assertNumber(id, "id")
+  assert_that(id):is_a_number():and_return()
   
   -- Ensure supplied entityType is indeed an NetworkedEntityType.
-  assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
+  assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
   
   -- Ensure entity type is registered. Otherwise, return nil.
   if not registeredEntities[entityType] then
@@ -132,8 +133,8 @@ end
 function NetworkedEntity:_init(manager, networkId, entityType, params, entity)
   class.superclass(NetworkedEntity)._init(self)
   assertNetworkedEntity(manager, NetworkedEntityManager, "manager")
-  assertNumber(networkId, "networkId")
-  assert(NetworkedEntityType.fromId(entityType), entityType.." is not a valid NetworkedEntityType")
+  assert_that(networkId):is_a_number():and_return()
+  assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
   assertNetworkedEntity(entity, Entity, "entity")
 
   self.manager = manager

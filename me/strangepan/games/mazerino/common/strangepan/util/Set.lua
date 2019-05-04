@@ -8,7 +8,7 @@ function Set:_init()
 end
 
 function Set:add(item)
-  assertTable(item, "item")
+  assert_that(item):is_a_table():and_return()
   if not self.contents[item] then
     self.contents[item] = true
     self.num_contents = self.num_contents + 1
@@ -16,7 +16,7 @@ function Set:add(item)
 end
 
 function Set:remove(item)
-  assertTable(item, "item")
+  assert_that(item):is_a_table():and_return()
   if self.contents[item] then
     self.contents[item] = nil
     self.num_contents = self.num_contents - 1

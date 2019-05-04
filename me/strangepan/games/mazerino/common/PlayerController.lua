@@ -1,7 +1,8 @@
 local class = require "me.strangepan.libs.lua.v1.class"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local Player = require "me.strangepan.games.mazerino.common.entities.Player"
 local Direction = require "me.strangepan.games.mazerino.common.entities.Direction"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local PlayerController = class.build()
 
@@ -11,7 +12,7 @@ end
 
 function PlayerController:setPlayer(player)
   if player then
-    assertClass(player, Player, "player")
+    assert_that(player):is_instance_of(Player):and_return()
   end
 
   self.player = player
@@ -38,7 +39,7 @@ function PlayerController:moveLeft()
 end
 
 function PlayerController:move(direction)
-  direction = Direction.fromId(direction)
+  direction = assert_that(direction):is_a_number():is_a_key_in(Direction):and_return()
   if direction == nil then return false end
   if not self:getPlayer() then return false end
   return self:getPlayer():move(direction)

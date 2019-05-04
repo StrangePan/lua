@@ -1,4 +1,3 @@
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
 local class = require "me.strangepan.libs.lua.v1.class"
 local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 
@@ -22,7 +21,7 @@ function EventCoordinator:registerListener(object, callback)
     self.listeners[object][self.listeners[object].n] = callback
     
     -- register for destroy callbacks with the secretary
-    if checkType(object, Entity) then
+    if class.instance_of(object, Entity) then
       local secretary = self:getSecretary()
       if secretary ~= nil then
         secretary:registerEventListener(self, self.unregisterListener, EventType.DESTROY, object)

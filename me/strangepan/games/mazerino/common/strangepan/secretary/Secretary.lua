@@ -5,9 +5,10 @@ local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary
 local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
 local class = require "me.strangepan.libs.lua.v1.class"
 local functions = require "me.strangepan.games.mazerino.common.strangepan.util.functions"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local SortedSet = require "me.strangepan.games.mazerino.common.strangepan.util.SortedSet"
 local FunctionQueue = require "me.strangepan.games.mazerino.common.strangepan.util.FunctionQueue"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local Secretary = class.build()
 
@@ -46,7 +47,7 @@ object: The new object to track collisions with.
 function Secretary:registerPhysObject(object)
   
   -- Validate arguments
-  assertClass(object, PhysObject, "object")
+  assert_that(object):is_instance_of(PhysObject)
   assert(self.objectNodes[object] == nil, "Object already registered with the secretary")
   
   -- Postpone if processing events
@@ -68,7 +69,7 @@ object: The object to unregister.
 function Secretary:unregisterPhysObject(object)
   
   -- Validate arguments
-  assertClass(object, PhysObject, "object")
+  assert_that(object):is_instance_of(PhysObject)
   
   -- Postpone if processing events
   if self.postpone then
@@ -148,7 +149,7 @@ function Secretary:getCollisions(top, right, bottom, left, front, back, ...)
 end
 
 function Secretary:remove(object)
-  if object:instanceOf(PhysObject) then
+  if class.instance_of(object, PhysObject) then
     self:unregisterPhysObject(object)
   end
   self:unregisterAllListeners(object)
@@ -159,7 +160,7 @@ end
 function Secretary:registerChildSecretary(child)
   
   -- Validate parameters
-  assertClass(child, Secretary, "child")
+  assert_that(child):is_instance_of(Secretary)
   assert(child ~= self, "A Secretary cannot register itself as a child, unless you're a sadist and WANT infinite loops")
   
   -- Register event methods of child with self
@@ -211,10 +212,10 @@ function Secretary:registerEventListener(object, listener, eventType, ...)
   local arg = {...}
   
   -- Verify arguments
-  assertTable(object, "object")
+  assert_that(object):is_a_table()
   assert(listener ~= nil, "Argument 'listener' cannot be nil")
   assert(eventType ~= nil, "Argument 'eventType' cannot be nil")
-  eventType = EventType.fromId(eventType)
+  eventType = assert_that(eventType):is_a_number():is_a_key_in(EventType):and_return()
   assert(eventType ~= nil, "eventType must be a valid EventType")
   
   -- Verify optional arguments
@@ -223,17 +224,17 @@ function Secretary:registerEventListener(object, listener, eventType, ...)
   
   if eventType == EventType.DESTROY and arg[1] ~= nil then
     -- Users is registering for desruction, optional parameter can be object to watch
-    assertClass(arg[1], Entity, 'optional parameter 1')
+    assert_that(arg[1]):is_instance_of(Entity)
     watchObject = arg[1]
     
     -- second optional parameter can be priority
     if arg[2] ~= nil then
-      assertInteger(arg[2], 'optional parameter 2')
+      assert_that(arg[2]):is_a_number()
       priority = arg[2]
     end
   elseif arg[1] ~= nil then
     -- Optional parameter can be layer
-    assertInteger(arg[1], 'optional parameter 1')
+    assert_that(arg[1]):is_a_number()
     priority = arg[1]
   end
   
@@ -311,12 +312,12 @@ end
 function Secretary:setEventPriority(object, listener, eventType, priority, watchObject)
   
   -- Validate arguments
-  assertTable(object, "object")
+  assert_that(object):is_a_table()
   if listener then
-    assertFunction(listener, "listener")
+    assert_that(listener):is_a_function()
   end
-  assert(EventType.fromId(eventType), "eventType must be a valid EventType: "..eventType.." received.")
-  assertInteger(priority, "priority")
+  assert_that(eventType):is_a_number():is_a_key_in(EventType)
+  assert_that(priority):is_a_number()
   
   -- Postpone if processing events
   if self.postpone then
@@ -375,7 +376,7 @@ Deletes all callbacks associated with the given object.
 function Secretary:unregisterAllListeners(object)
   
   -- Validate arguments
-  assertTable(object, "object")
+  assert_that(object):is_a_table()
   
   -- Postpone if processing events
   if self.postpone then

@@ -1,6 +1,6 @@
 local ClientConnectionManager = require "me.strangepan.games.mazerino.client.ClientConnectionManager"
 local CustomNetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local class = require "me.strangepan.libs.lua.v1.class"
 
 local F_NETWORK_ENTITY_ID = "i"

@@ -1,8 +1,9 @@
 local class = require "me.strangepan.libs.lua.v1.class"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local MessagePasser = require "me.strangepan.games.mazerino.common.networking.MessagePasser"
 local Connection = require "me.strangepan.games.mazerino.common.networking.Connection"
 local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local PRINT_DEBUG = true
 
@@ -119,8 +120,8 @@ end
 -- Automatically assigns an ID.
 --
 function ConnectionManager:createConnection(address, port)
-  assertString(address, "address")
-  assertNumber(port, "port")
+  assert_that(address):is_a_string():and_return()
+  assert_that(port):is_a_number():and_return()
   if self:getConnection(address, port) then return end
   
   local id = self.connectionIds.nxt
@@ -145,7 +146,7 @@ function ConnectionManager:terminateConnection(connection, sendDisconnect)
   local connection = self:getConnection(connection)
   if not connection then return end
   if sendDisconnect then
-    assertBoolean(sendDisconnect)
+    assert_that(sendDisconnect):is_a_boolean():and_return()
     self:sendMessage(messages.disconnect(), connection)
   end
   self:setConnectionStatus(connection, ConnectionStatus.DISCONNECTED)
@@ -208,9 +209,7 @@ end
 -- registered listeners if new status is different from old status.
 --
 function ConnectionManager:setConnectionStatus(connection, status)
-  assert(
-      ConnectionStatus.fromId(status),
-      status.." is not a valid ConnectionStatus")
+  assert_that(connection):is_a_number():is_a_key_in(ConnectionStatus)
   connection = self:getConnection(connection)
   if not connection then return end
   local oldStatus = connection.status or ConnectionStatus.DISCONNECTED
@@ -229,7 +228,7 @@ end
 -- connectionId: The ID of the connection that sent the message.
 --
 function ConnectionManager:registerMessageListener(messageType, listener, callback)
-  assert(MessageType.fromId(messageType), messageType.." is not a valid MessageType")
+  assert_that(messageType):is_a_number():is_a_key_in(MessageType)
   if not self.coordinators[messageType] then
     self.coordinators[messageType] = EventCoordinator()
   end

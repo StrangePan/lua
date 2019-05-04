@@ -1,10 +1,11 @@
 local class = require "me.strangepan.libs.lua.v1.class"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
 local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
 local messages = require "me.strangepan.games.mazerino.common.networking.messages"
 local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local PRINT_MESSAGES = false
 
@@ -42,9 +43,9 @@ end
 -- Sends message object to the specified IP address and port number.
 --
 function MessagePasser:sendMessage(message, address, port)
-  assertTable(message, "message")
-  assertString(address, "address")
-  assertNumber(port, "port")
+  assert_that(message):is_a_table():and_return()
+  assert_that(address):is_a_string():and_return()
+  assert_that(port):is_a_number():and_return()
   local outString = string.format("%s:%s", address, port)
   if not self.outbox[outString] then
     self.outbox[outString] = {
@@ -69,10 +70,10 @@ end
 -- client sends acknowledgement.
 --
 function MessagePasser:sendMessageWithAck(message, channel, address, port)
-  assertTable(message, "message")
-  assertString(channel, "channel")
-  assertString(address, "address")
-  assertNumber(port, "port")
+  assert_that(message):is_a_table():and_return()
+  assert_that(channel):is_a_string():and_return()
+  assert_that(address):is_a_string():and_return()
+  assert_that(port):is_a_number():and_return()
   return self:_sendMessageWithAck(
     MessageType.ACK_REQUEST, message, channel, address, port)
 end
@@ -84,10 +85,10 @@ end
 -- client sends acknowledgement.
 --
 function MessagePasser:sendMessageWithAckReset(message, channel, address, port)
-  assertTable(message, "message")
-  assertString(channel, "channel")
-  assertString(address, "address")
-  assertNumber(port, "port")
+  assert_that(message):is_a_table():and_return()
+  assert_that(channel):is_a_string():and_return()
+  assert_that(address):is_a_string():and_return()
+  assert_that(port):is_a_number():and_return()
   return self:_sendMessageWithAck(
     MessageType.ACK_REQUEST_RESET, message, channel, address, port)
 end
@@ -417,10 +418,9 @@ function MessagePasser:registerListener(messageType, listener, callback)
   if messageType == nil then
     messageType = ANY_MESSAGE_TYPE
   else
-    messageType = MessageType.fromId(messageType)
-    assert(messageType ~= nil)
+    assert_that(messageType):is_a_number():is_a_key_in(MessageType)
   end
-  assertFunction(callback, "callback")
+  assert_that(callback):is_a_function():and_return()
   
   -- Lazily instantiate event coordinators.
   if not self.coordinators[messageType] then

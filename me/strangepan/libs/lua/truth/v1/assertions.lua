@@ -218,4 +218,47 @@ function assertions.is_greater_than_or_equal_to(other)
     end)
 end
 
+function assertions.is_a_key_in_table(other)
+  return assertion(
+      function(_, value)
+        return type(other) == "table" and other[value] ~= nil
+      end,
+      function (_, value)
+        return tostring(value).." is not a key in table "..tostring(other)
+      end)
+end
+
+function assertions.is_a_value_in_table(other)
+  return assertion(
+      function(_, value)
+        if not type(other) ~= "table" then
+          return false
+        end
+        for _,otherv in pairs(other) do
+          if assertions.is_equal_to(otherv).check(_, value) then
+            return true
+          end
+        end
+        return false
+      end,
+      function (_, value)
+        return tostring(value).." is not a value in table "..tostring(other)
+      end)
+end
+
+function assertions.matches_a_value_in_table(other)
+  return assertion(
+      function(_, value)
+        for _,otherv in pairs(assert_that(other):is_a_table():and_return()) do
+          if assertions.is_copy_of(otherv).check(_, value) then
+            return true
+          end
+        end
+        return false
+      end,
+      function (_, value)
+        return tostring(value).." is not a copy of a value in table "..tostring(other)
+      end)
+end
+
 return assertions

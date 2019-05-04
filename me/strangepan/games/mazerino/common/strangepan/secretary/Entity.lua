@@ -12,8 +12,6 @@ local Entity = class.build()
 -- `Entity` constructor. Initializes data members.
 --
 function Entity:_init()
-  class.superclass(Entity)._init(self)
-  
   -- Assigned secretary object
   self.secretary = nil
 end
@@ -30,9 +28,6 @@ end
 --         affecting normal function.
 --
 function Entity:registerWithSecretary(secretary)
-  
-  -- Ensure secretary is of correct type
-  assertEntity(secretary, Secretary, "secretary")
   
   -- Make sure we're not already registered with a secretary
   if self.secretary ~= nil then

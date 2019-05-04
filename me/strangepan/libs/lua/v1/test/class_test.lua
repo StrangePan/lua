@@ -60,7 +60,7 @@ function TestClass:test_buildSubclass_getSuperclass_didReturnSuperclass()
   local baseClass = class.build()
   local testClass = class.build(baseClass)
 
-  luaunit.assertEquals(class.superclass(testClass), baseClass)
+  luaunit.assertIs(class.superclass(testClass), baseClass)
 end
 
 os.exit(luaunit.LuaUnit.run())

@@ -1,5 +1,5 @@
 local class = require "me.strangepan.libs.lua.v1.class"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 
 --
@@ -12,13 +12,13 @@ local Connection = class.build()
 function Connection:_init(networkId, address, port, initTime)
 
   -- The unique identifier of this connection. Should never change.
-  self.id = assertNumber(networkId, "networkId")
+  self.id = assert_that(networkId):is_a_number():and_return()
   
   -- The IP address of this connection. Should never change.
-  self.address = assertString(address, "address")
+  self.address = assert_that(address):is_a_string():and_return()
   
   -- The port number of this connection. Should never change.
-  self.port = assertNumber(port, "port")
+  self.port = assert_that(port):is_a_number():and_return()
 
   -- The connection status; defaults to ConnectionStatus.DISCONNECTED.
   self.status = ConnectionStatus.DISCONNECTED

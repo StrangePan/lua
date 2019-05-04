@@ -4,9 +4,12 @@ local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
 local Player = require "me.strangepan.games.mazerino.common.entities.Player"
 local Switch = require "me.strangepan.games.mazerino.common.entities.Switch"
 local CommandMap = require "me.strangepan.games.mazerino.common.CommandMap"
+local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
 local LocalPlayerController = require "me.strangepan.games.mazerino.common.LocalPlayerController"
 local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
 local GameMap = require "me.strangepan.games.mazerino.common.mazerino.map.GameMap"
+local class = require "me.strangepan.libs.lua.v1.class"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
 local OfflineGame = class.build(Game)
 
@@ -58,7 +61,7 @@ function OfflineGame:setUpLevel()
     entity:registerWithSecretary(secretary)
 
     -- Set up the player.
-    if checkType(entity, Player) then
+    if class.instance_of(entity, Player) then
       LocalPlayerController(entity, self.commandMap)
       self.camera:setSubject(entity)
       self.camera:jumpToSubject(entity)

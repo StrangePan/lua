@@ -1,6 +1,6 @@
 local NetworkedActor = require "me.strangepan.games.mazerino.common.networking.NetworkedActor"
 local Player = require "me.strangepan.games.mazerino.common.entities.Player"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local PRINT_DEBUG = false
 
@@ -22,7 +22,7 @@ local NetworkedPlayer = class.build(NetworkedActor)
 --
 function NetworkedPlayer.createNewInstanceWithParams(manager, id, entityType, params)
   if PRINT_DEBUG then print("NetworkedPlayer.createNewInstanceWithParams") end
-  local ownerId = assertNumber(params[F_OWNER])
+  local ownerId = assert_that(params):is_a_number():and_return()
   return NetworkedPlayer(manager, id, entityType, params, Player(), ownerId)
 end
 
@@ -51,7 +51,7 @@ NetworkedPlayer.registerEntityType(NetworkedEntityType.PLAYER, NetworkedPlayer)
 function NetworkedPlayer:_init(manager, networkedId, entityType, params, player, ownerId)
   class.superclass(NetworkedPlayer)._init(self, manager, networkedId, entityType, params, player)
   assertNetworkedPlayer(player, Player)
-  assertNumber(ownerId)
+  assert_that(ownerId):is_a_number():and_return()
   self.ownerId = ownerId
 end
 

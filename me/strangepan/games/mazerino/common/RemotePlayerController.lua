@@ -1,6 +1,6 @@
 local PlayerController = require "me.strangepan.games.mazerino.common.PlayerController"
 local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local RemotePlayerController = class.build(PlayerController)
 
@@ -13,7 +13,7 @@ end
 
 function RemotePlayerController:setConnection(connection)
   if connection ~= nil then
-    assertClass(connection, ConnectionManager, "connection")
+    assert_that(connection):is_instance_of(ConnectionManager):and_return()
   end
   
   if self.connection ~= nil then

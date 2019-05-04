@@ -1,6 +1,6 @@
 local class = require "me.strangepan.libs.lua.v1.class"
 local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 --[[
 Specialized queue for enqueuing function calls and executing them.
@@ -12,7 +12,7 @@ function FunctionQueue:_init()
 end
 
 function FunctionQueue:push(func, ...)
-  assertFunction(func, 'func')
+  assert_that(func):is_a_function():and_return()
   self.queue:push({f = func, a = {...}})
 end
 

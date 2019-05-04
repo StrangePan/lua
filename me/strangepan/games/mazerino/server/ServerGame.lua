@@ -7,8 +7,8 @@ local ServerGame = class.build(NetworkGame)
 
 function ServerGame:_init(secretary, connectionManager, entityManager)
   class.superclass(ServerGame)._init(self, secretary, connectionManager, entityManager)
-  assertClass(connectionManager, ServerConnectionManager)
-  assertClass(entityManager, ServerNetworkedEntityManager)
+  assert_that(connectionManager):is_instance_of(ServerConnectionManager):and_return()
+  assert_that(entityManager):is_instance_of(ServerNetworkedEntityManager):and_return()
 
   -- Register for network callbacks
   local connections = self:getConnectionManager()

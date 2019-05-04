@@ -1,4 +1,4 @@
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local ConnectionManager = require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
 local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
@@ -6,6 +6,7 @@ local EntityUpdateType = require "me.strangepan.games.mazerino.common.networking
 local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
 local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local PRINT_DEBUG = true
 
@@ -77,7 +78,7 @@ end
 -- Builds an entity string.
 --
 local function buildEntityChannelString(id)
-  id = checkType(id, NetworkedEntity) and id:getNetworkId() or id
+  id = class.instance_of(id, NetworkedEntity) and id:getNetworkId() or id
   return string.format("entity:%s", id)
 end
 
@@ -107,7 +108,7 @@ end
 -- Adds a connection ID to receive entity updates.
 --
 function NetworkedEntityManager:addConnection(connectionId)
-  assertNumber(connectionId)
+  assert_that(connectionId):is_a_number():and_return()
   local connection = self:getConnection(connectionId)
   if connection then return end
 
@@ -138,7 +139,7 @@ end
 -- Removes a connection from receiving entity updates.
 --
 function NetworkedEntityManager:removeConnection(connectionId)
-  assertNumber(connectionId)
+  assert_that(connectionId):is_a_number():and_return()
   local connection = self:getConnection(connectionId)
   if not connection then return end
 
@@ -189,7 +190,7 @@ end
 function NetworkedEntityManager:getEntity(entity)
 
   -- If parameter is already a NetworkedEntity
-  if checkType(entity, NetworkedEntity) then
+  if class.instance_of(entity, NetworkedEntity) then
     
     -- Verify entity is managed by this instance
     local e = self.entities[entity:getNetworkId()]
@@ -257,9 +258,8 @@ end
 -- using the provided ID.
 --
 function NetworkedEntityManager:createEntityWithParams(id, entityType, params)
-  assertNumber(id, "id")
-  assert(NetworkedEntityType.fromId(entityType),
-      "entityType: "..entityType.." is not a valid NetworkedEntityType")
+  assert_that(id):is_a_number():and_return()
+  assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
 
   -- Claim an ID. Will destroy the previous entity at that ID.
   id = self:claimId(id)
@@ -277,8 +277,7 @@ end
 -- for the expected arguments.
 --
 function NetworkedEntityManager:spawnEntity(entityType, ...)
-  assert(NetworkedEntityType.fromId(entityType),
-      "entityType: "..entityType.." is not a valid NetworkedEntityType")
+  assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
 
   -- Generate an ID.
   local id = self:claimId()
@@ -490,13 +489,11 @@ end
 function NetworkedEntityManager:_sendEntityUpdate(entity, updateType, update, ...)
   entity = self:getEntity(entity)
   assert(entity, "entity not of supported type or not recognized by manager")
-  assert(
-      EntityUpdateType.fromId(updateType),
-      updateType.." not valid EntityUpdateType")
+  assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
   if updateType == EntityUpdateType.CREATING
       or updateType == EntityUpdateType.SYNCHRONIZING
       or updateType == EntityUpdateType.INCREMENTING then
-    assertTable(update)
+    assert_that(update):is_a_table():and_return()
   end
 
   -- Establish up some local variables
@@ -740,8 +737,7 @@ end
 function NetworkedEntityManager:_registerEntityEventListener(
     listener, callback, entityType, coordinators)
   if entityType then
-    assert(NetworkedEntityType.fromId(entityType),
-        "Undefined NetworkedEntityType "..entityType)
+    assert_that(entityType):is_a_number():is_a_key_in(NetworkedEntityType)
   else
     entityType = "any"
   end

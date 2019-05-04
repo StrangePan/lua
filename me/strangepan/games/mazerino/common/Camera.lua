@@ -1,8 +1,9 @@
 local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
-local translation = local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 local class = require "me.strangepan.libs.lua.v1.class"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
 --
 -- Camera class for handling motion and keeping a subject within view.
@@ -27,8 +28,8 @@ end
 -- over multiple draw cycles at an ease value set with `setEasing()`.
 --
 function Camera:moveTowards(x, y)
-  self.x = assertNumber(x, "x")
-  self.y = assertNumber(y, "y")
+  self.x = assert_that(x):is_a_number():and_return()
+  self.y = assert_that(y):is_a_number():and_return()
 end
 
 --
@@ -44,7 +45,7 @@ end
 -- Immediately moves camera to be centered on the specified subject.
 --
 function Camera:jumpToSubject(subject)
-  assertCamera(subject, PhysObject, "subject")
+  assert_that(subject):is_instance_of(PhysObject):and_return()
   local px, py = translation.toScreen(subject:getPosition())
   local pw, ph = translation.toScreen(subject:getSize())
   self:jumpTo(px + pw / 2, py + ph / 2)
@@ -59,7 +60,7 @@ function Camera:setSubject(subject)
     self.subject = nil
     return
   end
-  self.subject = assertCamera(subject, PhysObject, "subject")
+  self.subject = assert_that(subject):is_instance_of(PhysObject):and_return()
 end
 
 --
@@ -69,7 +70,7 @@ end
 -- or equal to 1.
 --
 function Camera:setEasing(easeRatio)
-  assertNumber(easeRatio)
+  assert_that(easeRatio):is_a_number():and_return()
   assert(0 < easeRatio and easeRatio <= 1, "number must be (0..1]")
   self.easeRatio = easeRatio
 end

@@ -4,6 +4,11 @@ local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoord
 local Color = require "me.strangepan.games.mazerino.common.Color"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 local class = require "me.strangepan.libs.lua.v1.class"
+local Direction = require "me.strangepan.games.mazerino.common.entities.Direction"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local DrawLayer = require "me.strangepan.games.mazerino.common.strangepan.secretary.DrawLayer"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
 
 local Actor = class.build(PhysObject)
 
@@ -113,7 +118,7 @@ end
 -- actor successfully moves as a result, returns `true`.
 --
 function Actor:tryMove(direction, force)
-  direction = Direction.fromId(direction)
+  direction = assert_that(direction):is_a_number():is_a_key_in(Direction):and_return()
   if direction == nil then
     return false
   end
@@ -163,7 +168,7 @@ end
 -- direction.
 --
 function Actor:bump(direction)
-  direction = Direction.fromId(direction)
+  direction = assert_that(direction):is_a_number():is_a_key_in(Direction):and_return()
   if direction == nil then
     return false
   end

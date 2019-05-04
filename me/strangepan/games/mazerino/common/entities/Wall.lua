@@ -1,12 +1,13 @@
 local class = require "me.strangepan.libs.lua.v1.class"
 local Direction = require "me.strangepan.games.mazerino.common.entities.Direction"
-local PhysObject require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
 local Wall = class.build(PhysObject)
 
 function Wall:_init(x, y)
-  class.superclass(Wall)._init(self)
+  PhysObject._init(self)
   
   self:setPosition(x or 0, y or 0)
   self:setSize(1, 1)

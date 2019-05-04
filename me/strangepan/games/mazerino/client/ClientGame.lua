@@ -6,7 +6,7 @@ local LocalPlayerController = require "me.strangepan.games.mazerino.common.Local
 local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
 local Player = require "me.strangepan.games.mazerino.common.entities.Player"
 local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local class = require "me.strangepan.libs.lua.v1.class"
 
 local ClientGame = class.build(NetworkGame)

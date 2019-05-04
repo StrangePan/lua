@@ -1,5 +1,6 @@
 local class = require "me.strangepan.libs.lua.v1.class"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
 
 local QuadTree = class.build()
 
@@ -133,7 +134,7 @@ end
 function QuadTree:insert( object, top, right, bottom, left )
   
   -- Verify parameters
-  assertClass(object, PhysObject, "object")
+  assert_that(object):is_instance_of(PhysObject)
   
   -- Optional arguments
   if left == nil then
@@ -206,10 +207,10 @@ function QuadTree:insert( object, top, right, bottom, left )
   -- If not fitting in subnode, insert into current node, return
   -- Insert into appropriate bucket
   else
-    local class = object:getClass()
-    if class ~= nil then
-      if self.objects[class] == nil then self.objects[class] = {} end
-      table.insert(self.objects[class], object)
+    local object_class = class.superclass(object)
+    if object_class ~= nil then
+      if self.objects[object_class] == nil then self.objects[object_class] = {} end
+      table.insert(self.objects[object_class], object)
     else
       table.insert(self.objects, object)
     end
@@ -225,9 +226,9 @@ function QuadTree:remove( object, path )
   if path == nil or path:len()==0 then
     
     -- Determine object's class
-    local class = object:getClass()
+    local object_class = class.superclass(object)
     
-    if class == nil then
+    if object_class == nil then
       
       -- Remove from generic bucket
       for i,o in ipairs(self.objects) do
@@ -240,10 +241,10 @@ function QuadTree:remove( object, path )
     else
       
       -- Search for and remove from in class specific bucket
-      if self.objects[class] ~= nil then
-        for i,o in ipairs(self.objects[class]) do
+      if self.objects[object_class] ~= nil then
+        for i,o in ipairs(self.objects[object_class]) do
           if o == object then
-            table.remove(self.objects[class], i)
+            table.remove(self.objects[object_class], i)
             self.count = self.count - 1
             return true
           end
@@ -309,7 +310,7 @@ function QuadTree:retrieve( list, top, right, bottom, left, ... )
         
         -- Scan buckets for matching buckets
         for _,a in ipairs(arg) do
-          if checkType(key, a) then
+          if class.instance_of(key, a) then
             for _,obj in ipairs(val) do
               table.insert(list, obj)
             end

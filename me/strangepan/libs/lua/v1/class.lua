@@ -56,4 +56,12 @@ function class.superclass(clazz)
   return getmetatable(clazz)
 end
 
+function class.instance_of(instance, superclass)
+  while instance do
+    if instance == superclass then return true end
+    instance = getmetatable(instance)
+  end
+  return false
+end
+
 return class

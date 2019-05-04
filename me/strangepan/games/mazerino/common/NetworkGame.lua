@@ -1,5 +1,5 @@
 local Game = require "me.strangepan.games.mazerino.common.Game"
-local type = require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 local ConnectionManager = require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
 local NetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityManager"
 
@@ -7,8 +7,8 @@ local NetworkGame = class.build(Game)
 
 function NetworkGame:_init(secretary, connectionManager, entityManager)
   class.superclass(NetworkGame)._init(self, secretary)
-  self.connections = assertClass(connectionManager, ConnectionManager)
-  self.entities = assertClass(entityManager, NetworkedEntityManager)
+  self.connections = assert_that(connectionManager):is_instance_of(ConnectionManager):and_return()
+  self.entities = assert_that(entityManager):is_instance_of(NetworkedEntityManager):and_return()
 end
 
 function NetworkGame:start()

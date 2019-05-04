@@ -2,6 +2,7 @@ local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secre
 local Color = require "me.strangepan.games.mazerino.common.Color"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 local class = require "me.strangepan.libs.lua.v1.class"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
 local Switch = class.build(PhysObject)
 
