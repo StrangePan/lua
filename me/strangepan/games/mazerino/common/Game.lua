@@ -1,23 +1,23 @@
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
-Game = buildClass()
-local Class = Game
+local Game = class.build()
 
-function Class:_init(secretary)
-  Class.superclass._init(self)
-  self.secretary = assertClass(secretary, Secretary, "secretary")
+function Game:_init(secretary)
+  self.secretary = assert_that(secretary):is_instance_of(Secretary):and_return()
 end
 
-function Class:start()
+function Game:start()
   return self
 end
 
-function Class:stop()
+function Game:stop()
   return self
 end
 
-function Class:getSecretary()
+function Game:getSecretary()
   return self.secretary
 end
+
+return Game

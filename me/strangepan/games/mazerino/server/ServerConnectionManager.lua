@@ -1,12 +1,14 @@
-require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
+local ConnectionManager = require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
+local class = require "me.strangepan.libs.lua.v1.class"
 
 --
 -- Connection handler for servers; maintains connections to multiple clients.
 -- Sends periodic pings to clients in order to keep the connection alive.
 --
-ServerConnectionManager = buildClass(ConnectionManager)
-local Class = ServerConnectionManager
+local ServerConnectionManager = class.build(ConnectionManager)
 
-function Class:_init()
-  Class.superclass._init(self, 25565)
+function ServerConnectionManager:_init()
+  class.superclass(ServerConnectionManager)._init(self, 25565)
 end
+
+return ServerConnectionManager

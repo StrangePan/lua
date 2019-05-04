@@ -1,6 +1,6 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.enum"
+local enum = require "me.strangepan.libs.lua.v1.enum"
 
-InputMethod = buildEnum(
+return enum.build(
   "KEYBOARD",
   "JOYSTICK",
   "MOUSE")

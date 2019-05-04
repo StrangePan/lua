@@ -1,11 +1,13 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local class = require "me.strangepan.libs.lua.v1.class"
+local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local DrawLayer = require "me.strangepan.games.mazerino.common.strangepan.secretary.DrawLayer"
 
-Footprint = buildClass(Entity)
+local Footprint = class.build(Entity)
 
 function Footprint:_init(r, g, b, x, y)
-  Footprint.superclass._init(self)
+  class.superclass(Footprint)._init(self)
   
   self.r = r
   self.g = g
@@ -19,7 +21,7 @@ function Footprint:_init(r, g, b, x, y)
 end
 
 function Footprint:registerWithSecretary(secretary)
-  Footprint.superclass.registerWithSecretary(self, secretary)
+  class.superclass(Footprint).registerWithSecretary(self, secretary)
   
   secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
   secretary:registerEventListener(self, self.draw, EventType.DRAW, DrawLayer.BACKGROUND_PROPS)
@@ -46,3 +48,5 @@ function Footprint:draw()
   love.graphics.rectangle("fill", -self.w/2, -self.h/2, self.w, self.h)
   love.graphics.pop()
 end
+
+return Footprint

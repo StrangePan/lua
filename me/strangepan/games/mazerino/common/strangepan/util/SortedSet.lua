@@ -1,12 +1,12 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
-SortedSet = buildClass()
-local class = SortedSet
+local SortedSet = class.build()
 
 --[[
 A type of set that only accepts integers and keeps them in sorted order.
 ]]
-function class:_init()
+function SortedSet:_init()
   self.contents = {}
 end
 
@@ -15,8 +15,8 @@ Inserts an integer into the set. If number already exists in set, does nothing.
 Returns `true` if the number was not previously in the set and was inserted and
 `false` if it was already in the set.
 ]]
-function class:insert(number)
-  assertNumber(number)
+function SortedSet:insert(number)
+  assert_that(number):is_a_number():and_return()
   
   local n = #self.contents
   if n == 0 or self.contents[1] > number then
@@ -60,8 +60,8 @@ does nothing.
 Returns `true` if the number was in the set and was removed and `false` if it was not
 in the set.
 ]]
-function class:remove(number)
-  assertNumber(number)
+function SortedSet:remove(number)
+  assert_that(number):is_a_number():and_return()
   
   local n = #self.contents
   if n == 0 or self.contents[1] > number or self.contents[n] < number then
@@ -91,15 +91,15 @@ end
 --[[
 Gets the number of items in the set.
 ]]
-function class:size()
+function SortedSet:size()
   return #self.contents
 end
 
 --[[
 Checks whether the set contains the given number.
 ]]
-function class:contains(number)
-  assertNumber(number)
+function SortedSet:contains(number)
+  assert_that(number):is_a_number():and_return()
   
   local n = #self.contents
   if n == 0 then
@@ -126,7 +126,7 @@ end
 Returns an iterator function for all values in the set. Traverses the set in
 order.
 ]]
-function class:values()
+function SortedSet:values()
   local i = 0
   local values = self.contents
   return function()
@@ -134,3 +134,5 @@ function class:values()
     return values[i]
   end
 end
+
+return SortedSet

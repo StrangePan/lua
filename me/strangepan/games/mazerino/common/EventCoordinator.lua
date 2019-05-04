@@ -1,14 +1,11 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local class = require "me.strangepan.libs.lua.v1.class"
+local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 
-EventCoordinator = buildClass(Entity)
+local EventCoordinator = class.build(Entity)
 
 function EventCoordinator:_init()
   self.listeners = {n = 0}
 end
-
-
 
 function EventCoordinator:registerListener(object, callback)
   
@@ -24,7 +21,7 @@ function EventCoordinator:registerListener(object, callback)
     self.listeners[object][self.listeners[object].n] = callback
     
     -- register for destroy callbacks with the secretary
-    if checkType(object, Entity) then
+    if class.instance_of(object, Entity) then
       local secretary = self:getSecretary()
       if secretary ~= nil then
         secretary:registerEventListener(self, self.unregisterListener, EventType.DESTROY, object)
@@ -85,3 +82,5 @@ function EventCoordinator:notifyListeners(...)
     end
   end
 end
+
+return EventCoordinator

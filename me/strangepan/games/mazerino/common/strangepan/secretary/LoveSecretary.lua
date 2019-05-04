@@ -1,14 +1,14 @@
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+local class = require "me.strangepan.libs.lua.v1.class"
 
 --
 -- Secretary object that is specifically compatible with Love2D and
 -- is capable of capturing love events and restoring them on command.
 --
-LoveSecretary = buildClass(Secretary)
-local Class = LoveSecretary
+local LoveSecretary = class.build(Secretary)
 
-function Class:_init()
-  Class.superclass._init(self)
+function LoveSecretary:_init()
+  class.superclass(LoveSecretary)._init(self)
 end
 
 --
@@ -49,7 +49,7 @@ local captureMap = {
 -- the Love events. Returns `nil` if no instance exists that is capturing
 -- the Love events.
 --
-function Class.getCapturingInstance()
+function LoveSecretary.getCapturingInstance()
   return captured.instance
 end
 
@@ -59,7 +59,7 @@ end
 --
 -- Returns self if successful.
 --
-function Class:captureLoveEvents()
+function LoveSecretary:captureLoveEvents()
   assert(not captured.instance, "Love events already captured. Call releaseLoveEvents() on original LoveSecretary instance.")
   captured.instance = self
   
@@ -84,7 +84,7 @@ end
 -- original functionality. If this instance is not already capturing Love's
 -- events, then this method does nothing.
 --
-function Class:releaseLoveEvents()
+function LoveSecretary:releaseLoveEvents()
   if captured.instance ~= self then return end
   captured.instance = nil
   
@@ -102,7 +102,7 @@ end
 -- other event types in a specific order for finer granularity over event
 -- timing.
 --
-function Class:onLoveUpdate( dt )
+function LoveSecretary:onLoveUpdate( dt )
   
   -- Regulate the framerate to 60 fps
   local targetTime = love.timer.getTime() + (1/60 - dt)
@@ -121,7 +121,9 @@ end
 -- Overrides the default love.draw() method, seperating the event into multiple
 -- sub-events for finer granularity over event timing.
 --
-function Class:onLoveDraw( )
+function LoveSecretary:onLoveDraw( )
   self:onPreDraw()
   self:onDraw()
 end
+
+return LoveSecretary

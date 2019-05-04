@@ -1,17 +1,19 @@
-require "me.strangepan.games.mazerino.common.PlayerController"
-require "me.strangepan.games.mazerino.common.CommandMap"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local PlayerController = require "me.strangepan.games.mazerino.common.PlayerController"
+local CommandMap = require "me.strangepan.games.mazerino.common.CommandMap"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local class = require "me.strangepan.libs.lua.v1.class"
+local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
 
-LocalPlayerController = buildClass(PlayerController)
+local LocalPlayerController = class.build(PlayerController)
 
 function LocalPlayerController:_init(player, commandMap)
-  LocalPlayerController.superclass._init(self, player)
+  class.superclass(LocalPlayerController)._init(self, player)
   self:setCommandMap(commandMap)
 end
 
 function LocalPlayerController:setCommandMap(commandMap)
   if commandMap then
-    assertClass(commandMap, CommandMap, "commandMap")
+    assert_that(commandMap):is_instance_of(CommandMap):and_return()
   end
   
   if self.commandMap then
@@ -31,3 +33,5 @@ function LocalPlayerController:setCommandMap(commandMap)
     self.commandMap:registerCommandListener(CommandType.EMOTE_SPIN, self, self.emoteSpin)
   end
 end
+
+return LocalPlayerController

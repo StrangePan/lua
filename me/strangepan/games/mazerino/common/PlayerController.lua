@@ -1,51 +1,53 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.entities.Player"
-require "me.strangepan.games.mazerino.common.entities.Direction"
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local Player = require "me.strangepan.games.mazerino.common.entities.Player"
+local Direction = require "me.strangepan.games.mazerino.common.entities.Direction"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
-PlayerController = buildClass()
-local Class = PlayerController
+local PlayerController = class.build()
 
 function PlayerController:_init(player)
   self:setPlayer(player)
 end
 
-function Class:setPlayer(player)
+function PlayerController:setPlayer(player)
   if player then
-    assertClass(player, Player, "player")
+    assert_that(player):is_instance_of(Player):and_return()
   end
 
   self.player = player
 end
 
-function Class:getPlayer()
+function PlayerController:getPlayer()
   return self.player
 end
 
-function Class:moveUp()
+function PlayerController:moveUp()
   return self:move(Direction.UP)
 end
 
-function Class:moveRight()
+function PlayerController:moveRight()
   return self:move(Direction.RIGHT)
 end
 
-function Class:moveDown()
+function PlayerController:moveDown()
   return self:move(Direction.DOWN)
 end
 
-function Class:moveLeft()
+function PlayerController:moveLeft()
   return self:move(Direction.LEFT)
 end
 
-function Class:move(direction)
-  direction = Direction.fromId(direction)
+function PlayerController:move(direction)
+  direction = assert_that(direction):is_a_number():is_a_key_in(Direction):and_return()
   if direction == nil then return false end
   if not self:getPlayer() then return false end
   return self:getPlayer():move(direction)
 end
 
-function Class:emoteSpin()
+function PlayerController:emoteSpin()
   if not self:getPlayer() then return false end
   return self:getPlayer():spin()
 end
+
+return PlayerController

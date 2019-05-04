@@ -1,9 +1,10 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.CommandType"
-require "me.strangepan.games.mazerino.common.InputMethod"
-require "me.strangepan.games.mazerino.common.EventCoordinator"
+local class = require "me.strangepan.libs.lua.v1.class"
+local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
+local InputMethod = require "me.strangepan.games.mazerino.common.InputMethod"
+local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
-CommandMap = buildClass()
+local CommandMap = class.build()
 
 function CommandMap:_init()
   self.mappings = {
@@ -11,17 +12,17 @@ function CommandMap:_init()
     methods = {}
   }
   
-  for commandType in CommandType.values() do
+  for commandType in ipairs(CommandType) do
     self.mappings.commands[commandType] = {coordinator = EventCoordinator()}
   end
   
-  for inputMethod in InputMethod.values() do
+  for inputMethod in ipairs(InputMethod) do
     self.mappings.methods[inputMethod] = {}
   end
 end
 
 function CommandMap:registerCommandListener(command, listener, callback)
-  command = CommandType.fromId(command)
+  command = assert_that(command):is_a_number():is_a_key_in(CommandType):and_return()
   if command == nil then return end
   self.mappings.commands[command].coordinator:registerListener(listener, callback)
 end
@@ -39,7 +40,7 @@ function CommandMap:onMouseInput(button)
 end
 
 function CommandMap:onInput(method, input)
-  method = InputMethod.fromId(method)
+  method = assert_that(method):is_a_number():is_a_key_in(InputMethod):and_return()
   if method == nil then return end
   local command = self.mappings.methods[method][input]
   if command == nil then return end
@@ -68,8 +69,8 @@ function CommandMap:mapCommandToMouseButton(commandType, button)
 end
 
 function CommandMap:mapCommandToInput(command, method, input)
-  command = CommandType.fromId(command)
-  method = InputMethod.fromId(method)
+  command = assert_that(command):is_a_number():is_a_key_in(CommandType):and_return()
+  method = assert_that(method):is_a_number():is_a_key_in(InputMethod):and_return()
   if command == nil or method == nil or input == nil then return end
   self:unmapCommand(command)
   self:unmapInput(method, input)
@@ -80,7 +81,7 @@ function CommandMap:mapCommandToInput(command, method, input)
 end
 
 function CommandMap:unmapCommand(command)
-  command = CommandType.fromId(command)
+  command = assert_that(command):is_a_number():is_a_key_in(CommandType):and_return()
   if command == nil then return end
   self.mappings.commands[command].method = nil
   self.mappings.commands[command].input = nil
@@ -89,3 +90,5 @@ end
 function CommandMap:unmapInput(method, input)
   self.mappings.methods[method][input] = nil
 end
+
+return CommandMap

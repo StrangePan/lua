@@ -1,15 +1,17 @@
-require "me.strangepan.games.mazerino.common.NetworkGame"
-require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
-require "me.strangepan.games.mazerino.server.ServerConnectionManager"
-require "me.strangepan.games.mazerino.server.ServerNetworkedEntityManager"
+local NetworkGame = require "me.strangepan.games.mazerino.common.NetworkGame"
+local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+local ServerConnectionManager = require "me.strangepan.games.mazerino.server.ServerConnectionManager"
+local ServerNetworkedEntityManager = require "me.strangepan.games.mazerino.server.ServerNetworkedEntityManager"
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 
-ServerGame = buildClass(NetworkGame)
-local Class = ServerGame
+local ServerGame = class.build(NetworkGame)
 
-function Class:_init(secretary, connectionManager, entityManager)
-  Class.superclass._init(self, secretary, connectionManager, entityManager)
-  assertClass(connectionManager, ServerConnectionManager)
-  assertClass(entityManager, ServerNetworkedEntityManager)
+function ServerGame:_init(secretary, connectionManager, entityManager)
+  class.superclass(ServerGame)._init(self, secretary, connectionManager, entityManager)
+  assert_that(connectionManager):is_instance_of(ServerConnectionManager):and_return()
+  assert_that(entityManager):is_instance_of(ServerNetworkedEntityManager):and_return()
 
   -- Register for network callbacks
   local connections = self:getConnectionManager()
@@ -21,13 +23,13 @@ function Class:_init(secretary, connectionManager, entityManager)
   self.players = {}
 end
 
-function Class:start()
-  Class.superclass.start(self)
+function ServerGame:start()
+  class.superclass(ServerGame).start(self)
   self:buildWalls()
   return self
 end
 
-function Class:onPlayerConnected(connectionId)
+function ServerGame:onPlayerConnected(connectionId)
   if self.players[connectionId] then
     return
   end
@@ -53,7 +55,7 @@ function Class:onPlayerConnected(connectionId)
   }
 end
 
-function Class:onPlayerDisconnected(connectionId)
+function ServerGame:onPlayerDisconnected(connectionId)
   local player = self.players[connectionId]
   if not player then
     return
@@ -70,7 +72,7 @@ end
 --
 -- Handles a change in connection status.
 --
-function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
+function ServerGame:onConnectionStatusChanged(manager, connectionId, oldStatus)
   local connections = self:getConnectionManager()
   local connection = connections:getConnection(connectionId)
   if not connection then
@@ -89,7 +91,7 @@ end
 --
 -- Constructs the level map
 --
-function Class:buildWalls()
+function ServerGame:buildWalls()
   local wallCodes = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1},
@@ -114,3 +116,5 @@ function Class:buildWalls()
     end
   end
 end
+
+return ServerGame

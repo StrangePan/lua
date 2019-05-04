@@ -150,11 +150,25 @@ function assertion_subject:is_greater_than_or_equal_to(other)
   return self:_apply_assertion(assertions.is_greater_than_or_equal_to(other))
 end
 
+function assertion_subject:is_a_key_in(other)
+  return self:_apply_assertion(assertions.is_a_key_in_table(other))
+end
 
---[[ Generic assertion method to test against the current test subject and returns this
-assertion_subject. ]]
+function assertion_subject:is_a_value_in(other)
+  return self:_apply_assertion(assertions.is_a_value_in_table(other))
+end
+
+
+--[[ Tests a generic assertion method against the current test subject and returns this
+assertion_subject.
+]]
 function assertion_subject:passes_assertion(assertion)
   return self:_apply_assertion(assertion)
+end
+
+--[[ Returns the current test subject verbatim. ]]
+function assertion_subject:and_return()
+  return self.subject
 end
 
 -- INTERNAL METHODS

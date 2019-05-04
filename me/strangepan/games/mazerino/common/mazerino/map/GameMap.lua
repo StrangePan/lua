@@ -1,9 +1,10 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.entities.Player"
-require "me.strangepan.games.mazerino.common.entities.Switch"
-require "me.strangepan.games.mazerino.common.entities.Wall"
-local GameMap = buildClass()
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local Player = require "me.strangepan.games.mazerino.common.entities.Player"
+local Switch = require "me.strangepan.games.mazerino.common.entities.Switch"
+local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
+
+local GameMap = class.build()
 
 -- Instantiates an entity of the given type at the given game map coordinates.
 local function createEntity(code, x, y)
@@ -21,7 +22,7 @@ end
 
 -- Opens the file at the given path and instantiates entities according to the codes in the file.
 function GameMap.createFromFile(filename)
-  assertString(filename, 'filename')
+  assert_that(filename):is_a_string():and_return()
   local file = io.open(filename, 'r')
   local entities = {}
   local y = -1

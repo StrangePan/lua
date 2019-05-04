@@ -44,4 +44,23 @@ function TestClass:test_build_thenInvokeMemberMethod_didInvoke()
   luaunit.assertEquals(invokeCount, 1)
 end
 
+function TestClass:test_buildSubclass_thenInvokeBaseMethod_didExecute()
+  local baseClass = class.build()
+  local invokeCount = 0
+  local testClass = class.build(baseClass)
+
+  baseClass.baseMethod = function() invokeCount = invokeCount + 1 end
+
+  testClass():baseMethod()
+
+  luaunit.assertEquals(invokeCount, 1)
+end
+
+function TestClass:test_buildSubclass_getSuperclass_didReturnSuperclass()
+  local baseClass = class.build()
+  local testClass = class.build(baseClass)
+
+  luaunit.assertIs(class.superclass(testClass), baseClass)
+end
+
 os.exit(luaunit.LuaUnit.run())

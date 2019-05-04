@@ -1,7 +1,7 @@
-require "me.strangepan.games.mazerino.common.networking.MessageType"
-require "me.strangepan.games.mazerino.common.networking.EntityUpdateType"
+local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
+local EntityUpdateType = require "me.strangepan.games.mazerino.common.networking.EntityUpdateType"
 
-messages = {}
+local messages = {}
 
 -- creates a message to attempt to connect to a server
 function messages.connectionInit()
@@ -123,3 +123,5 @@ function messages.bundle(...)
   end
   return bundle
 end
+
+return messages

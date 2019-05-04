@@ -1,6 +1,9 @@
-require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
-require "me.strangepan.games.mazerino.common.entities.Actor"
-require "me.strangepan.games.mazerino.common.Color"
+local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
+local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
+local Color = require "me.strangepan.games.mazerino.common.Color"
+local class = require "me.strangepan.libs.lua.v1.class"
+local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 -- Message fields.
 local F_X = "x"
@@ -17,24 +20,23 @@ local T_STEP = 1
 local T_SPIN = 2
 
 --
--- Class for tying an actor entity to corresponding actors on other instances.
+-- NetworkedActor for tying an actor entity to corresponding actors on other instances.
 --
-NetworkedActor = buildClass(NetworkedEntity)
-local Class = NetworkedActor
+local NetworkedActor = class.build(NetworkedEntity)
 
 --
 -- Instantiates an Actor and performs necessary setup.
 --
-function Class.createNewInstanceWithParams(manager, id, entityType, params)
-  return Class(manager, id, entityType, params, Actor())
+function NetworkedActor.createNewInstanceWithParams(manager, id, entityType, params)
+  return NetworkedActor(manager, id, entityType, params, Actor())
 end
 
 --
 -- Instantiates an Actor and performs necessary setup.
 --
-function Class.createNewInstance(manager, id, entityType, ...)
+function NetworkedActor.createNewInstance(manager, id, entityType, ...)
   local x, y, r, g, b = ...
-  return Class.createNewInstanceWithParams(manager, id, entityType, {
+  return NetworkedActor.createNewInstanceWithParams(manager, id, entityType, {
       [F_X] = x,
       [F_Y] = y,
       [F_RED] = r,
@@ -43,22 +45,15 @@ function Class.createNewInstance(manager, id, entityType, ...)
   })
 end
 
---
--- Registers this class to be instantiated by the network.
---
-Class.registerEntityType(NetworkedEntityType.ACTOR, Class)
-
-
-
-function Class:_init(manager, networkedId, entityType, params, actor)
-  Class.superclass._init(self, manager, networkedId, entityType, params, actor)
-  assertClass(actor, Actor, "actor")
+function NetworkedActor:_init(manager, networkedId, entityType, params, actor)
+  class.superclass(NetworkedActor)._init(self, manager, networkedId, entityType, params, actor)
+  assert_that(actor):is_instance_of(Actor)
   self:setActorState(params)
 end
 
-function Class:startBroadcastingUpdates()
+function NetworkedActor:startBroadcastingUpdates()
   if self:isBroadcastingUpdates() then return end
-  Class.superclass.startBroadcastingUpdates(self)
+  class.superclass(NetworkedActor).startBroadcastingUpdates(self)
 
   -- Register for listener callbacks
   local actor = self:getLocalEntity()
@@ -66,29 +61,29 @@ function Class:startBroadcastingUpdates()
   actor:registerSpinListener(self, self.onActorSpin)
 end
 
-function Class:stopBroadcastingUpdates()
+function NetworkedActor:stopBroadcastingUpdates()
   if not self:isBroadcastingUpdates() then return end
   local actor = self:getLocalEntity()
   actor:unregisterMoveListener(self, self.onActorStep)
   actor:unregisterSpinListener(self, self.onActorSpin)
 
-  Class.superclass.stopBroadcastingUpdates(self)
+  class.superclass(NetworkedActor).stopBroadcastingUpdates(self)
 end
 
-function Class:getInstantiationParams(params)
-  params = Class.superclass.getInstantiationParams(self, params)
+function NetworkedActor:getInstantiationParams(params)
+  params = class.superclass(NetworkedActor).getInstantiationParams(self, params)
   return self:writeActorState(params, "new")
 end
 
-function Class:setSynchronizedState(state)
-  Class.superclass.setSynchronizedState(self, state)
+function NetworkedActor:setSynchronizedState(state)
+  class.superclass(NetworkedActor).setSynchronizedState(self, state)
   self:setActorState(state)
 end
 
 --
 -- Sets the state of the actor given a params/state object.
 --
-function Class:setActorState(state)
+function NetworkedActor:setActorState(state)
   self:lock()
   local actor = self:getLocalEntity()
   local x, y = state[F_X], state[F_Y]
@@ -102,8 +97,8 @@ function Class:setActorState(state)
   self:unlock()
 end
 
-function Class:getSynchronizedState(state)
-  state = Class.superclass.getSynchronizedState(self, state)
+function NetworkedActor:getSynchronizedState(state)
+  state = class.superclass(NetworkedActor).getSynchronizedState(self, state)
   return self:writeActorState(state, "sync")
 end
 
@@ -113,7 +108,7 @@ end
 -- - 'new': for new Actors
 -- - 'sync': for sync updates
 --
-function Class:writeActorState(state, mode)
+function NetworkedActor:writeActorState(state, mode)
   local actor = self:getLocalEntity()
   local x, y = actor:getPosition()
   state[F_X] = x
@@ -129,9 +124,9 @@ function Class:writeActorState(state, mode)
   return state
 end
 
-function Class:performIncrementalUpdate(update)
+function NetworkedActor:performIncrementalUpdate(update)
   self:lock()
-  local inSync = Class.superclass.performIncrementalUpdate(self, update)
+  local inSync = class.superclass(NetworkedActor).performIncrementalUpdate(self, update)
 
   if inSync then
     local updateType = update[F_UPDATE_TYPE]
@@ -149,7 +144,7 @@ end
 --
 -- Handles actors being moved.
 --
-function Class:performStepUpdate(update)
+function NetworkedActor:performStepUpdate(update)
   self:lock()
   local inSync = true
   local actor = self:getLocalEntity()
@@ -175,7 +170,7 @@ end
 --
 -- Handles actors emoting a spin
 --
-function Class:performSpinUpdate(update)
+function NetworkedActor:performSpinUpdate(update)
   self:lock()
   local actor = self:getLocalEntity()
   local inSync = actor:spin()
@@ -186,7 +181,7 @@ end
 --
 -- Builds incremental update message for an actor stepping.
 --
-function Class:buildStepUpdate(x, y, dir, success)
+function NetworkedActor:buildStepUpdate(x, y, dir, success)
   local msg = {}
   msg[F_UPDATE_TYPE] = T_STEP
   msg[F_X] = x
@@ -199,7 +194,7 @@ end
 --
 -- Builds incremental update message for an actor spinning.
 --
-function Class:buildSpinUpdate()
+function NetworkedActor:buildSpinUpdate()
   local msg = {}
   msg[F_UPDATE_TYPE] = T_SPIN
   return msg
@@ -208,7 +203,7 @@ end
 --
 -- Handles actor stepping.
 --
-function Class:onActorStep(actor, x, y, dir, success)
+function NetworkedActor:onActorStep(actor, x, y, dir, success)
   if self:isLocked() or self:getLocalEntity() ~= actor then return end
   self:sendIncrementalUpdate(self:buildStepUpdate(x, y, dir, success))
 end
@@ -216,7 +211,9 @@ end
 --
 -- Handles actors spinning.
 --
-function Class:onActorSpin(actor)
+function NetworkedActor:onActorSpin(actor)
   if self:isLocked() or self:getLocalEntity() ~= actor then return end
   self:sendIncrementalUpdate(self:buildSpinUpdate())
 end
+
+return NetworkedActor

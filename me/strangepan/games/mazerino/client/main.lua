@@ -1,11 +1,10 @@
-require "me.strangepan.games.mazerino.client.ClientConnectionManager"
-require "me.strangepan.games.mazerino.client.ClientGame"
-require "me.strangepan.games.mazerino.client.ClientNetworkedEntityManager"
-require "me.strangepan.games.mazerino.common.entities.Player"
-require "me.strangepan.games.mazerino.common.entities.Wall"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.LoveSecretary"
-
-local connection
+local ClientConnectionManager = require "me.strangepan.games.mazerino.client.ClientConnectionManager"
+local ClientGame = require "me.strangepan.games.mazerino.client.ClientGame"
+local ClientNetworkedEntityManager = require "me.strangepan.games.mazerino.client.ClientNetworkedEntityManager"
+local LoveSecretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.LoveSecretary"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
+local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
 
 function love.load()
   local secretary = LoveSecretary()
@@ -13,8 +12,7 @@ function love.load()
   local connection = ClientConnectionManager()
   local entityManager = ClientNetworkedEntityManager(connection)
       :registerWithSecretary(secretary)
-  local game = ClientGame(secretary, connection, entityManager)
-      :start()
+  ClientGame(secretary, connection, entityManager):start()
 
   secretary:registerEventListener(
       connection.passer,
@@ -24,4 +22,14 @@ function love.load()
       connection.passer,
       connection.passer.releaseMessageBundle,
       EventType.SHUTDOWN)
+
+  NetworkedEntity.registerEntityType(
+      NetworkedEntityType.ACTOR,
+      require "me.strangepan.games.mazerino.common.networking.NetworkedActor")
+  NetworkedEntity.registerEntityType(
+      NetworkedEntityType.PLAYER,
+      require "me.strangepan.games.mazerino.common.networking.NetworkedPlayer")
+  NetworkedEntity.registerEntityType(
+      NetworkedEntityType.WALL,
+      require "me.strangepan.games.mazerino.common.networking.NetworkedWall")
 end

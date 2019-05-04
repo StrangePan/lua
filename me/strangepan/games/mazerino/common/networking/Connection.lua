@@ -1,25 +1,24 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 
 --
 -- Class for maintaining information on connections. Rather than using a
 -- generic table, allows us to keep a record of exactly what datas are
 -- available, check class, etc.
 --
-Connection = buildClass()
-local Class = Connection
+local Connection = class.build()
 
-function Class:_init(networkId, address, port, initTime)
+function Connection:_init(networkId, address, port, initTime)
 
   -- The unique identifier of this connection. Should never change.
-  self.id = assertNumber(networkId, "networkId")
+  self.id = assert_that(networkId):is_a_number():and_return()
   
   -- The IP address of this connection. Should never change.
-  self.address = assertString(address, "address")
+  self.address = assert_that(address):is_a_string():and_return()
   
   -- The port number of this connection. Should never change.
-  self.port = assertNumber(port, "port")
+  self.port = assert_that(port):is_a_number():and_return()
 
   -- The connection status; defaults to ConnectionStatus.DISCONNECTED.
   self.status = ConnectionStatus.DISCONNECTED
@@ -39,3 +38,5 @@ function Class:_init(networkId, address, port, initTime)
   -- when initial contact was received.
   self.initTime = initTime or os.time()
 end
+
+return Connection

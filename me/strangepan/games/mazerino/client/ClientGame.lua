@@ -1,19 +1,21 @@
-require "me.strangepan.games.mazerino.client.ClientConnectionManager"
-require "me.strangepan.games.mazerino.common.NetworkGame"
-require "me.strangepan.games.mazerino.common.Camera"
-require "me.strangepan.games.mazerino.common.CommandMap"
-require "me.strangepan.games.mazerino.common.LocalPlayerController"
-require "me.strangepan.games.mazerino.common.entities.Actor"
-require "me.strangepan.games.mazerino.common.entities.Player"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
+local ClientConnectionManager = require "me.strangepan.games.mazerino.client.ClientConnectionManager"
+local NetworkGame = require "me.strangepan.games.mazerino.common.NetworkGame"
+local Camera = require "me.strangepan.games.mazerino.common.Camera"
+local CommandMap = require "me.strangepan.games.mazerino.common.CommandMap"
+local LocalPlayerController = require "me.strangepan.games.mazerino.common.LocalPlayerController"
+local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local class = require "me.strangepan.libs.lua.v1.class"
+local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
+local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 
-ClientGame = buildClass(NetworkGame)
-local Class = ClientGame
+local ClientGame = class.build(NetworkGame)
 
-function Class:_init(secretary, connectionManager, entityManager)
-  Class.superclass._init(self, secretary, connectionManager, entityManager)
-  assertClass(connectionManager, ClientConnectionManager, "connectionManager")
+function ClientGame:_init(secretary, connectionManager, entityManager)
+  class.superclass(ClientGame)._init(self, secretary, connectionManager, entityManager)
+  assert_that(connectionManager):is_instance_of(ClientConnectionManager)
 
   self.lastSpinTime = love.timer.getTime()
   self.idleActor = Actor()
@@ -35,8 +37,8 @@ function Class:_init(secretary, connectionManager, entityManager)
       self.onConnectionStatusChanged)
 end
 
-function Class:start()
-  Class.superclass.start(self)
+function ClientGame:start()
+  class.superclass(ClientGame).start(self)
   local secretary = self:getSecretary()
   local connections = self:getConnectionManager()
   local entityManager = self:getEntityManager()
@@ -75,8 +77,8 @@ function Class:start()
   return self
 end
 
-function Class:stop()
-  Class.superclass.stop(self)
+function ClientGame:stop()
+  class.superclass(ClientGame).stop(self)
   local entityManager = self:getEntityManager()
   local commandMap = self.commandMap
   local idleActor = self.idleActor
@@ -97,7 +99,7 @@ end
 
 
 
-function Class:onStep()
+function ClientGame:onStep()
   local time = love.timer.getTime()
   local connections = self:getConnectionManager()
   local connection = connections:getServerConnection()
@@ -110,7 +112,7 @@ function Class:onStep()
   end
 end
 
-function Class:onPlayerCreate(entityManager, networkedPlayer)
+function ClientGame:onPlayerCreate(entityManager, networkedPlayer)
   if networkedPlayer:getOwnerId() ~= self:getConnectionManager().playerId then
     return
   end
@@ -130,7 +132,7 @@ function Class:onPlayerCreate(entityManager, networkedPlayer)
   self.camera:jumpToSubject(player)
 end
 
-function Class:onPlayerDestroy(entityManager, networkedPlayer)
+function ClientGame:onPlayerDestroy(entityManager, networkedPlayer)
   if networkedPlayer:getOwnerId() ~= self:getConnectionManager().playerId then
     return
   end
@@ -149,26 +151,26 @@ function Class:onPlayerDestroy(entityManager, networkedPlayer)
   end
 end
 
-function Class:onServerConnected(connectionId)
+function ClientGame:onServerConnected(connectionId)
   local entities = self:getEntityManager()
   entities:addConnection(connectionId)
 end
 
-function Class:onServerStalled(connectionId)
+function ClientGame:onServerStalled(connectionId)
   for _,localPlayer in ipairs(self.localPlayers) do
     localPlayer.controller:setPlayer(nil)
     localPlayer.player:stopBroadcastingUpdates()
   end
 end
 
-function Class:onServerReconnected(connectionId)
+function ClientGame:onServerReconnected(connectionId)
   for _,localPlayer in ipairs(self.localPlayers) do
     localPlayer.controller:setPlayer(localPlayer.player:getLocalEntity())
     localPlayer.player:startBroadcastingUpdates()
   end
 end
 
-function Class:onServerDisconnected(connectionId)
+function ClientGame:onServerDisconnected(connectionId)
   local entities = self:getEntityManager()
   entities:removeConnection(connectionId)
 end
@@ -176,7 +178,7 @@ end
 --
 -- Handles a change in connection status.
 --
-function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
+function ClientGame:onConnectionStatusChanged(manager, connectionId, oldStatus)
   local connections = self:getConnectionManager()
   local connection = connections:getConnection(connectionId)
   if not connection then
@@ -200,3 +202,5 @@ function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
     self:onServerDisconnected(connectionId)
   end
 end
+
+return ClientGame

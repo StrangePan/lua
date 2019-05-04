@@ -1,10 +1,9 @@
-require "me.strangepan.games.mazerino.common.strangepan.util.class"
+local class = require "me.strangepan.libs.lua.v1.class"
 
-Entity = buildClass()
-local Class = Entity
+local Entity = class.build()
 
 --------------------------------------------------------------------------------
---                                Entity Class                                --
+--                                Entity Entity                                --
 --------------------------------------------------------------------------------
 
 
@@ -12,9 +11,7 @@ local Class = Entity
 --
 -- `Entity` constructor. Initializes data members.
 --
-function Class:_init()
-  Class.superclass._init(self)
-  
+function Entity:_init()
   -- Assigned secretary object
   self.secretary = nil
 end
@@ -30,10 +27,7 @@ end
 -- Return: This same object so that this method can be called inline without
 --         affecting normal function.
 --
-function Class:registerWithSecretary(secretary)
-  
-  -- Ensure secretary is of correct type
-  assertClass(secretary, Secretary, "secretary")
+function Entity:registerWithSecretary(secretary)
   
   -- Make sure we're not already registered with a secretary
   if self.secretary ~= nil then
@@ -52,7 +46,7 @@ end
 -- Unregisters this object from the `Secretary` object it had been previously
 -- registered with using the `registerWithSecretary()` method, if any.
 --
-function Class:deregisterWithSecretary()
+function Entity:deregisterWithSecretary()
   
   -- Remove all record of self from current secretary
   if self.secretary ~= nil then
@@ -73,7 +67,7 @@ end
 --         if this object has not been registered or if
 --         `deregisterWithSecretary()` has been more recently called.
 --
-function Class:getSecretary()
+function Entity:getSecretary()
   return self.secretary
 end
 
@@ -83,6 +77,8 @@ end
 -- Performs any necessary self-destruction steps, including deregistering this
 -- object from any known `Secretary` objects.
 --
-function Class:destroy()
+function Entity:destroy()
   self:deregisterWithSecretary()
 end
+
+return Entity

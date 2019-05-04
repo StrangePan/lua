@@ -1,18 +1,20 @@
-require "me.strangepan.games.mazerino.common.Camera"
-require "me.strangepan.games.mazerino.common.Game"
-require "me.strangepan.games.mazerino.common.entities.Actor"
-require "me.strangepan.games.mazerino.common.entities.Player"
-require "me.strangepan.games.mazerino.common.entities.Switch"
-require "me.strangepan.games.mazerino.common.CommandMap"
-require "me.strangepan.games.mazerino.common.LocalPlayerController"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+local Camera = require "me.strangepan.games.mazerino.common.Camera"
+local Game = require "me.strangepan.games.mazerino.common.Game"
+local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
+local Player = require "me.strangepan.games.mazerino.common.entities.Player"
+local Switch = require "me.strangepan.games.mazerino.common.entities.Switch"
+local CommandMap = require "me.strangepan.games.mazerino.common.CommandMap"
+local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
+local LocalPlayerController = require "me.strangepan.games.mazerino.common.LocalPlayerController"
+local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
 local GameMap = require "me.strangepan.games.mazerino.common.mazerino.map.GameMap"
+local class = require "me.strangepan.libs.lua.v1.class"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
-OfflineGame = buildClass(Game)
-local Class = OfflineGame
+local OfflineGame = class.build(Game)
 
-function Class:_init(secretary)
-  Class.superclass._init(self, secretary)
+function OfflineGame:_init(secretary)
+  class.superclass(OfflineGame)._init(self, secretary)
 
   self.commandMap = CommandMap()
   local commandMap = self.commandMap
@@ -29,8 +31,8 @@ function Class:_init(secretary)
     end)
 end
 
-function Class:start()
-  Class.superclass.start(self)
+function OfflineGame:start()
+  class.superclass(OfflineGame).start(self)
   
   local secretary = self:getSecretary()
   
@@ -51,7 +53,7 @@ function Class:start()
   return self
 end
 
-function Class:setUpLevel()
+function OfflineGame:setUpLevel()
   local gameMap = GameMap.createFromFile('me/strangepan/games/mazerino/maps/offline_test.mmap')
   local secretary = self:getSecretary()
 
@@ -59,11 +61,12 @@ function Class:setUpLevel()
     entity:registerWithSecretary(secretary)
 
     -- Set up the player.
-    if checkType(entity, Player) then
+    if class.instance_of(entity, Player) then
       LocalPlayerController(entity, self.commandMap)
       self.camera:setSubject(entity)
       self.camera:jumpToSubject(entity)
     end
   end
-
 end
+
+return OfflineGame

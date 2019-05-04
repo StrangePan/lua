@@ -1,20 +1,20 @@
-require "me.strangepan.games.mazerino.common.Game"
-require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
-require "me.strangepan.games.mazerino.common.networking.NetworkedEntityManager"
+local Game = require "me.strangepan.games.mazerino.common.Game"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local ConnectionManager = require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
+local NetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityManager"
+local class = require "me.strangepan.libs.lua.v1.class"
+local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
-NetworkGame = buildClass(Game)
-local Class = NetworkGame
+local NetworkGame = class.build(Game)
 
-function Class:_init(secretary, connectionManager, entityManager)
-  Class.superclass._init(self, secretary)
-  self.connections = assertClass(connectionManager, ConnectionManager)
-  self.entities = assertClass(entityManager, NetworkedEntityManager)
+function NetworkGame:_init(secretary, connectionManager, entityManager)
+  class.superclass(NetworkGame)._init(self, secretary)
+  self.connections = assert_that(connectionManager):is_instance_of(ConnectionManager):and_return()
+  self.entities = assert_that(entityManager):is_instance_of(NetworkedEntityManager):and_return()
 end
 
-function Class:start()
-  Class.superclass.start(self)
+function NetworkGame:start()
+  class.superclass(NetworkGame).start(self)
   
   local secretary = self:getSecretary()
   local connections = self:getConnectionManager()
@@ -36,20 +36,22 @@ function Class:start()
   return self
 end
 
-function Class:stop()
+function NetworkGame:stop()
   local entities = self:getEntityManager()
   local connections = self:getConnectionManager()
   
   entities:destroy()
   connections:destroy()
   
-  return Class.superclass.stop(self)
+  return class.superclass(NetworkGame).stop(self)
 end
 
-function Class:getConnectionManager()
+function NetworkGame:getConnectionManager()
   return self.connections
 end
 
-function Class:getEntityManager()
+function NetworkGame:getEntityManager()
   return self.entities
 end
+
+return NetworkGame

@@ -1,10 +1,9 @@
-require "me.strangepan.games.mazerino.common.networking.Connection"
-require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
-require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
-require "me.strangepan.games.mazerino.common.strangepan.util.type"
-require "me.strangepan.games.mazerino.server.ServerConnectionManager"
-
+local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
+local CustomNetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local ServerConnectionManager = require "me.strangepan.games.mazerino.server.ServerConnectionManager"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
+local class = require "me.strangepan.libs.lua.v1.class"
 
 local PRINT_DEBUG = false
 
@@ -13,12 +12,11 @@ local F_ENTITY_UPDATE_TYPE = "u"
 local F_INC_DATA = "d"
 local F_SYNC_NUM = "n"
 
-ServerNetworkedEntityManager = buildClass(CustomNetworkedEntityManager)
-local Class = ServerNetworkedEntityManager
+local ServerNetworkedEntityManager = class.build(CustomNetworkedEntityManager)
 
-function Class:_init(connectionManager)
-  Class.superclass._init(self, connectionManager)
-  assertClass(connectionManager, ServerConnectionManager, "connectionManager")
+function ServerNetworkedEntityManager:_init(connectionManager)
+  class.superclass(ServerNetworkedEntityManager)._init(self, connectionManager)
+  assert_that(connectionManager):is_instance_of(ServerConnectionManager):and_return()
   connectionManager:registerConnectionStatusListener(
       self, self.onConnectionStatusChanged)
 end
@@ -26,7 +24,7 @@ end
 --
 -- Sends entity updates when connection status changes.
 --
-function Class:onConnectionStatusChanged(manager, connectionId, oldStatus)
+function ServerNetworkedEntityManager:onConnectionStatusChanged(manager, connectionId, oldStatus)
   local newStatus = manager:getConnection(connectionId).status
   if newStatus == ConnectionStatus.CONNECTED
       and oldStatus == ConnectionStatus.STALLED then
@@ -51,7 +49,7 @@ end
 -- Override default behavior to limit what kind of updates the server handles
 -- and under what conditions to do so.
 --
-function Class:onReceiveEntityUpdate(message, connectionId)
+function ServerNetworkedEntityManager:onReceiveEntityUpdate(message, connectionId)
   if PRINT_DEBUG then print("ServerNetworkedEntityManager:onReceiveEntityUpdate", Serializer.serialize(message)) end
 
   local id = message[F_NETWORK_ENTITY_ID]
@@ -63,7 +61,7 @@ function Class:onReceiveEntityUpdate(message, connectionId)
 
   if t == EntityUpdateType.INCREMENTING
       and entity:getOwnerId() == connectionId then
-    Class.superclass.onReceiveEntityUpdate(self, message, connectionId)
+    class.superclass(ServerNetworkedEntityManager).onReceiveEntityUpdate(self, message, connectionId)
 
     if self:_isInSync(connectionId, id) then
       local params = message[F_INC_DATA]
@@ -77,6 +75,8 @@ function Class:onReceiveEntityUpdate(message, connectionId)
           connectionId)
     end
   elseif t == EntityUpdateType.OUT_OF_SYNC then
-    Class.superclass.onReceiveEntityUpdate(self, message, connectionId)
+    class.superclass(ServerNetworkedEntityManager).onReceiveEntityUpdate(self, message, connectionId)
   end
 end
+
+return ServerNetworkedEntityManager
