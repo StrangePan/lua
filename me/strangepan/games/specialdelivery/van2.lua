@@ -1,16 +1,9 @@
-require "graph_walker"
-require "me.strangepan.games.specialdelivery.path"
-require "me.strangepan.games.specialdelivery.direction"
+local GraphWalker = require "me.strangepan.games.specialdelivery.graph_walker"
+local Direction = require "me.strangepan.games.specialdelivery.direction"
+local class = require "me.strangepan.libs.lua.v1.class"
+local gameGraph = require "me.strangepan.games.specialdelivery.graph"
 
-Van2 = {}
-Van2.__index = Van2
-setmetatable(Van2, {
-  __call = function(cls, ...)
-    local self = setmetatable({}, cls)
-    self:_init(...)
-    return self
-  end
-})
+local Van2 = class.build()
 
 local VAN_SPRITE = love.graphics.newImage('van.png')
 local VAN_SPRITE_LIGHTS = love.graphics.newImage('van_lights.png')
@@ -68,3 +61,5 @@ end
 function Van2:onEdgeChanged()
   print("changed edge")
 end
+
+return Van2

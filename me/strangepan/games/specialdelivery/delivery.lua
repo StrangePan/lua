@@ -1,14 +1,9 @@
-require "me.strangepan.games.specialdelivery.path"
+local Path = require "me.strangepan.games.specialdelivery.path"
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local gameGraph = require "me.strangepan.games.specialdelivery.graph"
 
-Delivery = {}
-Delivery.__index = Delivery
-setmetatable(Delivery, {
-  __call = function(cls, ...)
-    local self = setmetatable({}, cls)
-    self:_init(...)
-    return self
-  end
-})
+local Delivery = class.build()
 
 local START_SPRITE = love.graphics.newImage('pin_package.png')
 local END_SPRITE = love.graphics.newImage('pin_destination.png')
@@ -18,12 +13,16 @@ local SPRITE_ORIGIN = {
 }
 
 function Delivery:_init(startEdgeId, startEdgeDist, endEdgeId, endEdgeDist)
-  assert(type(startEdgeId) == 'number')
-  assert(type(startEdgeDist) == 'number')
-  assert(startEdgeDist >= 0 and startEdgeDist <= gameGraph:lengthOfEdge(startEdgeId))
-  assert(type(endEdgeId) == 'number')
-  assert(type(endEdgeDist) == 'number')
-  assert(endEdgeDist >= 0 and endEdgeDist <= gameGraph:lengthOfEdge(endEdgeId))
+  assert_that(startEdgeId):is_a_number()
+  assert_that(startEdgeDist)
+      :is_a_number()
+      :is_greater_than_or_equal_to(0)
+      :is_less_than_or_equal_to(gameGraph:lengthOfEdge(startEdgeId))
+  assert_that(endEdgeId):is_a_number()
+  assert_that(endEdgeDist)
+      :is_a_number()
+      :is_greater_than_or_equal_to(0)
+      :is_less_than_or_equal_to(gameGraph:lengthOfEdge(endEdgeId))
   
   self.path = Path(gameGraph)
   self.path:setEndpoints(startEdgeId, startEdgeDist, endEdgeId, endEdgeDist)
@@ -37,3 +36,5 @@ function Delivery:draw()
   love.graphics.draw(START_SPRITE, self.startCoords.x, self.startCoords.y, 0, 1, 1, SPRITE_ORIGIN.x, SPRITE_ORIGIN.y)
   love.graphics.draw(END_SPRITE, self.endCoords.x, self.endCoords.y, 0, 1, 1, SPRITE_ORIGIN.x, SPRITE_ORIGIN.y)
 end
+
+return Delivery

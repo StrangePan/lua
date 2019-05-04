@@ -1,13 +1,7 @@
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
-PriorityQueue = {}
-PriorityQueue.__index = PriorityQueue
-setmetatable(PriorityQueue, {
-  __call = function(cls, ...)
-    local self = setmetatable({}, cls)
-    self:_init(...)
-    return self
-  end
-})
+local PriorityQueue = class.build()
 
 function PriorityQueue:_init()
   self.items = {}
@@ -16,10 +10,8 @@ function PriorityQueue:_init()
   self.size = 0 --number of items
 end
 
-local comp = function(a, b) return a.p < b.p end
-
 function PriorityQueue:push(value, priority)
-  assert(type(priority) == "number")
+  assert_that(priority):is_a_number()
 
   -- binary search to find insertion point
   local left = 1 + self.head
@@ -86,3 +78,5 @@ function PriorityQueue:print()
   s = s..'}'
   print(s)
 end
+
+return PriorityQueue

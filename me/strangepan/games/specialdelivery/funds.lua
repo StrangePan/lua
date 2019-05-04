@@ -1,4 +1,6 @@
-funds = {
+local mainFont = require "me.strangepan.games.specialdelivery.font"
+
+local funds = {
   cash = 0,
   drawable = love.graphics.newText(mainFont, "$0")
 }
@@ -25,3 +27,5 @@ function funds.draw()
   love.graphics.setColor(255, 255, 255)
   love.graphics.draw(funds.drawable, 4, 4)
 end
+
+return funds

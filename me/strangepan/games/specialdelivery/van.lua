@@ -1,12 +1,8 @@
-Van = {}
-Van.__index = Van
-setmetatable(Van, {
-  __call = function(cls, ...)
-    local self = setmetatable({}, cls)
-    self:_init(...)
-    return self
-  end
-})
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local gameGraph = require "me.strangepan.games.specialdelivery.graph"
+
+local Van = class.build()
 
 local FORWARD = 1
 local BACKWARD = -1
@@ -25,9 +21,11 @@ local VAN_COLORS = {
 local VAN_SPEED = 30 --px per sec
 
 function Van:_init(edgeId, dist)
-  assert(type(edgeId) == 'number')
-  assert(type(dist) == 'number')
-  assert(dist >= 0 and dist < gameGraph:lengthOfEdge(edgeId))
+  assert_that(edgeId):is_a_number()
+  assert_that(dist)
+      :is_a_number()
+      :is_greater_than_or_equal_to(0)
+      :is_less_than_or_equal_to(gameGraph:lengthOfEdge(edgeId))
   
   self.location = {
     edgeId = edgeId,
@@ -75,3 +73,5 @@ function Van:draw()
   love.graphics.setColor(255, 255, 255)
   love.graphics.draw(VAN_SPRITE_LIGHTS, coords.x, coords.y, orientation, 1, 1, VAN_SPRITE_ORIGIN.x, VAN_SPRITE_ORIGIN.y)
 end
+
+return Van

@@ -1,18 +1,10 @@
-Queue = {}
-Queue.__index = Queue
-setmetatable(Queue, {
-  __call = function(cls, ...)
-    local self = setmetatable({}, cls)
-    self:_init(...)
-    return self
-  end
-})
+local class = require "me.strangepan.libs.lua.v1.class"
+
+local Queue = class.build()
 
 function Queue:_init()
   self:clear()
 end
-
-local comp = function(a, b) return a.p < b.p end
 
 function Queue:push(value, priority)
   self.items[self.tail] = {
@@ -71,3 +63,5 @@ function Queue:print()
   s = s..'}'
   print(s)
 end
+
+return Queue

@@ -1,17 +1,11 @@
-require "me.strangepan.games.specialdelivery.direction"
+local Direction = require "me.strangepan.games.specialdelivery.direction"
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
-Path = {}
-Path.__index = Path
-setmetatable(Path, {
-  __call = function(cls, ...)
-    local self = setmetatable({}, cls)
-    self:_init(...)
-    return self
-  end
-})
+local Path = class.build()
 
 function Path:_init(graph)
-  assert(type(graph) == 'table')
+  assert_that(graph):is_a_table()
   self.graph = graph
   self.direction = 1
 end
@@ -49,10 +43,11 @@ function Path:setEndpoints(startEdgeId, startEdgeDist, endEdgeId, endEdgeDist)
 end
 
 function Path:setStart(startEdgeId, startEdgeDist)
-  assert(type(startEdgeId) == 'number')
-  assert(self.graph.edges[startEdgeId])
-  assert(type(startEdgeDist) == 'number')
-  assert(startEdgeDist >= 0 and startEdgeDist <= self.graph:lengthOfEdge(startEdgeId))
+  assert_that(startEdgeId):is_a_number():is_a_key_in(self.graph.edges)
+  assert_that(startEdgeDist)
+      :is_a_number()
+      :is_greater_than_or_equal_to(0)
+      :is_less_than_or_equal_to(self.graph:lengthOfEdge(startEdgeId))
 
   -- Trivial case, short-circuit. No need to recalculate path.
   if startEdgeId == self.start.edge then
@@ -152,3 +147,5 @@ function Path:draw()
     love.graphics.ellipse('fill', points[i].x, points[i].y, 6, 6)
   end
 end
+
+return Path

@@ -1,15 +1,8 @@
-require "me.strangepan.games.specialdelivery.path"
-require "me.strangepan.games.specialdelivery.direction"
+local Path = require "me.strangepan.games.specialdelivery.path"
+local class = require "me.strangepan.libs.lua.v1.class"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
-GraphWalker = {}
-GraphWalker.__index = GraphWalker
-setmetatable(GraphWalker, {
-  __call = function(cls, ...)
-    local self = setmetatable({}, cls)
-    self:_init(...)
-    return self
-  end
-})
+local GraphWalker = class.build()
 
 --
 -- A class that can traverse a graph at a constant number of pixels per step. Requires:
@@ -18,11 +11,12 @@ setmetatable(GraphWalker, {
 -- - the number of pixels along the edge it is located.
 --
 function GraphWalker:_init(graph, edgeId, dist)
-  assert(type(graph) == 'table')
-  assert(type(edgeId) == 'number')
-  assert(type(dist) == 'number')
-  assert(dist >= 0 and dist <= graph:lengthOfEdge(edgeId))
-  
+  assert_that(graph):is_a_table()
+  assert_that(edgeId):is_a_number()
+  assert_that(dist):is_a_number()
+      :is_greater_than_or_equal_to(0)
+      :is_less_than_or_equal_to(graph:lengthOfEdge(edgeId))
+
   self.graph = graph
   self.location = {
     edgeId = edgeId,
@@ -138,3 +132,5 @@ function GraphWalker:update()
   
   self.rolloverPxNextStep = math.min(0, self.pxPerStep - pxThisStep)
 end
+
+return GraphWalker

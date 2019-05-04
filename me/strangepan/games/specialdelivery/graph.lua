@@ -1,4 +1,5 @@
-require "me.strangepan.games.specialdelivery.priorityqueue"
+local PriorityQueue = require "me.strangepan.games.specialdelivery.priorityqueue"
+local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
 
 local graph = {
   nextNode = 1,
@@ -8,8 +9,8 @@ local graph = {
 }
 
 function graph:addNode(x, y)
-  assert(type(x) == "number")
-  assert(type(y) == "number")
+  assert_that(x):is_a_number()
+  assert_that(y):is_a_number()
 
   local nodeId = self.nextNode
   self.nextNode = self.nextNode + 1
@@ -25,12 +26,10 @@ end
 
 function graph:addEdge(from, to, weight)
   weight = weight or 1
-  assert(type(from) == "number")
-  assert(self.nodes[from])
-  assert(type(to) == "number" and self.nodes[to])
-  assert(self.nodes[to])
-  assert(type(weight) == "number")
-  assert(from ~= to)
+  assert_that(from):is_a_number():is_a_key_in(self.nodes)
+  assert_that(to):is_a_number():is_a_key_in(self.nodes)
+  assert_that(weight):is_a_number()
+  assert_that(from):is_unequal_to(to)
 
   -- see if edge already exists and update it if it does
   for _,edgeId in ipairs(self.nodes[from].edges) do
@@ -56,10 +55,8 @@ function graph:addEdge(from, to, weight)
 end
 
 function graph:pointOnEdge(edgeId, dist)
-  assert(type(edgeId) == "number")
-  assert(self.edges[edgeId])
-  assert(type(dist) == "number")
-  assert(dist >= 0 and dist <= self:lengthOfEdge(edgeId))
+  assert_that(edgeId):is_a_number():is_a_key_in(self.edges)
+  assert_that(dist):is_a_number():is_greater_than_or_equal_to(0):is_less_than_or_equal_to(self:lengthOfEdge(edgeId))
   local edge = self.edges[edgeId]
   local from = self.nodes[edge.from]
   local to = self.nodes[edge.to]
@@ -71,8 +68,7 @@ function graph:pointOnEdge(edgeId, dist)
 end
 
 function graph:angleOfEdge(edgeId)
-  assert(type(edgeId) == 'number')
-  assert(self.edges[edgeId])
+  assert_that(edgeId):is_a_number():is_a_key_in(self.edges)
   local edge = self.edges[edgeId]
   local from = self.nodes[edge.from]
   local to = self.nodes[edge.to]
@@ -84,8 +80,7 @@ function graph:angleOfEdge(edgeId)
 end
 
 function graph:lengthOfEdge(edgeId)
-  assert(type(edgeId) == 'number')
-  assert(self.edges[edgeId])
+  assert_that(edgeId):is_a_number():is_a_key_in(self.edges)
   local edge = self.edges[edgeId]
   if not edge.length then
     local dx = self.nodes[edge.from].x - self.nodes[edge.to].x
@@ -96,17 +91,15 @@ function graph:lengthOfEdge(edgeId)
 end
 
 function graph:percentageAlongEdge(edgeId, dist)
-  assert(type(edgeId) == 'number')
-  assert(type(dist) == 'number')
+  assert_that(edgeId):is_a_number()
+  assert_that(dist):is_a_number()
   return dist / self:lengthOfEdge(edgeId)
 end
 
 -- Get edge connecting nodes with IDs from and to. Returns nil if none exist.
 function graph:edgeBetweenNodes(from, to)
-  assert(type(from) == 'number')
-  assert(self.nodes[from])
-  assert(type(to) == 'number')
-  assert(self.nodes[to])
+  assert_that(from):is_a_number():is_a_key_in(self.nodes)
+  assert_that(to):is_a_number():is_a_key_in(self.nodes)
   for _,edgeId in ipairs(self.nodes[from].edges) do
     local edge = self.edges[edgeId]
     if edge.from == to or edge.to == to then
@@ -123,14 +116,16 @@ end
 -- Returns:
 -- 1. table of node IDs between starting and ending edge, or nil if no path exists
 function graph:findPath(from, fromDist, to, toDist)
-  assert(type(from) == 'number')
-  assert(self.edges[from])
-  assert(type(fromDist) == 'number')
-  assert(fromDist >= 0 and fromDist <= self:lengthOfEdge(from))
-  assert(type(to) == 'number')
-  assert(self.edges[to])
-  assert(type(toDist) == 'number')
-  assert(toDist >= 0 and toDist <= self:lengthOfEdge(to))
+  assert_that(from):is_a_number():is_a_key_in(self.edges)
+  assert_that(fromDist)
+      :is_a_number()
+      :is_greater_than_or_equal_to(0)
+      :is_less_than_or_equal_to(self:lengthOfEdge(from))
+  assert_that(to):is_a_number():is_a_key_in(self.edges)
+  assert_that(toDist)
+      :is_a_number()
+      :is_greater_than_or_equal_to(0)
+      :is_less_than_or_equal_to(self:lengthOfEdge(to))
   
   -- Short-circuit if both points exist on same edge.
   -- Assumes that shorter, cheaper path doesn't exist.

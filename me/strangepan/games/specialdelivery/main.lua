@@ -1,10 +1,8 @@
-require "me.strangepan.games.specialdelivery.font"
-require "me.strangepan.games.specialdelivery.funds"
-
-gameGraph = require "me.strangepan.games.specialdelivery.graph"
-require "me.strangepan.games.specialdelivery.van"
-require "me.strangepan.games.specialdelivery.delivery"
-require "van2"
+local funds = require "me.strangepan.games.specialdelivery.funds"
+local gameGraph = require "me.strangepan.games.specialdelivery.graph"
+local Van = require "me.strangepan.games.specialdelivery.van"
+local Delivery = require "me.strangepan.games.specialdelivery.delivery"
+local Van2 = require "van2"
 
 vans = {}
 delivery = nil
