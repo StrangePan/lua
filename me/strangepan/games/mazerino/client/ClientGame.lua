@@ -7,7 +7,7 @@ local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local class = require "me.strangepan.libs.util.v1.class"
 local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
-local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local EventType = require "me.strangepan.libs.secretary.v1.EventType"
 local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
 local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 

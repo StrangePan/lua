@@ -6,10 +6,10 @@ local Switch = require "me.strangepan.games.mazerino.common.entities.Switch"
 local CommandMap = require "me.strangepan.games.mazerino.common.CommandMap"
 local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
 local LocalPlayerController = require "me.strangepan.games.mazerino.common.LocalPlayerController"
-local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+local Secretary = require "me.strangepan.libs.secretary.v1.Secretary"
 local GameMap = require "me.strangepan.games.mazerino.common.mazerino.map.GameMap"
 local class = require "me.strangepan.libs.util.v1.class"
-local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local EventType = require "me.strangepan.libs.secretary.v1.EventType"
 
 local OfflineGame = class.build(Game)
 

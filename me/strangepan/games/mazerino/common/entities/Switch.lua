@@ -1,8 +1,8 @@
-local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local PhysObject = require "me.strangepan.libs.secretary.v1.PhysObject"
 local Color = require "me.strangepan.games.mazerino.common.Color"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 local class = require "me.strangepan.libs.util.v1.class"
-local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local EventType = require "me.strangepan.libs.secretary.v1.EventType"
 
 local Switch = class.build(PhysObject)
 

@@ -1,9 +1,9 @@
-local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
-local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local Entity = require "me.strangepan.libs.secretary.v1.Entity"
+local PhysObject = require "me.strangepan.libs.secretary.v1.PhysObject"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
 local class = require "me.strangepan.libs.util.v1.class"
-local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local EventType = require "me.strangepan.libs.secretary.v1.EventType"
 
 --
 -- Camera class for handling motion and keeping a subject within view.

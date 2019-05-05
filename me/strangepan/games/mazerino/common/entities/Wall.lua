@@ -1,8 +1,8 @@
 local class = require "me.strangepan.libs.util.v1.class"
 local Direction = require "me.strangepan.games.mazerino.common.entities.Direction"
-local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local PhysObject = require "me.strangepan.libs.secretary.v1.PhysObject"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
-local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local EventType = require "me.strangepan.libs.secretary.v1.EventType"
 
 local Wall = class.build(PhysObject)
 

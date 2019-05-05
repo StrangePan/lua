@@ -1,4 +1,4 @@
-local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local Entity = require "me.strangepan.libs.secretary.v1.Entity"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local Set = require "me.strangepan.games.mazerino.common.Set"
 local class = require "me.strangepan.libs.util.v1.class"
