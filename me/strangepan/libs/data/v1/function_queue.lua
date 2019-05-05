@@ -18,7 +18,7 @@ Parameters:
 ]]
 function FunctionQueue:enqueue(func, ...)
   assert_that(func):is_a_function():and_return()
-  self.queue:push({func, {...}})
+  self.queue:enqueue({func, {...}})
 end
 
 --[[ Removes and runs runs all functions in the queue in the order they were enqueued util the queue
