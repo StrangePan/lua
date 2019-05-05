@@ -1,13 +1,10 @@
 local QuadTree = require "me.strangepan.libs.secretary.v1.QuadTree"
 local EventType = require "me.strangepan.libs.secretary.v1.EventType"
-local DrawLayer = require "me.strangepan.libs.secretary.v1.DrawLayer"
 local Entity = require "me.strangepan.libs.secretary.v1.Entity"
 local PhysObject = require "me.strangepan.libs.secretary.v1.PhysObject"
 local class = require "me.strangepan.libs.util.v1.class"
-local functions = require "me.strangepan.libs.secretary.v1.functions"
-local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
-local SortedSet = require "me.strangepan.libs.secretary.v1.SortedSet"
-local FunctionQueue = require "me.strangepan.libs.secretary.v1.FunctionQueue"
+local SortedSet = require "me.strangepan.libs.data.v1.sorted_set"
+local FunctionQueue = require "me.strangepan.libs.data.v1.function_queue"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 local Secretary = class.build()
@@ -26,9 +23,6 @@ function Secretary:_init()
   self.callbacks = {}    -- table containing all callbacks
   self.queue = FunctionQueue()
   self.postpone = false
-
-  -- sorted table of integers representing indexes into self.callbacks[EventType.DRAW] table.
-  self.layers = SortedSet()
 end
 
 
@@ -52,7 +46,7 @@ function Secretary:registerPhysObject(object)
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue:push(self.registerPhysObject, self, object)
+    self.queue:enqueue(self.registerPhysObject, self, object)
     return
   end
   
@@ -73,7 +67,7 @@ function Secretary:unregisterPhysObject(object)
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue:push(self.unregisterPhysObject, self, object)
+    self.queue:enqueue(self.unregisterPhysObject, self, object)
     return
   end
   
@@ -240,7 +234,7 @@ function Secretary:registerEventListener(object, listener, eventType, ...)
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue:push(self.registerEventListener, self, object, listener, eventType, unpack(arg))
+    self.queue:enqueue(self.registerEventListener, self, object, listener, eventType, unpack(arg))
     return
   end
   
@@ -275,7 +269,7 @@ function Secretary:registerEventListener(object, listener, eventType, ...)
 
   if not callbacks[priority] then
     callbacks[priority] = {n = 0}
-    callbacks.priorities:insert(priority)
+    callbacks.priorities:add(priority)
   end
   callbacks = callbacks[priority]
 
@@ -321,7 +315,7 @@ function Secretary:setEventPriority(object, listener, eventType, priority, watch
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue:push(self.setDrawLayer, self, object, listener, priority, watchObject)
+    self.queue:enqueue(self.setDrawLayer, self, object, listener, priority, watchObject)
     return
   end
   
@@ -353,7 +347,7 @@ function Secretary:setEventPriority(object, listener, eventType, priority, watch
       end
       if not newCallbacks[priority] then
         newCallbacks[priority] = {n = 0}
-        newCallbacks.priorities:insert(priority)
+        newCallbacks.priorities:add(priority)
       end
       newCallbacks = newCallbacks[priority]
       newCallbacks.n = newCallbacks.n + 1
@@ -380,7 +374,7 @@ function Secretary:unregisterAllListeners(object)
   
   -- Postpone if processing events
   if self.postpone then
-    self.queue:push(self.unregisterAllListeners, self, object)
+    self.queue:enqueue(self.unregisterAllListeners, self, object)
     return
   end
   
@@ -394,10 +388,10 @@ function Secretary:unregisterAllListeners(object)
   local destroyCallbacks = (self.callbacks[EventType.DESTROY]
       and self.callbacks[EventType.DESTROY][object])
   if destroyCallbacks then
-    for priority in destroyCallbacks.priorities:values() do
+    for priority in destroyCallbacks.priorities:items() do
       for i,callback in ipairs(destroyCallbacks[priority]) do
         if callback then
-          self.queue:push(callback.listener, callback.object, callback.watchObject)
+          self.queue:enqueue(callback.listener, callback.object, callback.watchObject)
         end
       end
     end
@@ -584,7 +578,7 @@ function Secretary:executeCallbacks(callbacks, ...)
   local emptyLayers = {}
   
   -- Execute all callbacks registered with Secretary
-  for priority in callbacks.priorities:values() do
+  for priority in callbacks.priorities:items() do
     
     local lastIndex = 0
     for i = 1,callbacks[priority].n do
@@ -633,7 +627,7 @@ function Secretary:executeCallbacks(callbacks, ...)
   self.postpone = false
   
   -- Empty any event queue we got
-  self.queue:executeAll()
+  self.queue:poll_all()
 end
 
 return Secretary
