@@ -1,0 +1,3 @@
+[submodule "libs/rxlua"]
+	path = libs/rxlua
+	url = https://github.com/bjornbytes/RxLua.git
