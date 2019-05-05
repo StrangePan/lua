@@ -1,9 +1,9 @@
-local assertion_subject = require 'me.strangepan.libs.lua.truth.v1.assertion_subject'
+local assertion_subject = require 'me.strangepan.libs.truth.v1.assertion_subject'
 
 --[[ An easy, readable way to make various types of assertions.
 
 Example usage:
-  local assert_that = require 'me.strangepan.libs.lua.truth.v1.assert_that'
+  local assert_that = require 'me.strangepan.libs.truth.v1.assert_that'
 
   function foo(bar)
     assert_that(bar):is_a_string()

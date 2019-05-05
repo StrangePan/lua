@@ -2,7 +2,7 @@ local class = require "me.strangepan.libs.lua.v1.class"
 local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
 local InputMethod = require "me.strangepan.games.mazerino.common.InputMethod"
 local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 local CommandMap = class.build()
 

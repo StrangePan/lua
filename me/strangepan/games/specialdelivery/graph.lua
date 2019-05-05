@@ -1,5 +1,5 @@
 local PriorityQueue = require "me.strangepan.games.specialdelivery.priorityqueue"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 local graph = {
   nextNode = 1,

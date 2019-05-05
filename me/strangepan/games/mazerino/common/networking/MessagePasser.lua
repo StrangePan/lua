@@ -1,11 +1,11 @@
 local class = require "me.strangepan.libs.lua.v1.class"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
 local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
 local messages = require "me.strangepan.games.mazerino.common.networking.messages"
 local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 local PRINT_MESSAGES = false
 

@@ -1,6 +1,6 @@
 local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking.ConnectionStatus"
 local CustomNetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.CustomNetworkedEntityManager"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local ServerConnectionManager = require "me.strangepan.games.mazerino.server.ServerConnectionManager"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 local class = require "me.strangepan.libs.lua.v1.class"

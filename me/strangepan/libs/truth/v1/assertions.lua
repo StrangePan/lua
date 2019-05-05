@@ -1,4 +1,4 @@
-local assertion = require 'me.strangepan.libs.lua.truth.v1.assertion'
+local assertion = require 'me.strangepan.libs.truth.v1.assertion'
 
 --[[ Collection of assertions used in other parts of this library and in external code.
 

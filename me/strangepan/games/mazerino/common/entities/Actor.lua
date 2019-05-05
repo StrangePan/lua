@@ -7,7 +7,7 @@ local class = require "me.strangepan.libs.lua.v1.class"
 local Direction = require "me.strangepan.games.mazerino.common.entities.Direction"
 local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 local DrawLayer = require "me.strangepan.games.mazerino.common.strangepan.secretary.DrawLayer"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
 
 local Actor = class.build(PhysObject)

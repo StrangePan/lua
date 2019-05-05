@@ -1,8 +1,8 @@
 local class = require "me.strangepan.libs.lua.v1.class"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local Player = require "me.strangepan.games.mazerino.common.entities.Player"
 local Direction = require "me.strangepan.games.mazerino.common.entities.Direction"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 local PlayerController = class.build()
 

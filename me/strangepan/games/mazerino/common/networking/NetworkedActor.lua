@@ -3,7 +3,7 @@ local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
 local Color = require "me.strangepan.games.mazerino.common.Color"
 local class = require "me.strangepan.libs.lua.v1.class"
 local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 -- Message fields.
 local F_X = "x"

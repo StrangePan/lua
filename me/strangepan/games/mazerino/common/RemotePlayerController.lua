@@ -1,6 +1,6 @@
 local PlayerController = require "me.strangepan.games.mazerino.common.PlayerController"
 local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 local RemotePlayerController = class.build(PlayerController)
 

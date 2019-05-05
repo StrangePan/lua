@@ -1,6 +1,6 @@
 local Path = require "me.strangepan.games.specialdelivery.path"
 local class = require "me.strangepan.libs.lua.v1.class"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local gameGraph = require "me.strangepan.games.specialdelivery.graph"
 
 local Delivery = class.build()

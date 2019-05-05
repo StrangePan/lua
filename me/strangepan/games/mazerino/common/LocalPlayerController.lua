@@ -1,6 +1,6 @@
 local PlayerController = require "me.strangepan.games.mazerino.common.PlayerController"
 local CommandMap = require "me.strangepan.games.mazerino.common.CommandMap"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local class = require "me.strangepan.libs.lua.v1.class"
 local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
 

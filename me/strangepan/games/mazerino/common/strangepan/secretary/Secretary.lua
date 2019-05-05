@@ -5,10 +5,10 @@ local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary
 local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
 local class = require "me.strangepan.libs.lua.v1.class"
 local functions = require "me.strangepan.games.mazerino.common.strangepan.util.functions"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local SortedSet = require "me.strangepan.games.mazerino.common.strangepan.util.SortedSet"
 local FunctionQueue = require "me.strangepan.games.mazerino.common.strangepan.util.FunctionQueue"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 local Secretary = class.build()
 

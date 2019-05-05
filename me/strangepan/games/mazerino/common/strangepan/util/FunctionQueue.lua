@@ -1,6 +1,6 @@
 local class = require "me.strangepan.libs.lua.v1.class"
 local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
-local assert_that = require "me.strangepan.libs.lua.truth.v1.assert_that"
+local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 --[[
 Specialized queue for enqueuing function calls and executing them.

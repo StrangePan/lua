@@ -1,5 +1,5 @@
 local class = require 'me.strangepan.libs.lua.v1.class'
-local assertions = require 'me.strangepan.libs.lua.truth.v1.assertions'
+local assertions = require 'me.strangepan.libs.truth.v1.assertions'
 
 --[[ A stateful object tracking the current state of a composite assertion.
 
