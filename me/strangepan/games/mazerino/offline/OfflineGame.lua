@@ -14,7 +14,7 @@ local EventType = require "me.strangepan.games.mazerino.common.strangepan.secret
 local OfflineGame = class.build(Game)
 
 function OfflineGame:_init(secretary)
-  class.superclass(OfflineGame)._init(self, secretary)
+  Game._init(self, secretary)
 
   self.commandMap = CommandMap()
   local commandMap = self.commandMap
@@ -32,7 +32,7 @@ function OfflineGame:_init(secretary)
 end
 
 function OfflineGame:start()
-  class.superclass(OfflineGame).start(self)
+  Game.start(self)
   
   local secretary = self:getSecretary()
   

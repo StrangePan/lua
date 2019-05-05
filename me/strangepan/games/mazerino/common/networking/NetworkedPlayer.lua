@@ -52,7 +52,7 @@ NetworkedPlayer.registerEntityType(NetworkedEntityType.PLAYER, NetworkedPlayer)
 
 function NetworkedPlayer:_init(manager, networkedId, entityType, params, player, ownerId)
   print(manager, networkedId, entityType, params, player, ownerId)
-  class.superclass(NetworkedPlayer)._init(self, manager, networkedId, entityType, params, player)
+  NetworkedActor._init(self, manager, networkedId, entityType, params, player)
   assert_that(player):is_instance_of(Player)
   assert_that(ownerId):is_a_number():and_return()
   self.ownerId = ownerId
@@ -63,7 +63,7 @@ function NetworkedPlayer:getOwnerId()
 end
 
 function NetworkedPlayer:getInstantiationParams(params)
-  params = class.superclass(NetworkedPlayer).getInstantiationParams(self, params)
+  params = NetworkedActor.getInstantiationParams(self, params)
   return self:writePlayerState(params, "new")
 end
 

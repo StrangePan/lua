@@ -11,7 +11,7 @@ local EventType = require "me.strangepan.games.mazerino.common.strangepan.secret
 local Camera = class.build(Entity)
 
 function Camera:_init()
-  class.superclass(Camera)._init(self)
+  Entity._init(self)
   
   self.x = 0
   self.y = 0
@@ -76,7 +76,7 @@ function Camera:setEasing(easeRatio)
 end
 
 function Camera:registerWithSecretary(secretary)
-  class.superclass(Camera).registerWithSecretary(self, secretary)
+  Entity.registerWithSecretary(self, secretary)
   secretary:registerEventListener(self, self.onPreDraw, EventType.PRE_DRAW)
   secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
   secretary:registerEventListener(self, self.onStep, EventType.STEP)
@@ -135,7 +135,7 @@ function Camera:onStep()
 end
 
 function Camera:destroy()
-  class.superclass(Camera)s.destroy(self)
+  Entitys.destroy(self)
   self.subject = nil
 end
 

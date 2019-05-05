@@ -128,6 +128,10 @@ function QuadTree:getFullIndex( top, right, bottom, left )
   end
 end
 
+local function classof(object)
+  return getmetatable(object)
+end
+
 --
 -- QuadTree:insert
 --
@@ -207,7 +211,7 @@ function QuadTree:insert( object, top, right, bottom, left )
   -- If not fitting in subnode, insert into current node, return
   -- Insert into appropriate bucket
   else
-    local object_class = class.superclass(object)
+    local object_class = classof(object)
     if object_class ~= nil then
       if self.objects[object_class] == nil then self.objects[object_class] = {} end
       table.insert(self.objects[object_class], object)
@@ -226,7 +230,7 @@ function QuadTree:remove( object, path )
   if path == nil or path:len()==0 then
     
     -- Determine object's class
-    local object_class = class.superclass(object)
+    local object_class = classof(object)
     
     if object_class == nil then
       

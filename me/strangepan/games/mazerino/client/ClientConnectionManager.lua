@@ -13,7 +13,7 @@ local ClientConnectionManager = class.build(ConnectionManager)
 --
 function ClientConnectionManager:_init()
   math.randomseed(os.time())
-  class.superclass(ClientConnectionManager)._init(self, math.random(25566, 25666))
+  ConnectionManager._init(self, math.random(25566, 25666))
 
   -- Constant values
   --self.serverAddress = '74.51.150.17'
@@ -39,7 +39,7 @@ end
 -- Handle connection to server.
 --
 function ClientConnectionManager:onReceiveConnectionAck(message, address, port)
-  class.superclass(ClientConnectionManager).onReceiveConnectionAck(self, message, address, port)
+  ConnectionManager.onReceiveConnectionAck(self, message, address, port)
   if address ~= self.serverAddress or port ~= self.serverPort then
     return
   end

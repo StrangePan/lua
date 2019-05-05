@@ -35,7 +35,7 @@ function Wall:bump(direction)
 end
 
 function Wall:registerWithSecretary(secretary)
-  class.superclass(Wall).registerWithSecretary(self, secretary)
+  PhysObject.registerWithSecretary(self, secretary)
   secretary:registerEventListener(self, self.onStep, EventType.STEP)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
   return self

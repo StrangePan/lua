@@ -46,14 +46,14 @@ function NetworkedActor.createNewInstance(manager, id, entityType, ...)
 end
 
 function NetworkedActor:_init(manager, networkedId, entityType, params, actor)
-  class.superclass(NetworkedActor)._init(self, manager, networkedId, entityType, params, actor)
+  NetworkedEntity._init(self, manager, networkedId, entityType, params, actor)
   assert_that(actor):is_instance_of(Actor)
   self:setActorState(params)
 end
 
 function NetworkedActor:startBroadcastingUpdates()
   if self:isBroadcastingUpdates() then return end
-  class.superclass(NetworkedActor).startBroadcastingUpdates(self)
+  NetworkedEntity.startBroadcastingUpdates(self)
 
   -- Register for listener callbacks
   local actor = self:getLocalEntity()
@@ -67,16 +67,16 @@ function NetworkedActor:stopBroadcastingUpdates()
   actor:unregisterMoveListener(self, self.onActorStep)
   actor:unregisterSpinListener(self, self.onActorSpin)
 
-  class.superclass(NetworkedActor).stopBroadcastingUpdates(self)
+  NetworkedEntity.stopBroadcastingUpdates(self)
 end
 
 function NetworkedActor:getInstantiationParams(params)
-  params = class.superclass(NetworkedActor).getInstantiationParams(self, params)
+  params = NetworkedEntity.getInstantiationParams(self, params)
   return self:writeActorState(params, "new")
 end
 
 function NetworkedActor:setSynchronizedState(state)
-  class.superclass(NetworkedActor).setSynchronizedState(self, state)
+  NetworkedEntity.setSynchronizedState(self, state)
   self:setActorState(state)
 end
 
@@ -98,7 +98,7 @@ function NetworkedActor:setActorState(state)
 end
 
 function NetworkedActor:getSynchronizedState(state)
-  state = class.superclass(NetworkedActor).getSynchronizedState(self, state)
+  state = NetworkedEntity.getSynchronizedState(self, state)
   return self:writeActorState(state, "sync")
 end
 
@@ -126,7 +126,7 @@ end
 
 function NetworkedActor:performIncrementalUpdate(update)
   self:lock()
-  local inSync = class.superclass(NetworkedActor).performIncrementalUpdate(self, update)
+  local inSync = NetworkedEntity.performIncrementalUpdate(self, update)
 
   if inSync then
     local updateType = update[F_UPDATE_TYPE]

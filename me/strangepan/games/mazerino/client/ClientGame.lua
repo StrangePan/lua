@@ -14,7 +14,7 @@ local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking
 local ClientGame = class.build(NetworkGame)
 
 function ClientGame:_init(secretary, connectionManager, entityManager)
-  class.superclass(ClientGame)._init(self, secretary, connectionManager, entityManager)
+  NetworkGame._init(self, secretary, connectionManager, entityManager)
   assert_that(connectionManager):is_instance_of(ClientConnectionManager)
 
   self.lastSpinTime = love.timer.getTime()
@@ -38,7 +38,7 @@ function ClientGame:_init(secretary, connectionManager, entityManager)
 end
 
 function ClientGame:start()
-  class.superclass(ClientGame).start(self)
+  NetworkGame.start(self)
   local secretary = self:getSecretary()
   local connections = self:getConnectionManager()
   local entityManager = self:getEntityManager()
@@ -78,7 +78,7 @@ function ClientGame:start()
 end
 
 function ClientGame:stop()
-  class.superclass(ClientGame).stop(self)
+  NetworkGame.stop(self)
   local entityManager = self:getEntityManager()
   local commandMap = self.commandMap
   local idleActor = self.idleActor

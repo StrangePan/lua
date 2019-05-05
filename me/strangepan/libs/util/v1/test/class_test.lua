@@ -56,11 +56,4 @@ function TestClass:test_buildSubclass_thenInvokeBaseMethod_didExecute()
   luaunit.assertEquals(invokeCount, 1)
 end
 
-function TestClass:test_buildSubclass_getSuperclass_didReturnSuperclass()
-  local baseClass = class.build()
-  local testClass = class.build(baseClass)
-
-  luaunit.assertIs(class.superclass(testClass), baseClass)
-end
-
 os.exit(luaunit.LuaUnit.run())

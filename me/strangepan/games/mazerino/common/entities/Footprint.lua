@@ -7,7 +7,7 @@ local DrawLayer = require "me.strangepan.games.mazerino.common.strangepan.secret
 local Footprint = class.build(Entity)
 
 function Footprint:_init(r, g, b, x, y)
-  class.superclass(Footprint)._init(self)
+  Entity._init(self)
   
   self.r = r
   self.g = g
@@ -21,7 +21,7 @@ function Footprint:_init(r, g, b, x, y)
 end
 
 function Footprint:registerWithSecretary(secretary)
-  class.superclass(Footprint).registerWithSecretary(self, secretary)
+  Entity.registerWithSecretary(self, secretary)
   
   secretary:registerEventListener(self, self.onPostPhysics, EventType.POST_PHYSICS)
   secretary:registerEventListener(self, self.draw, EventType.DRAW, DrawLayer.BACKGROUND_PROPS)

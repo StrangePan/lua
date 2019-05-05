@@ -13,7 +13,7 @@ local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
 local Actor = class.build(PhysObject)
 
 function Actor:_init()
-  class.superclass(Actor)._init(self)
+  PhysObject._init(self)
   
   self.angle = 0
   self.drawAngle = self.angle
@@ -77,7 +77,7 @@ function Actor:unregisterSpinListener(listener, callback)
 end
 
 function Actor:registerWithSecretary(secretary)
-  class.superclass(Actor).registerWithSecretary(self, secretary)
+  PhysObject.registerWithSecretary(self, secretary)
   
   self.moveEventCoordinator:registerWithSecretary(secretary)
   
@@ -151,7 +151,7 @@ end
 
 function Actor:setPosition(x, y, z)
   local ox, oy, oz = self:getPosition()
-  class.superclass(Actor).setPosition(self, x, y, z)
+  PhysObject.setPosition(self, x, y, z)
   
   x, y, z = self:getPosition()
   if ox ~= x or oy ~= y or oz ~= z then

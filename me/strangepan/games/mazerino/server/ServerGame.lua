@@ -9,7 +9,7 @@ local ConnectionStatus = require "me.strangepan.games.mazerino.common.networking
 local ServerGame = class.build(NetworkGame)
 
 function ServerGame:_init(secretary, connectionManager, entityManager)
-  class.superclass(ServerGame)._init(self, secretary, connectionManager, entityManager)
+  NetworkGame._init(self, secretary, connectionManager, entityManager)
   assert_that(connectionManager):is_instance_of(ServerConnectionManager):and_return()
   assert_that(entityManager):is_instance_of(ServerNetworkedEntityManager):and_return()
 
@@ -24,7 +24,7 @@ function ServerGame:_init(secretary, connectionManager, entityManager)
 end
 
 function ServerGame:start()
-  class.superclass(ServerGame).start(self)
+  NetworkGame.start(self)
   self:buildWalls()
   return self
 end

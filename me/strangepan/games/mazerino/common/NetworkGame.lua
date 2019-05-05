@@ -8,13 +8,13 @@ local EventType = require "me.strangepan.games.mazerino.common.strangepan.secret
 local NetworkGame = class.build(Game)
 
 function NetworkGame:_init(secretary, connectionManager, entityManager)
-  class.superclass(NetworkGame)._init(self, secretary)
+  Game._init(self, secretary)
   self.connections = assert_that(connectionManager):is_instance_of(ConnectionManager):and_return()
   self.entities = assert_that(entityManager):is_instance_of(NetworkedEntityManager):and_return()
 end
 
 function NetworkGame:start()
-  class.superclass(NetworkGame).start(self)
+  Game.start(self)
   
   local secretary = self:getSecretary()
   local connections = self:getConnectionManager()
@@ -43,7 +43,7 @@ function NetworkGame:stop()
   entities:destroy()
   connections:destroy()
   
-  return class.superclass(NetworkGame).stop(self)
+  return Game.stop(self)
 end
 
 function NetworkGame:getConnectionManager()

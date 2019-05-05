@@ -8,7 +8,7 @@ local class = require "me.strangepan.libs.util.v1.class"
 local LoveSecretary = class.build(Secretary)
 
 function LoveSecretary:_init()
-  class.superclass(LoveSecretary)._init(self)
+  Secretary._init(self)
 end
 
 --

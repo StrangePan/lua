@@ -7,7 +7,7 @@ local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
 local LocalPlayerController = class.build(PlayerController)
 
 function LocalPlayerController:_init(player, commandMap)
-  class.superclass(LocalPlayerController)._init(self, player)
+  PlayerController._init(self, player)
   self:setCommandMap(commandMap)
 end
 

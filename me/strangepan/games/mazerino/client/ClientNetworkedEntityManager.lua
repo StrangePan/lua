@@ -25,13 +25,13 @@ function ClientNetworkedEntityManager:onReceiveEntityUpdate(message, connectionI
     return
   end
 
-  return class.superclass(ClientNetworkedEntityManager).onReceiveEntityUpdate(self, message, connectionId)
+  CustomNetworkedEntityManager.onReceiveEntityUpdate(self, message, connectionId)
 end
 
 function ClientNetworkedEntityManager:onReceiveEntityInc(message, connectionId)
   local entity = self:getEntity(message[F_NETWORK_ENTITY_ID])
 
-  if class.superclass(ClientNetworkedEntityManager).onReceiveEntityInc(self, message, connectionId)
+  if CustomNetworkedEntityManager.onReceiveEntityInc(self, message, connectionId)
       and entity
       and not self:_isInSync(connectionId, entity) then
     self:_sendEntityUpdate(

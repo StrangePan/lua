@@ -8,7 +8,7 @@ local class = require "me.strangepan.libs.util.v1.class"
 local ServerConnectionManager = class.build(ConnectionManager)
 
 function ServerConnectionManager:_init()
-  class.superclass(ServerConnectionManager)._init(self, 25565)
+  ConnectionManager._init(self, 25565)
 end
 
 return ServerConnectionManager

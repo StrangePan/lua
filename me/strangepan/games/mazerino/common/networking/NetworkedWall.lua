@@ -35,16 +35,16 @@ function NetworkedWall.createNewInstance(manager, id, entityType, ...)
 end
 
 function NetworkedWall:_init(manager, networkedId, entityType, params, wall)
-  class.superclass(NetworkedWall)._init(self, manager, networkedId, entityType, params, wall)
+  NetworkedEntity._init(self, manager, networkedId, entityType, params, wall)
 end
 
 function NetworkedWall:getInstantiationParams(params)
-  params = class.superclass(NetworkedWall).getInstantiationParams(self, params)
+  params = NetworkedEntity.getInstantiationParams(self, params)
   return self:writeWallState(params)
 end
 
 function NetworkedWall:setSynchronizedState(state)
-  class.superclass(NetworkedWall).setSynchronizedState(self, state)
+  NetworkedEntity.setSynchronizedState(self, state)
   local wall = self:getLocalEntity()
   local x, y = state[F_X], state[F_Y]
   if x and y then
@@ -53,7 +53,7 @@ function NetworkedWall:setSynchronizedState(state)
 end
 
 function NetworkedWall:getSynchronizedState(state)
-  state = class.superclass(NetworkedWall).getSynchronizedState(self, state)
+  state = NetworkedEntity.getSynchronizedState(self, state)
   return self:writeWallState(state)
 end
 

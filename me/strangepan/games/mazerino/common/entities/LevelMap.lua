@@ -6,7 +6,7 @@ local class = require "me.strangepan.libs.util.v1.class"
 local LevelMap = class.build(Entity)
 
 function LevelMap:_init()
-  class.superclass(LevelMap)._init(self)
+  Entity._init(self)
   
   self.entities = Set()
 end
@@ -20,11 +20,11 @@ function LevelMap:destroy()
   for entity in self.entities:each() do
     entity:destroy()
   end
-  class.superclass(LevelMap).destroy(self)
+  Entity.destroy(self)
 end
 
 function LevelMap:registerWithSecretary(secretary)
-  class.superclass(LevelMap).registerWithSecretary(self, secretary)
+  Entity.registerWithSecretary(self, secretary)
   for entity in self.entities:each() do
     entity:registerWithSecretary(secretary)
   end
@@ -34,7 +34,7 @@ function LevelMap:deregisterWithSecretary()
   for entity in self.entities:each() do
     entity:deregisterWithSecretary()
   end
-  class.superclass(LevelMap).deregisterWithSecretary(self)
+  Entity.deregisterWithSecretary(self)
 end
 
 return LevelMap

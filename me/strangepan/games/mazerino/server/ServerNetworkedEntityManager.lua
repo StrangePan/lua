@@ -16,7 +16,7 @@ local F_SYNC_NUM = "n"
 local ServerNetworkedEntityManager = class.build(CustomNetworkedEntityManager)
 
 function ServerNetworkedEntityManager:_init(connectionManager)
-  class.superclass(ServerNetworkedEntityManager)._init(self, connectionManager)
+  CustomNetworkedEntityManager._init(self, connectionManager)
   assert_that(connectionManager):is_instance_of(ServerConnectionManager):and_return()
   connectionManager:registerConnectionStatusListener(
       self, self.onConnectionStatusChanged)
@@ -62,7 +62,7 @@ function ServerNetworkedEntityManager:onReceiveEntityUpdate(message, connectionI
 
   if t == EntityUpdateType.INCREMENTING
       and entity:getOwnerId() == connectionId then
-    class.superclass(ServerNetworkedEntityManager).onReceiveEntityUpdate(self, message, connectionId)
+    CustomNetworkedEntityManager.onReceiveEntityUpdate(self, message, connectionId)
 
     if self:_isInSync(connectionId, id) then
       local params = message[F_INC_DATA]
@@ -76,7 +76,7 @@ function ServerNetworkedEntityManager:onReceiveEntityUpdate(message, connectionI
           connectionId)
     end
   elseif t == EntityUpdateType.OUT_OF_SYNC then
-    class.superclass(ServerNetworkedEntityManager).onReceiveEntityUpdate(self, message, connectionId)
+    CustomNetworkedEntityManager.onReceiveEntityUpdate(self, message, connectionId)
   end
 end
 

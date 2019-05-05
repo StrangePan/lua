@@ -7,7 +7,7 @@ local EventType = require "me.strangepan.games.mazerino.common.strangepan.secret
 local Switch = class.build(PhysObject)
 
 function Switch:_init(x, y)
-  class.superclass(Switch)._init(self)
+  PhysObject._init(self)
   self:setPosition(x, y)
   self:setSize(1, 1)
   self.lineColor = Color(255, 255, 255)
@@ -29,7 +29,7 @@ function Switch:deactivate()
 end
 
 function Switch:registerWithSecretary(secretary)
-  class.superclass(Switch).registerWithSecretary(self, secretary)
+  PhysObject.registerWithSecretary(self, secretary)
   secretary:registerEventListener(self, self.step, EventType.STEP)
   secretary:registerEventListener(self, self.postStep, EventType.POST_STEP)
   secretary:registerEventListener(self, self.draw, EventType.DRAW)
