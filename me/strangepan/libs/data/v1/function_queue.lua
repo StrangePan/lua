@@ -1,5 +1,5 @@
 local class = require "me.strangepan.libs.util.v1.class"
-local Queue = require "me.strangepan.libs.util.v1.queue"
+local Queue = require "me.strangepan.libs.data.v1.queue"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 --[[ Specialized queue for enqueuing function calls and executing them. ]]
