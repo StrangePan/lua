@@ -1,4 +1,4 @@
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 

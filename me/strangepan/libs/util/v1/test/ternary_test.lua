@@ -1,5 +1,5 @@
 local luaunit = require 'luaunit'
-local ternary = require 'me.strangepan.libs.lua.v1.ternary'
+local ternary = require 'me.strangepan.libs.util.v1.ternary'
 
 TestClass = {}
 

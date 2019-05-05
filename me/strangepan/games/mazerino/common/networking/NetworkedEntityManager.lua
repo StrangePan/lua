@@ -6,7 +6,7 @@ local EntityUpdateType = require "me.strangepan.games.mazerino.common.networking
 local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
 local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
 local messages = require "me.strangepan.games.mazerino.common.networking.messages"
 

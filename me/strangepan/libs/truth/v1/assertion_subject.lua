@@ -1,4 +1,4 @@
-local class = require 'me.strangepan.libs.lua.v1.class'
+local class = require 'me.strangepan.libs.util.v1.class'
 local assertions = require 'me.strangepan.libs.truth.v1.assertions'
 
 --[[ A stateful object tracking the current state of a composite assertion.
@@ -53,7 +53,7 @@ end
 
 --[[ Checks if the current test subject evaluates to true and returns this assertion object.
 
-This check leverages the truthiness of native lua types. In other words, false, and nil evaluate to
+This check leverages the truthiness of native util types. In other words, false, and nil evaluate to
 false while every other value evalutes to true, including 0. Use the `is_a_boolean()` assertion in
 combination with this one to assert the boolean `true` constant.
  ]]
@@ -63,7 +63,7 @@ end
 
 --[[ Checks if the current test subject evaluates to false and returns this assertion object.
 
-This check leverages the truthiness of native lua types. In other words, false, and nil evaluate to
+This check leverages the truthiness of native util types. In other words, false, and nil evaluate to
 false while every other value evalutes to true, including 0. Use the `is_a_boolean()` assertion in
 combination with this one to assert the boolean `false` constant.
  ]]

@@ -1,6 +1,6 @@
-local builder = require 'me.strangepan.libs.lua.v1.builder'
-local class = require 'me.strangepan.libs.lua.v1.class'
-local ternary = require 'me.strangepan.libs.lua.v1.ternary'
+local builder = require 'me.strangepan.libs.util.v1.builder'
+local class = require 'me.strangepan.libs.util.v1.class'
+local ternary = require 'me.strangepan.libs.util.v1.ternary'
 
 local button = class.build()
 button.HEIGHT = 64

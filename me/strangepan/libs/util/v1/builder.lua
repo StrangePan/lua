@@ -1,11 +1,11 @@
-local class = require 'me.strangepan.libs.lua.v1.class'
-local identifier = require 'me.strangepan.libs.lua.v1.identifier'
-local ternary = require 'me.strangepan.libs.lua.v1.ternary'
+local class = require 'me.strangepan.libs.util.v1.class'
+local identifier = require 'me.strangepan.libs.util.v1.identifier'
+local ternary = require 'me.strangepan.libs.util.v1.ternary'
 
 --[[ A general way to define builders for your objects using (you guessed it) a builder pattern!
 
 Usage:
-    local builder = require 'me.strangepan.libs.lua.v1.builder'
+    local builder = require 'me.strangepan.libs.util.v1.builder'
 
     local my_class = {}
 

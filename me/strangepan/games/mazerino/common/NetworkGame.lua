@@ -2,7 +2,7 @@ local Game = require "me.strangepan.games.mazerino.common.Game"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local ConnectionManager = require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
 local NetworkedEntityManager = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityManager"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
 local NetworkGame = class.build(Game)

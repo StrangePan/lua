@@ -1,5 +1,5 @@
 local Actor = require "me.strangepan.games.mazerino.common.entities.Actor"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 
 local Player = class.build(Actor)
 

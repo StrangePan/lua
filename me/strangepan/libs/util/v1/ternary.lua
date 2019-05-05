@@ -1,7 +1,7 @@
 --[[ A basic ternary function!
 
 Usage:
-    local ternary = require 'me.strangepan.libs.lua.v1.ternary'
+    local ternary = require 'me.strangepan.libs.util.v1.ternary'
 
     function foo(bar)
       print(ternary(bar == nil, 'unset', bar))

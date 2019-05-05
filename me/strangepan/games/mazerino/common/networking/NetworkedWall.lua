@@ -1,6 +1,6 @@
 local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
 local Wall = require "me.strangepan.games.mazerino.common.entities.Wall"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 
 local PRINT_DEBUG = false
 

@@ -6,7 +6,7 @@ Calling the returned table as a function will call the ._init(...) method, so ov
 in your class to use it as a constructor. Or don't.
 
 Usage:
-    local class = require 'me.strangepan.libs.lua.v1.class'
+    local class = require 'me.strangepan.libs.util.v1.class'
 
     local my_class = class.build()
 
@@ -23,7 +23,7 @@ Usage:
 To create a subclass of another preexisting class, provide the base class as a parameter.
 
 Usage:
-    local class = require 'me.strangepan.libs.lua.v1.class'
+    local class = require 'me.strangepan.libs.util.v1.class'
 
     local superclass = class.build()
     local subclass = class.build(superclass)

@@ -1,7 +1,7 @@
 local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local Set = require "me.strangepan.games.mazerino.common.Set"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 
 local LevelMap = class.build(Entity)
 

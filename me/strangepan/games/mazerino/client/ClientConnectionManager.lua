@@ -1,5 +1,5 @@
 local ConnectionManager = require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 
 --
 -- Message handler and coordinator for clients.

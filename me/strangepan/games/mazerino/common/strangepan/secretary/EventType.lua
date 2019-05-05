@@ -1,4 +1,4 @@
-local enum = require "me.strangepan.libs.lua.v1.enum"
+local enum = require "me.strangepan.libs.util.v1.enum"
 
 -- Enum
 -- Event types; used for event registration

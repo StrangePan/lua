@@ -1,4 +1,4 @@
-local lazy = require 'me.strangepan.libs.lua.v1.lazy'
+local lazy = require 'me.strangepan.libs.util.v1.lazy'
 local mock_computercraft = lazy 'me.strangepan.libs.computercraft.mock.v1.computercraft'
 local mock_turtle = lazy 'me.strangepan.libs.computercraft.mock.v1.turtle'
 local dig_lib = lazy 'me.strangepan.libs.computercraft.turtle.v1.dig'

@@ -2,7 +2,7 @@ local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary
 local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local translation = require "me.strangepan.games.mazerino.common.mazerino.util.translation"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
 --

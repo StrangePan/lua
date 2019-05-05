@@ -3,7 +3,7 @@ local assert_that = require 'me.strangepan.libs.truth.v1.assert_that'
 --[[ Builder functions creating enums.
 
 Usage:
-    local enum = require 'me.strangepan.libs.lua.v1.enum'
+    local enum = require 'me.strangepan.libs.util.v1.enum'
 
     local my_enum = enum.build(
         'ENUM_VALUE_ALPHA',

@@ -1,5 +1,5 @@
 local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 
 --
 -- Secretary object that is specifically compatible with Love2D and

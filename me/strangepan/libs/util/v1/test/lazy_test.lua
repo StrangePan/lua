@@ -1,5 +1,5 @@
 local luaunit = require 'luaunit'
-local lazy = require 'me.strangepan.libs.lua.v1.lazy'
+local lazy = require 'me.strangepan.libs.util.v1.lazy'
 
 TestClass = {}
 local test_requirement = 'my.custom.requirement'

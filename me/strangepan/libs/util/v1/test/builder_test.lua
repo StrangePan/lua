@@ -1,5 +1,5 @@
 local luaunit = require 'luaunit'
-local builder = require 'me.strangepan.libs.lua.v1.builder'
+local builder = require 'me.strangepan.libs.util.v1.builder'
 
 TestClass = {}
 

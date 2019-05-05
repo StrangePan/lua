@@ -1,4 +1,4 @@
-local class = require 'me.strangepan.libs.lua.v1.class'
+local class = require 'me.strangepan.libs.util.v1.class'
 
 --[[ An assertion object that can perform a static assertion on a value and construct a useful error
 message if the assertion fails. ]]

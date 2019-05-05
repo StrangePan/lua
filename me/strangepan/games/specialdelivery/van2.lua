@@ -1,6 +1,6 @@
 local GraphWalker = require "me.strangepan.games.specialdelivery.graph_walker"
 local Direction = require "me.strangepan.games.specialdelivery.direction"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 local gameGraph = require "me.strangepan.games.specialdelivery.graph"
 
 local Van2 = class.build()

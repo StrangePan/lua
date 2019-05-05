@@ -8,7 +8,7 @@ local CommandType = require "me.strangepan.games.mazerino.common.CommandType"
 local LocalPlayerController = require "me.strangepan.games.mazerino.common.LocalPlayerController"
 local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
 local GameMap = require "me.strangepan.games.mazerino.common.mazerino.map.GameMap"
-local class = require "me.strangepan.libs.lua.v1.class"
+local class = require "me.strangepan.libs.util.v1.class"
 local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
 
 local OfflineGame = class.build(Game)

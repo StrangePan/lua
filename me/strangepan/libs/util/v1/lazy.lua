@@ -1,10 +1,10 @@
-local class = require 'me.strangepan.libs.lua.v1.class'
+local class = require 'me.strangepan.libs.util.v1.class'
 local assert_that = require 'me.strangepan.libs.truth.v1.assert_that'
 
 --[[ A handy way to require a module lazily.
 
 Usage:
-    local lazy = require 'me.strangepan.libs.lua.v1.lazy'
+    local lazy = require 'me.strangepan.libs.util.v1.lazy'
     local lazy_my_module = lazy 'my.custom.module'
 
     function do_something()

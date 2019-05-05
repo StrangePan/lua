@@ -1,7 +1,7 @@
-local class = require 'me.strangepan.libs.lua.v1.class'
-local lazy = require 'me.strangepan.libs.lua.v1.lazy'
-local ternary = require 'me.strangepan.libs.lua.v1.ternary'
-local builder_lazy = lazy 'me.strangepan.libs.lua.v1.builder'
+local class = require 'me.strangepan.libs.util.v1.class'
+local lazy = require 'me.strangepan.libs.util.v1.lazy'
+local ternary = require 'me.strangepan.libs.util.v1.ternary'
+local builder_lazy = lazy 'me.strangepan.libs.util.v1.builder'
 local mock_os_lazy = lazy 'me.strangepan.libs.computercraft.mock.v1.os'
 local mock_turtle_lazy = lazy 'me.strangepan.libs.computercraft.mock.v1.turtle'
 

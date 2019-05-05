@@ -415,7 +415,7 @@ function Serializer.deserialize(data)
 end
 
 --
--- Turns a lua table into a serialized string. Functions will be ommited, as well as any nil values.
+-- Turns a util table into a serialized string. Functions will be ommited, as well as any nil values.
 -- Will handle recursive table references without problem. Table keys of type boolean will be
 -- ommitted.
 --
