@@ -6,7 +6,7 @@ local class = require "me.strangepan.libs.util.v1.class"
 local SortedSet = require "me.strangepan.libs.data.v1.mutable_sorted_set"
 local FunctionQueue = require "me.strangepan.libs.data.v1.function_queue"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
-
+require "me.strangepan.libs.secretary.v1.functions"
 local Secretary = class.build()
 
 Secretary.DEFAULT_PRIORITY = 1
