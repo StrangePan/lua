@@ -46,7 +46,7 @@ function Queue:poll(n)
   if n then
     assert_that(n):is_a_number():is_greater_than_or_equal_to(0)
   else
-    n = n or 1
+    n = 1
   end
 
   local r = {}
@@ -55,7 +55,7 @@ function Queue:poll(n)
     r[i] = self._front[1]
     i = i + 1
 
-    self._front = self._front[1]
+    self._front = self._front[2]
     if self._front == nil then
       self._back = nil
     end
