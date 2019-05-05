@@ -22,11 +22,11 @@ order in the table. This will cause the sorting order to break.
 This set enforces exclusivity; the same item may not be included twice. This is accomplished using
 standard equivalency operators.
 ]]
-local SortedSet = class.build()
+local MutableSortedSet = class.build()
 
 local DEFAULT_COMPARATOR = function(a, b) return a <= b end
 
-function SortedSet:_init(comparator)
+function MutableSortedSet:_init(comparator)
   if comparator then
     self._are_in_order = assert_that(comparator):is_a_function():and_return()
   else
@@ -40,7 +40,7 @@ end
 
 Returns: `true` if an item was inserted into the set
 ]]
-function SortedSet:add(item)
+function MutableSortedSet:add(item)
 
   local n = self._size
 
@@ -183,7 +183,7 @@ end
 
 Returns `true` if the item was removed from the set.
 ]]
-function SortedSet:remove(item)
+function MutableSortedSet:remove(item)
   local i = find(self, item)
   if i then
     table.remove(self._contents, i)
@@ -194,18 +194,18 @@ function SortedSet:remove(item)
 end
 
 --[[ Checks whether the set contains the given item. ]]
-function SortedSet:contains(item)
+function MutableSortedSet:contains(item)
   return find(self, item) ~= nil
 end
 
 --[[ Gets the number of items in the set. ]]
-function SortedSet:size()
+function MutableSortedSet:size()
   return self._size
 end
 
 --[[ Returns an iterator function that iterates over all items in the set in order. The iterator
 returns just the items in the set. ]]
-function SortedSet:items()
+function MutableSortedSet:items()
   local i = 0
   local values = self._contents
   return function()
@@ -214,4 +214,4 @@ function SortedSet:items()
   end
 end
 
-return SortedSet
+return MutableSortedSet
