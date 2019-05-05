@@ -3,8 +3,8 @@ local EventType = require "me.strangepan.libs.secretary.v1.EventType"
 local Entity = require "me.strangepan.libs.secretary.v1.Entity"
 local PhysObject = require "me.strangepan.libs.secretary.v1.PhysObject"
 local class = require "me.strangepan.libs.util.v1.class"
-local SortedSet = require "me.strangepan.libs.data.v1.sorted_set"
-local FunctionQueue = require "me.strangepan.libs.data.v1.function_queue"
+local SortedSet = require "me.strangepan.libs.data.mutable_sorted_set"
+local FunctionQueue = require "me.strangepan.libs.data.function_queue"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 local Secretary = class.build()
