@@ -3,7 +3,7 @@ local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local EventCoordinator = require "me.strangepan.games.mazerino.common.EventCoordinator"
 local MessageType = require "me.strangepan.games.mazerino.common.networking.MessageType"
 local messages = require "me.strangepan.games.mazerino.common.networking.messages"
-local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
+local Queue = require "me.strangepan.libs.secretary.v1.Queue"
 local Serializer = require "me.strangepan.games.mazerino.common.Serializer"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 

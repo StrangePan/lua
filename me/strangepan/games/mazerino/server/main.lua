@@ -1,5 +1,5 @@
-local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
-local LoveSecretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.LoveSecretary"
+local EventType = require "me.strangepan.libs.secretary.v1.EventType"
+local LoveSecretary = require "me.strangepan.libs.secretary.v1.LoveSecretary"
 local ServerConnectionManager = require "me.strangepan.games.mazerino.server.ServerConnectionManager"
 local ServerGame = require "me.strangepan.games.mazerino.server.ServerGame"
 local ServerNetworkedEntityManager = require "me.strangepan.games.mazerino.server.ServerNetworkedEntityManager"

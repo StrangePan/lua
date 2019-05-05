@@ -1,6 +1,6 @@
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 local ConnectionManager = require "me.strangepan.games.mazerino.common.networking.ConnectionManager"
-local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local Entity = require "me.strangepan.libs.secretary.v1.Entity"
 local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
 local EntityUpdateType = require "me.strangepan.games.mazerino.common.networking.EntityUpdateType"
 local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"

@@ -1,8 +1,8 @@
 local ClientConnectionManager = require "me.strangepan.games.mazerino.client.ClientConnectionManager"
 local ClientGame = require "me.strangepan.games.mazerino.client.ClientGame"
 local ClientNetworkedEntityManager = require "me.strangepan.games.mazerino.client.ClientNetworkedEntityManager"
-local LoveSecretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.LoveSecretary"
-local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local LoveSecretary = require "me.strangepan.libs.secretary.v1.LoveSecretary"
+local EventType = require "me.strangepan.libs.secretary.v1.EventType"
 local NetworkedEntity = require "me.strangepan.games.mazerino.common.networking.NetworkedEntity"
 local NetworkedEntityType = require "me.strangepan.games.mazerino.common.networking.NetworkedEntityType"
 

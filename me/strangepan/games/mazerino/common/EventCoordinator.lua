@@ -1,5 +1,5 @@
 local class = require "me.strangepan.libs.util.v1.class"
-local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
+local Entity = require "me.strangepan.libs.secretary.v1.Entity"
 
 local EventCoordinator = class.build(Entity)
 
