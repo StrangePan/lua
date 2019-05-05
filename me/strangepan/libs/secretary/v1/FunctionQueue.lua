@@ -1,5 +1,5 @@
 local class = require "me.strangepan.libs.util.v1.class"
-local Queue = require "me.strangepan.games.mazerino.common.strangepan.util.Queue"
+local Queue = require "me.strangepan.libs.secretary.v1.Queue"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
 
 --[[

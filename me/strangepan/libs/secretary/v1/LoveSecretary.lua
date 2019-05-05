@@ -1,4 +1,4 @@
-local Secretary = require "me.strangepan.games.mazerino.common.strangepan.secretary.Secretary"
+local Secretary = require "me.strangepan.libs.secretary.v1.Secretary"
 local class = require "me.strangepan.libs.util.v1.class"
 
 --

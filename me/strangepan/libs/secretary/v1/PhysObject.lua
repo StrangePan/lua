@@ -1,6 +1,6 @@
 local class = require "me.strangepan.libs.util.v1.class"
-local Entity = require "me.strangepan.games.mazerino.common.strangepan.secretary.Entity"
-local EventType = require "me.strangepan.games.mazerino.common.strangepan.secretary.EventType"
+local Entity = require "me.strangepan.libs.secretary.v1.Entity"
+local EventType = require "me.strangepan.libs.secretary.v1.EventType"
 
 --
 -- PhysObject

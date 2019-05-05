@@ -1,6 +1,6 @@
 local class = require "me.strangepan.libs.util.v1.class"
 local assert_that = require "me.strangepan.libs.truth.v1.assert_that"
-local PhysObject = require "me.strangepan.games.mazerino.common.strangepan.secretary.PhysObject"
+local PhysObject = require "me.strangepan.libs.secretary.v1.PhysObject"
 
 local QuadTree = class.build()
 
