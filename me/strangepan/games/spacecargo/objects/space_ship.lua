@@ -5,7 +5,7 @@ local ternary = require 'me.strangepan.libs.util.v1.ternary'
 local SpaceShip = class.build()
 
 local thrust_force = 100 -- pts / sec^2
-local angular_force = 2 -- radians / sec^2
+local angular_force = 4 -- radians / sec^2
 
 function SpaceShip:_init()
   self._state = {
@@ -19,6 +19,7 @@ function SpaceShip:_init()
     angular_velocity = 0,
   }
 
+  local initial_state = self._state
   local x_update =
       love.update
           :map(function(dt) return self._state.velocity.x * dt end)
@@ -56,10 +57,7 @@ function SpaceShip:_init()
           :map(function(a, b) return a + b end)
           :map(function(da) return self._state.angular_velocity + da end)
 
-  local initialState =
-      Rx.Observable.of()
-
-  local stateUpdate =
+  local state_update =
       Rx.Observable.zip(
           x_update,
           y_update,
@@ -81,8 +79,13 @@ function SpaceShip:_init()
               }
             end)
 
+  local state_reset =
+      love.keypressed
+          :filter(function(k) return k == 'space' end)
+          :map(function() return initial_state end)
+
   self._subscriptions = {
-    initialState:concat(stateUpdate):subscribe(function(state) self._state = state end),
+    state_update:merge(state_reset):subscribe(function(state) self._state = state end),
 
     -- subscribe the draw event
     love.draw

@@ -7,7 +7,7 @@ love.draw:subscribe(function()
   love.graphics.printf(
       'this was a triumph',
       0,
-      love.graphics.getHeight() / 2,
+      love.graphics.getHeight() / 2 - 100,
       love.graphics.getWidth(),
       'center')
 end)
