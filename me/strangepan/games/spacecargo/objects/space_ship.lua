@@ -1,11 +1,13 @@
 local class = require 'me.strangepan.libs.util.v1.class'
 local Rx = require 'libs.rxlua.rx'
 local ternary = require 'me.strangepan.libs.util.v1.ternary'
+local Vector = require 'me.strangepan.games.spacecargo.util.vector'
+local Smoke = require 'me.strangepan.games.spacecargo.particles.smoke'
 
 local SpaceShip = class.build()
 
-local thrust_force = 100 -- pts / sec^2
-local angular_force = 4 -- radians / sec^2
+local thrust = 100 -- pts / sec^2
+local angular_thrust = 4 -- radians / sec^2
 
 function SpaceShip:_init()
   self._state = {
@@ -31,13 +33,13 @@ function SpaceShip:_init()
   local x_velocity_update =
       love.update
           :map(function(dt) return ternary(love.keyboard.isDown('w'), dt, 0) end)
-          :map(function(dt) return thrust_force * dt end)
+          :map(function(dt) return thrust * dt end)
           :map(function(dv) return math.cos(self._state.angle) * dv end)
           :map(function(dxv) return self._state.velocity.x + dxv end)
   local y_velocity_update =
       love.update
           :map(function(dt) return ternary(love.keyboard.isDown('w'), dt, 0) end)
-          :map(function(dt) return thrust_force * dt end)
+          :map(function(dt) return thrust * dt end)
           :map(function(dv) return math.sin(self._state.angle) * dv end)
           :map(function(dyv) return self._state.velocity.y + dyv end)
   local angle_update =
@@ -47,11 +49,11 @@ function SpaceShip:_init()
   local positive_angular_velocity_update =
       love.update
           :map(function(dt) return ternary(love.keyboard.isDown('a'), dt, 0) end)
-          :map(function(dt) return -angular_force * dt end)
+          :map(function(dt) return -angular_thrust * dt end)
   local negative_angular_velocity_update =
       love.update
           :map(function(dt) return ternary(love.keyboard.isDown('d'), dt, 0) end)
-          :map(function(dt) return angular_force * dt end)
+          :map(function(dt) return angular_thrust * dt end)
   local angular_velocity_update =
       Rx.Observable.zip(positive_angular_velocity_update, negative_angular_velocity_update)
           :map(function(a, b) return a + b end)
@@ -98,6 +100,16 @@ function SpaceShip:_init()
           g.setColor(255, 255, 255)
           g.polygon('fill', 20, 0, -10, 10, -10, -10)
           g.pop()
+        end),
+
+    love.update
+        :filter(function() return love.keyboard.isDown('w') end)
+        :debounce(100, Rx.ImmediateScheduler.create())
+        :map(function() return self._state end)
+        :subscribe(function(s)
+          Smoke(
+              Vector(s.x, s.y):add(Vector(0, 10):rotate_by(s.angle)),
+              Vector(0, 10):rotate_by(s.angle))
         end),
   }
 end
