@@ -11,37 +11,23 @@ local angular_thrust = 4 -- radians / sec^2
 
 function SpaceShip:_init()
   self._state = {
-    x = love.graphics.getWidth() / 2,
-    y = love.graphics.getHeight() / 2,
-    velocity = {
-      x = 0,
-      y = 0,
-    },
+    position = Vector(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2),
+    velocity = Vector(0, 0),
     angle = 0,
     angular_velocity = 0,
   }
 
   local initial_state = self._state
-  local x_update =
+  local position_update =
       love.update
-          :map(function(dt) return self._state.velocity.x * dt end)
-          :map(function(dx) return self._state.x + dx end)
-  local y_update =
-      love.update
-          :map(function(dt) return self._state.velocity.y * dt end)
-          :map(function(dy) return self._state.y + dy end)
-  local x_velocity_update =
+          :map(function(dt) return self._state.velocity:scale(dt) end)
+          :map(function(dp) return self._state.position:add(dp) end)
+  local velocity_update =
       love.update
           :map(function(dt) return ternary(love.keyboard.isDown('w'), dt, 0) end)
           :map(function(dt) return thrust * dt end)
-          :map(function(dv) return math.cos(self._state.angle) * dv end)
-          :map(function(dxv) return self._state.velocity.x + dxv end)
-  local y_velocity_update =
-      love.update
-          :map(function(dt) return ternary(love.keyboard.isDown('w'), dt, 0) end)
-          :map(function(dt) return thrust * dt end)
-          :map(function(dv) return math.sin(self._state.angle) * dv end)
-          :map(function(dyv) return self._state.velocity.y + dyv end)
+          :map(function(dv) return Vector(1, 0):rotate_by(self._state.angle):scale(dv) end)
+          :map(function(dxv) return self._state.velocity:add(dxv) end)
   local angle_update =
       love.update
           :map(function(dt) return self._state.angular_velocity * dt end)
@@ -61,21 +47,15 @@ function SpaceShip:_init()
 
   local state_update =
       Rx.Observable.zip(
-          x_update,
-          y_update,
-          x_velocity_update,
-          y_velocity_update,
+          position_update,
+          velocity_update,
           angle_update,
           angular_velocity_update)
         :map(
-            function(x, y, vx, vy, a, va)
+            function(p, v, a, va)
               return {
-                x = x,
-                y = y,
-                velocity = {
-                  x = vx,
-                  y = vy,
-                },
+                position = p,
+                velocity = v,
                 angle = a,
                 angular_velocity = va,
               }
@@ -95,21 +75,11 @@ function SpaceShip:_init()
         :subscribe(function()
           local g = love.graphics
           g.push()
-          g.translate(self._state.x, self._state.y)
+          g.translate(self._state.position:x(), self._state.position:y())
           g.rotate(self._state.angle)
           g.setColor(255, 255, 255)
           g.polygon('fill', 20, 0, -10, 10, -10, -10)
           g.pop()
-        end),
-
-    love.update
-        :filter(function() return love.keyboard.isDown('w') end)
-        :debounce(100, Rx.ImmediateScheduler.create())
-        :map(function() return self._state end)
-        :subscribe(function(s)
-          Smoke(
-              Vector(s.x, s.y):add(Vector(0, 10):rotate_by(s.angle)),
-              Vector(0, 10):rotate_by(s.angle))
         end),
   }
 end
