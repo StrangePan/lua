@@ -17,17 +17,32 @@ function SpaceShip:_init()
     angular_velocity = 0,
   }
 
+  -- x  = x0 + v0 * t + a / 2 * t * t
+
   local initial_state = self._state
-  local position_update =
+  local acceleration_vector =
       love.update
-          :map(function(dt) return self._state.velocity:scale(dt) end)
-          :map(function(dp) return self._state.position:add(dp) end)
-  local velocity_update =
+          :map(
+            function()
+              return ternary(
+                  love.keyboard.isDown('w'),
+                  Vector(thrust, 0):rotate_by(self._state.angle),
+                  Vector(0, 0))
+            end)
+  local velocity_vector =
       love.update
-          :map(function(dt) return ternary(love.keyboard.isDown('w'), dt, 0) end)
-          :map(function(dt) return thrust * dt end)
-          :map(function(dv) return Vector(1, 0):rotate_by(self._state.angle):scale(dv) end)
-          :map(function(dxv) return self._state.velocity:add(dxv) end)
+          :zip(acceleration_vector)
+          :map(function(dt, av) return av:scale(dt) end)
+          :map(function(av) return self._state.velocity:add(av) end)
+  local position_vector =
+  love.update
+      :zip(acceleration_vector)
+      :map(
+      function(dt, av)
+        return self._state.position
+                   :add(self._state.velocity:scale(dt))
+                   :add(av:scale(dt * dt / 2))
+      end)
   local angle_update =
       love.update
           :map(function(dt) return self._state.angular_velocity * dt end)
@@ -47,8 +62,8 @@ function SpaceShip:_init()
 
   local state_update =
       Rx.Observable.zip(
-          position_update,
-          velocity_update,
+          position_vector,
+          velocity_vector,
           angle_update,
           angular_velocity_update)
         :map(
