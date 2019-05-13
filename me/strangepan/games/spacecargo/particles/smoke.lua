@@ -47,10 +47,8 @@ function Smoke:_init(position, velocity)
 end
 
 function Smoke:destroy()
-  print('destroyed')
   for _,s in ipairs(self._subscriptions) do
     s:unsubscribe()
-    print('unsubscribed ', s)
   end
 end
 
