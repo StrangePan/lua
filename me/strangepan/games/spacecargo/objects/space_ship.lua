@@ -26,46 +26,47 @@ function SpaceShip:_init()
             function()
               return ternary(
                   love.keyboard.isDown('w'),
-                  Vector(thrust, 0):rotate_by(self._state.angle),
-                  Vector(0, 0))
+                  Vector(thrust, 0):rotate(self._state.angle),
+                  Vector.ZERO)
             end)
   local velocity_vector =
       love.update
           :zip(acceleration_vector)
-          :map(function(dt, av) return av:scale(dt) end)
-          :map(function(av) return self._state.velocity:add(av) end)
+          :map(function(dt, av) return av * dt + self._state.velocity end)
   local position_vector =
   love.update
       :zip(acceleration_vector)
       :map(
-      function(dt, av)
-        return self._state.position
-                   :add(self._state.velocity:scale(dt))
-                   :add(av:scale(dt * dt / 2))
-      end)
-  local angle_update =
-      love.update
-          :map(function(dt) return self._state.angular_velocity * dt end)
-          :map(function(da) return self._state.angle + da end)
-  local positive_angular_velocity_update =
-      love.update
-          :map(function(dt) return ternary(love.keyboard.isDown('a'), dt, 0) end)
-          :map(function(dt) return -angular_thrust * dt end)
-  local negative_angular_velocity_update =
+        function(dt, av)
+          return self._state.position + self._state.velocity * dt + av * (dt * dt / 2)
+        end)
+  local positive_angular_acceleration =
       love.update
           :map(function(dt) return ternary(love.keyboard.isDown('d'), dt, 0) end)
-          :map(function(dt) return angular_thrust * dt end)
-  local angular_velocity_update =
-      Rx.Observable.zip(positive_angular_velocity_update, negative_angular_velocity_update)
-          :map(function(a, b) return a + b end)
+  local negative_angular_acceleration =
+      love.update
+          :map(function(dt) return ternary(love.keyboard.isDown('a'), -dt, 0) end)
+  local angular_acceleration =
+      positive_angular_acceleration
+          :zip(negative_angular_acceleration)
+          :map(function(pa, na) return angular_thrust * (pa + na) end)
+  local angular_velocity =
+      angular_acceleration
           :map(function(da) return self._state.angular_velocity + da end)
+  local angle =
+      love.update
+          :zip(angular_acceleration)
+          :map(
+            function(dt, aa)
+                return self._state.angle + self._state.angular_velocity * dt + aa * (dt * dt / 2)
+            end)
 
   local state_update =
       Rx.Observable.zip(
           position_vector,
           velocity_vector,
-          angle_update,
-          angular_velocity_update)
+          angle,
+          angular_velocity)
         :map(
             function(p, v, a, va)
               return {
