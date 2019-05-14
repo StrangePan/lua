@@ -1,6 +1,6 @@
 local Physics = {}
 
-local ftable = {n = 0, [1] = 1, [2] = 2}
+local ftable = {n = 2, [1] = 1, [2] = 2}
 
 local function factorial(n)
   if n <= ftable.n then
@@ -30,3 +30,5 @@ function Physics.increment(dt, ...)
   end
   return unpack(processed_state)
 end
+
+return Physics
