@@ -14,42 +14,40 @@ function Smoke:_init(position, velocity)
     lifespan = LIFESPAN,
   }
 
-  self._subscriptions = {
-    Rx.Observable.zip(
-        love.update
-            :map(function(dt) return self._state.velocity:scale(dt) end)
-            :map(function(dp) return self._state.position:add(dp) end),
-        love.update
-            :map(function(dt) return math.max(0, self._state.lifespan - LIFESPAN * dt) end))
+  self._subscriptions = Rx.CompositeSubscription.create(
+      Rx.Observable.zip(
+          love.update
+              :map(function(dt) return self._state.velocity:scale(dt) end)
+              :map(function(dp) return self._state.position:add(dp) end),
+          love.update
+              :map(function(dt) return math.max(0, self._state.lifespan - LIFESPAN * dt) end))
         :map(function(pos, li)
-          return {
-            position = pos,
-            velocity = self._state.velocity,
-            lifespan = li,
-          }
-        end)
+        return {
+          position = pos,
+          velocity = self._state.velocity,
+          lifespan = li,
+        }
+      end)
         :subscribe(function(state) self._state = state end),
 
-    love.draw:subscribe(function()
-      local g = love.graphics
-      local x, y = self._state.position:x(), self._state.position:y()
-      g.push()
-      g.translate(x, y)
-      g.setColor(255, 255, 255, (1 - self._state.lifespan / LIFESPAN) * 255)
-      g.circle('fill', x, y, (1 - self._state.lifespan / LIFESPAN) * 10)
-      g.pop()
-    end),
+      love.draw:subscribe(function()
+        local g = love.graphics
+        local x, y = self._state.position:x(), self._state.position:y()
+        g.push()
+        g.translate(x, y)
+        g.setColor(255, 255, 255, (1 - self._state.lifespan / LIFESPAN) * 255)
+        g.circle('fill', x, y, (1 - self._state.lifespan / LIFESPAN) * 10)
+        g.pop()
+      end),
 
-    love.update
-        :filter(function() return self._state.lifespan <= 0 end)
-        :subscribe(function() self:destroy() end),
-  }
+      love.update
+          :filter(function() return self._state.lifespan <= 0 end)
+          :subscribe(function() self:destroy() end)
+  )
 end
 
 function Smoke:destroy()
-  for _,s in ipairs(self._subscriptions) do
-    s:unsubscribe()
-  end
+  self._subscriptions:unsubscribe()
 end
 
 return Smoke

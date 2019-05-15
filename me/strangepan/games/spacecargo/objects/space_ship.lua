@@ -63,29 +63,24 @@ function SpaceShip:_init()
           :filter(function(k) return k == 'space' end)
           :map(function() return initial_state end)
 
-  self._subscriptions = {
-    state_update:merge(state_reset):subscribe(self._state),
-
-    -- subscribe the draw event
-    love.draw
-        :with(self._state)
-        :subscribe(
-          function(_,s)
-            local g = love.graphics
-            g.push()
-            g.translate(s.position:x(), s.position:y())
-            g.rotate(s.angle)
-            g.setColor(255, 255, 255)
-            g.polygon('fill', 20, 0, -10, 10, -10, -10)
-            g.pop()
-          end),
-  }
+  self._subscriptions = Rx.CompositeSubscription.create(
+      state_update:merge(state_reset):subscribe(self._state),
+      love.draw
+          :with(self._state)
+          :subscribe(
+            function(_,s)
+              local g = love.graphics
+              g.push()
+              g.translate(s.position:x(), s.position:y())
+              g.rotate(s.angle)
+              g.setColor(255, 255, 255)
+              g.polygon('fill', 20, 0, -10, 10, -10, -10)
+              g.pop()
+            end))
 end
 
 function SpaceShip:destroy()
-  for _,subscription in ipairs(self._subscriptions) do
-    subscription:unsubscribe()
-  end
+  self._subscriptions:unsubscribe()
 end
 
 return SpaceShip
