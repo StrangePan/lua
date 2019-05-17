@@ -4,7 +4,7 @@ local Rx = require 'libs.rxlua.rx'
 local Smoke = require 'me.strangepan.games.spacecargo.particles.smoke'
 local Vector = require 'me.strangepan.games.spacecargo.util.vector'
 
-local SpaceShip = require 'me.strangepan.games.spacecargo.objects.space_ship'
+local SpaceShip = require 'me.strangepan.games.spacecargo.objects.spaceship'
 local scheduler = Rx.CooperativeScheduler.create()
 
 love.update:subscribe(function(dt) scheduler:update(dt) end)
