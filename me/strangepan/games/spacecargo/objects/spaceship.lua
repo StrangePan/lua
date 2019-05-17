@@ -64,10 +64,17 @@ function SpaceShip:_init()
 
   self._subscriptions = Rx.CompositeSubscription.create(
       state_update:merge(state_reset):subscribe(self._state),
+      love.keypressed
+          :filter(function(k) return k == 'backspace' end)
+          :subscribe(function() self:destroy() end),
       love.draw
           :with(self._state)
           :map(function(_,s) return s end)
           :subscribe(self.draw))
+end
+
+function SpaceShip:state()
+  return self._state
 end
 
 function SpaceShip.draw(state)
@@ -82,6 +89,7 @@ end
 
 function SpaceShip:destroy()
   self._subscriptions:unsubscribe()
+  self._state:onCompleted()
 end
 
 return SpaceShip
