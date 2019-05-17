@@ -8,8 +8,8 @@ local Rxf = require 'me.strangepan.games.spacecargo.util.rxf'
 
 local SpaceShip = class.build()
 
-local thrust = 100 -- pts / sec^2
-local angular_thrust = 4 -- radians / sec^2
+local FORWARD_THRUST = 100 -- pts / sec^2
+local ANGULAR_THRUST = 4 -- radians / sec^2
 
 function SpaceShip:_init()
   local initial_state = {
@@ -24,13 +24,13 @@ function SpaceShip:_init()
   local positional_acceleration =
       love.update
           :with(Rxf.key_state('w'), self._state)
-          :map(function(_, e, s) return e and Vector(thrust, 0):rotate(s.angle) or Vector.ZERO end)
+          :map(function(_, e, s) return e and Vector(FORWARD_THRUST, 0):rotate(s.angle) or Vector.ZERO end)
   local positional_velocity = self._state:map(function(s) return s.velocity end)
   local position = self._state:map(function(s) return s.position end)
   local angular_acceleration =
       Rx.Observable.combineLatest(Rxf.key_state('d'), Rxf.key_state('a'), Rxf.VERBATIM_COMBINER())
           :map(function(right, left) return ternary(left, -1, 0) + ternary(right, 1, 0) end)
-          :map(function(a) return a * angular_thrust end)
+          :map(function(a) return a * ANGULAR_THRUST end)
   local angular_velocity = self._state:map(function(s) return s.angular_velocity end)
   local angle = self._state:map(function(s) return s.angle end)
 
@@ -67,16 +67,18 @@ function SpaceShip:_init()
       state_update:merge(state_reset):subscribe(self._state),
       love.draw
           :with(self._state)
-          :subscribe(
-            function(_,s)
-              local g = love.graphics
-              g.push()
-              g.translate(s.position:x(), s.position:y())
-              g.rotate(s.angle)
-              g.setColor(255, 255, 255)
-              g.polygon('fill', 20, 0, -10, 10, -10, -10)
-              g.pop()
-            end))
+          :map(function(_,s) return s end)
+          :subscribe(self.draw))
+end
+
+function SpaceShip.draw(state)
+  local g = love.graphics
+  g.push()
+  g.translate(state.position:x(), state.position:y())
+  g.rotate(state.angle)
+  g.setColor(255, 255, 255)
+  g.polygon('fill', 20, 0, -10, 10, -10, -10)
+  g.pop()
 end
 
 function SpaceShip:destroy()
