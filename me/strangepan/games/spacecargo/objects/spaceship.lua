@@ -2,7 +2,6 @@ local class = require 'me.strangepan.libs.util.v1.class'
 local Rx = require 'libs.rxlua.rx'
 local ternary = require 'me.strangepan.libs.util.v1.ternary'
 local Vector = require 'me.strangepan.games.spacecargo.util.vector'
-local Smoke = require 'me.strangepan.games.spacecargo.particles.smoke'
 local Physics = require 'me.strangepan.games.spacecargo.newton.physics'
 local Rxf = require 'me.strangepan.games.spacecargo.util.rxf'
 
