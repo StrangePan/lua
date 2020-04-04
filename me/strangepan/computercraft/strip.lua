@@ -17,9 +17,9 @@ for i,argv in ipairs(args) do
   end
 end
 if debug then
-  mock_computercraft().mocker()
-      :mock_turtle(mock_turtle().mocker():enable_print_status(true):build_mocks())
-      :build_mocks()
+  mock_computercraft().builder()
+      :mock_turtle(mock_turtle().builder():enable_print_status(true):build())
+      :build()
       :capture()
 end
 
