@@ -65,7 +65,7 @@ function vector.__add(a, b)
       _merge_arrays(
           _to_number_array(a),
           _to_number_array(b),
-           function(a, b) return a+b end))
+          function(a, b) return a+b end))
 end
 
 function vector.__sub(a, b)
@@ -102,19 +102,15 @@ local function mul_or_div(a, b, f)
 end
 
 function vector.__mul(a, b)
-  return mul_or_div(a, b, function(v, n) return v*n end)
+  return mul_or_div(a, b, function(v, n) return v * n end)
 end
 
 function vector.__div(a, b)
-  return mul_or_div(a, b, function(v, n) return v/n end)
+  return mul_or_div(a, b, function(v, n) return v / n end)
 end
 
 function vector.__mod(a, b)
-  return mul_or_div(a, b, function(v, n) return v%n end)
-end
-
-function vector.__idiv(a, b)
-  return mul_or_div(a, b, function(v, n) return v//n end)
+  return mul_or_div(a, b, function(v, n) return v % n end)
 end
 
 function vector.__eq(a, b)
