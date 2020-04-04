@@ -35,11 +35,13 @@ function class.build(superclass, immutable)
   local new_class = {}
   new_class.__index = new_class
   new_class._init = function() end
-  new_class.__newindex = function(self, index, value)
-    if self._mutation_lock then
-      error('attempt to mutate instance of immutable class '..tostring(new_class))
-    else
-      return rawset(self, index, value)
+  if immutable then
+    new_class.__newindex = function(self, index, value)
+      if self._mutation_lock then
+        error('attempt to mutate instance of immutable class '..tostring(new_class))
+      else
+        return rawset(self, index, value)
+      end
     end
   end
 
@@ -47,7 +49,9 @@ function class.build(superclass, immutable)
   new_metatable.__call = function(this_class, ...)
     local self = setmetatable({}, this_class)
     self:_init(...)
-    self._mutation_lock = true
+    if immutable then
+      self._mutation_lock = true
+    end
     return self
   end
 
