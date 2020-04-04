@@ -1,4 +1,5 @@
 local luaunit = require 'luaunit'
+local assert_that = require 'me.strangepan.libs.truth.v1.assert_that'
 local class = require 'me.strangepan.libs.util.v1.class'
 
 TestClass = {}
@@ -54,6 +55,21 @@ function TestClass:test_buildSubclass_thenInvokeBaseMethod_didExecute()
   testClass():baseMethod()
 
   luaunit.assertEquals(invokeCount, 1)
+end
+
+function TestClass:test_buildImmutable_thenCreateInstance_isInstance()
+  local testClass = class.build(nil, true)
+  local testInstance = testClass()
+
+  luaunit.assertNotEquals(testInstance, testClass)
+  assert_that(testInstance):is_instance_of(testClass)
+end
+
+function TestClass:test_buildImmutable_thenMutateInstance_throwsError()
+  local testClass = class.build(nil, true)
+  local testInstance = testClass()
+
+  luaunit.assertError(function() testInstance[0] = 'test' end)
 end
 
 os.exit(luaunit.LuaUnit.run())
