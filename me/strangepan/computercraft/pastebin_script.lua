@@ -1,17 +1,21 @@
 local SCRIPT_URL = 'http://files.strangepan.me/computercraft/pastebin_entrypoint.lua'
 
-print('This program will download and run a remote program from:\n')
+print('This program will download and run:')
 print(SCRIPT_URL)
 
 local user_response
 
-do
+repeat
   io.write('Continue? (y/n): ')
   user_response = io.read()
-  if not {'y'=true, 'n'=true}[user_response] then
+  local supported_responses = {
+    'y'=true,
+    'n'=true,
+  }
+  if not supported_responses[user_response] then
     user_response = nil
   end
-until user_response ~= nil end
+until user_response
 
 if user_response == 'n' then
   return
@@ -29,4 +33,4 @@ local script_contents = script_handle.readAll()
 script_handle.close()
 
 print('Running script...')
-loadstring(script_contents)
+loadstring(script_contents)()
