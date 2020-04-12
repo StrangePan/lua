@@ -2,7 +2,9 @@ local URL_BASE = 'http://files.strangepan.me/computercraft/downloader/test'
 local MANIFEST_URL = URL_BASE..'/manifest.json'
 
 local manifest
-
+local obtain_manifest
+local download_each_file
+local download_file
 
 local function main()
   local manifest = obtain_manifest()
@@ -10,7 +12,7 @@ local function main()
   print('success')
 end
 
-local function obtain_manifest()
+obtain_manifest = function()
   print('downloading manifest from '..MANIFEST_URL)
   -- download from personal file server
   local manifest_response = http.get(MANIFEST_URL)
@@ -18,35 +20,36 @@ local function obtain_manifest()
     error('unable to download manifest from '..MANIFEST_URL)
   end
 
-  local manifest_contents = manifest.readAll()
+  local manifest_contents = manifest_response.readAll()
   manifest_response.close()
 
   return manifest.parse(manifest_contents)
 end
 
-local function download_each_file(manifest)
-  local total_bytes = function()
+download_each_file = function(manifest)
+  local total_bytes = (function()
     local sum = 0
     for _,entry in ipairs(manifest.entries) do
       sum = sum + entry.size
     end
-  end()
+    return sum
+  end)()
   local total_entries = #manifest.entries
 
   print(string.format('downloading %d files (%d bytes)', total_entries, total_bytes))
 
   -- for each, download
-  for index,entry in manifest.entries do
+  for index,entry in ipairs(manifest.entries) do
     download_file(entry, index, string.format('(%d/%d)', index, total_entries))
   end
 end
 
-local function download_file(entry, index, msg_prefix)
+download_file = function(entry, index, msg_prefix)
   print(string.format('%s downloading %s (%d bytes)', msg_prefix, entry.source, entry.size))
 
   local file_response = http.get(entry.source)
   if not file_response then
-    error(string.format('unable to download entry %d: %s', index, entry.source)
+    error(string.format('unable to download entry %d: %s', index, entry.source))
   end
 
   local file_contents = file_response.readAll()
@@ -54,9 +57,9 @@ local function download_file(entry, index, msg_prefix)
 
   print(string.format('%s writing to %s (%d bytes)', msg_prefix, entry.destination, #file_contents))
 
-  local file_handle = fs.open('w', entry.destination)
+  local file_handle = fs.open(entry.destination, 'w')
   if not file_handle then
-    error(string.format('unable to open entry %d destination for write: %s', index, entry.destination)
+    error(string.format('unable to open entry %d destination for write: %s', index, entry.destination))
   end
 
   file_handle.write(file_contents)
@@ -97,14 +100,14 @@ end
 
 function manifest.validate_manifest_entry(index, entry, seen_destinations)
   local entry_name = string.format('entries[%d]', index)
-  manifest.validate_manifest_field(entry_name..'.source', entry.source, 'string'))
-  manifest.validate_manifest_field(entry_name..'.destination', entry.destination, 'string'))
-  manifest.validate_manifest_field(entry_name..'.size', entry.size, 'number'))
+  manifest.validate_manifest_field(entry_name..'.source', entry.source, 'string')
+  manifest.validate_manifest_field(entry_name..'.destination', entry.destination, 'string')
+  manifest.validate_manifest_field(entry_name..'.size', entry.size, 'number')
 
   assert(
       not seen_destinations[entry.destination],
       string.format('duplicate destination definition in entry %d: %s', index, entry.destination))
-  seen_destinations[entry.destination] = true,
+  seen_destinations[entry.destination] = true
 end
 
 function manifest.validate_manifest_field(name, field, field_type)

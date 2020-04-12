@@ -1,4 +1,5 @@
-local SCRIPT_URL = 'http://files.strangepan.me/computercraft/pastebin_entrypoint.lua'
+local FILE_NAME = 'pastebin_entrypoint.lua'
+local SCRIPT_URL = 'http://files.strangepan.me/computercraft/'..FILE_NAME
 
 print('This program will download and run:')
 print(SCRIPT_URL)
@@ -9,8 +10,8 @@ repeat
   io.write('Continue? (y/n): ')
   user_response = io.read()
   local supported_responses = {
-    'y'=true,
-    'n'=true,
+    y=true,
+    n=true,
   }
   if not supported_responses[user_response] then
     user_response = nil
@@ -32,5 +33,26 @@ end
 local script_contents = script_handle.readAll()
 script_handle.close()
 
+print('Downloaded '..#script_contents..' bytes')
+
+local TEMP_FILE_NAME = FILE_NAME..'.tmp'
+print('Saving to temp file '..TEMP_FILE_NAME)
+local f = fs.open(TEMP_FILE_NAME, 'w')
+f.write(script_contents)
+f.close()
+
 print('Running script...')
-loadstring(script_contents)()
+local function run_script() 
+  dofile(TEMP_FILE_NAME)
+end
+
+local success, result = pcall(run_script)
+
+if not success then
+  print('Error while running downloaded script: '..result)
+end
+
+print('Deleting temporary file '..TEMP_FILE_NAME)
+fs.delete(TEMP_FILE_NAME)
+
+print('Done')
